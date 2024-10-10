@@ -37,4 +37,4 @@ Junior Cintra Mauricio
 
 
 ## Project status
-Iguape is fully operational. Currently working on improvements in the peak fitting tool. 
+Iguape is fully operational at Paineira. Working on distribution for Paineira users. 
