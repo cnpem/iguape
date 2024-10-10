@@ -1,3 +1,12 @@
+#This is part of the source code of the Paineira Graphical User Interface - Iguape
+#The code is distributed under the GNU GPL-3.0 License.
+
+"""
+This is the main script for the excution of the Paineira Graphical User Interface.
+In this script, both GUIs used by the program are called and all of the backend functions and processes are defined. 
+Please refer to the main page ()
+"""
+
 import sys, time
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QDialog, QProgressDialog, QPushButton
 from PyQt5.QtCore import Qt, QSize, QThread, pyqtSignal
