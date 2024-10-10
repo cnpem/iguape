@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Iguape - Paineira Graphical User Interface"
+version = "1.0"
+dependencies = [
+  "httpx",
+  "gidgethub[httpx]>4.0.0",
+  "django>2.1; os_name != 'nt'",
+  "django>2.0; os_name == 'nt'",
+]
+requires-python = ">=3.12"
+authors = [
+  {name = "João Luis Biondo Neto", email = "joaoluisbiondo@gmail.com"},
+  {name = "Junior Cintra Mauricio"},
+  {name = "Cristiane Barbieri Rodella"},
+]
+maintainers = [
+  {name = "João Luis Biondo Neto", email = "joaoluisbiondo@gmail.com"}
+]
+description = "Iguape is a Graphical User Interface for X-ray diffraction in situ experiments at Paineira beamline (LNLS/CNPEM)."
+readme = {file = "README.md"}
+license = {file = "LICENSE.txt"}
+keywords = ["X-ray diffraction", 'in situ experiments', 'XRD synchrotron']
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Scientific/Engineering :: Chemistry"
+  
+]
+dependencies = [ 
+	"PyQt5 = 5.15.10"
+	"numpy = 1.26.4"
+	"pandas = 2.2.2"
+	"scipy = 1.13.1"
+	"matplotlib = 3.8.4"
+	"lmfit = 1.3.1"
+]
+
+[project.urls]
+Repository = "https://github.com/cnpem/Iguape"
+
+
+[project.scripts]
+spam-cli = "spam:main_cli"
+
+[project.gui-scripts]
+spam-gui = "spam:main_gui"
+
+[project.entry-points."spam.magical"]
+tomatoes = "spam:main_tomatoes"
