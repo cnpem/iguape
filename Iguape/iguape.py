@@ -2,7 +2,7 @@
 #The code is distributed under the GNU GPL-3.0 License. Please refer to the main page (https://github.com/cnpem/iguape) for more information
 
 """
-This is the main script for the excution of the Paineira Graphical User Interface.
+This is the main script for the excution of the Paineira Graphical User Interface, a GUI for visualization and data processing during in situ experiments at Paineira.
 In this script, both GUIs used by the program are called and all of the backend functions and processes are defined. 
 """
 
@@ -28,13 +28,11 @@ from Monitor import peak_fit, counter, peak_fit_split_gaussian
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QProgressDialog, QMessageBox, QVBoxLayout
 
-
-# --- Defining the storaging lists --- #        
-
+__version__ = '1.0'
+__name__ = 'Iguape - Paineira Graphical User Interface'
+license  = 'GNU GPL-3.0 License'
     
 counter.count = 0
-
-
 
 class Window(QMainWindow, Ui_MainWindow):
     """ 

@@ -1,9 +1,16 @@
-import sys, time, os, math
+#This is part of the source code for the Paineira Graphical User Interface - Iguape
+#The code is distributed under the GNU GPL-3.0 License. Please refer to the main page (https://github.com/cnpem/iguape) for more information
+
+"""
+This is Monitor Class. It was built to track and read a given Folder for new XRD Data. It's dependent on the iguape_fileslist.txt text file.
+It was built to work only for Paineira XRD Data, but it can easily be adjusted for other situations.
+"""
+
+import time, os, math
 import numpy as np
 import lmfit as lm
-from lmfit.models import PseudoVoigtModel, LinearModel, SplineModel
+from lmfit.models import PseudoVoigtModel, LinearModel
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 from PyQt5.QtCore import QThread, pyqtSignal
 
