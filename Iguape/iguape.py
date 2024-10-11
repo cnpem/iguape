@@ -1,10 +1,9 @@
-#This is part of the source code of the Paineira Graphical User Interface - Iguape
-#The code is distributed under the GNU GPL-3.0 License.
+#This is part of the source code for the Paineira Graphical User Interface - Iguape
+#The code is distributed under the GNU GPL-3.0 License. Please refer to the main page (https://github.com/cnpem/iguape) for more information
 
 """
 This is the main script for the excution of the Paineira Graphical User Interface.
 In this script, both GUIs used by the program are called and all of the backend functions and processes are defined. 
-Please refer to the main page ()
 """
 
 import sys, time
@@ -38,14 +37,20 @@ counter.count = 0
 
 
 class Window(QMainWindow, Ui_MainWindow):
+    """ 
+    Main window Class
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         self.create_graphs_layout()
 
     def create_graphs_layout(self):
+        """
+        Routine to create the layout for the XRD and Fitting Data Graphs
+        """
         self.XRD_data_layout = QVBoxLayout()
-        # Creating the main plot #
+        # Creating the main Figure and Layout #
         self.fig_main = Figure(figsize=(8, 6), dpi=100)
         self.gs_main = self.fig_main.add_gridspec(1, 1)
         self.ax_main = self.fig_main.add_subplot(self.gs_main[0, 0])
@@ -55,7 +60,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.XRD_data_tab.setLayout(self.XRD_data_layout)
     
         self.peak_fit_layout = QVBoxLayout()
-        # Creating the subplots #
+        #Creating the fitting parameter Figure and Layout#
         self.fig_sub = Figure(figsize=(8, 5), dpi=100)
         self.gs_sub = self.fig_sub.add_gridspec(1, 3)
         self.ax_2theta = self.fig_sub.add_subplot(self.gs_sub[0, 0])
@@ -66,14 +71,14 @@ class Window(QMainWindow, Ui_MainWindow):
         self.peak_fit_layout.addWidget(self.canvas_sub)
         self.peak_fit_tab.setLayout(self.peak_fit_layout)
 
-        # Creating a colormap on the main canvas #
+        #Creating a colormap on the main canvas#
         self.cmap = plt.get_cmap('coolwarm') 
         self.norm = plt.Normalize(vmin=0, vmax=1) # Initial placeholder values for norm #
         self.sm = ScalarMappable(cmap=self.cmap, norm=self.norm)
         self.sm.set_array([])
         self.cax = self.fig_main.colorbar(self.sm, ax=self.ax_main) # Creating the colorbar axes #
         
-        # Create button layout #
+        #Connecting functions to buttons#
         self.refresh_button.clicked.connect(self.update_graphs)
         
         self.reset_button.clicked.connect(self.reset_interval)
@@ -89,7 +94,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.temp_mask_signal = False
         self.plot_data = pd.DataFrame()
 
-        # Create span selector on the main plot
+        #Create span selector on the main plot#
         self.span = SpanSelector(self.ax_main, self.onselect, 'horizontal', useblit=True,
                                 props=dict(alpha=0.3, facecolor='red', capstyle='round'))
 
@@ -109,9 +114,12 @@ class Window(QMainWindow, Ui_MainWindow):
         self.filter_button.clicked.connect(self.apply_temp_mask)
 
     def update_graphs(self):
+        """
+        Clears plotted axis, updates the colormap normalization and calls refreshing routines (_update_main_figure and _plot_fitting_parameters)
+        """
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
-        # Clear previous plots #
+
             self.ax_main.clear()
         
             self._update_main_figure()
@@ -130,11 +138,18 @@ class Window(QMainWindow, Ui_MainWindow):
         
 
     def _get_mask(self, i):
+        """
+        Creates a mask, based on the interval selected by the user, for the i-th XRD measure.
+        If no interval is selected, returns None.
+        """
         if self.selected_interval:
             return (self.plot_data['theta'][i] >= self.selected_interval[0]) & (self.plot_data['theta'][i] <= self.selected_interval[1])
         return slice(None)
 
     def _update_main_figure(self):
+        """
+        Main Figure (XRD Data) refreshing routine. It plots the XRD patterns, with the customizations selected by the user (2theta mask, temperature mask, XRD index, etc.)
+        """
         try:
             self.plot_data = self.monitor.data_frame[self.temp_mask].reset_index(drop=True) if self.temp_mask_signal else self.monitor.data_frame
         except (AttributeError, pd.errors.IndexingError):
@@ -144,6 +159,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.norm.vmin, self.norm.vmax = min(self.plot_data[color_map_type]), max(self.plot_data[color_map_type])
             self.sm.set_norm(self.norm)
             self.cax.set_label(label)
+
         if self.plot_with_temp:
             update_colormap('temp', 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)')
             self.min_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['temp']), max(self.monitor.data_frame['temp']))
@@ -159,8 +175,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.spacing = max(self.plot_data['max']) / self.offset_slider.value()
         offset = 0
         for i in range(len(self.plot_data['theta'])):
-            norm_col = 'temp' if self.plot_with_temp else 'file_index'
-            color = self.cmap(self.norm(self.plot_data[norm_col][i]))
+            norm_col = 'temp' if self.plot_with_temp else 'file_index' #Flag for chosing the XRD pattern index
+            color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
             mask = self._get_mask(i)
             self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color)
             offset += self.spacing
@@ -169,6 +185,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.ax_main.set_ylabel('Intensity (u.a.)')
 
     def _plot_fitting_parameters(self):
+        """
+        Calls the fitting parameters plotting routines (_plot_single_peak or _plot_double_peak) 
+        """
         if not self.fit_interval:
             return
 
@@ -176,17 +195,20 @@ class Window(QMainWindow, Ui_MainWindow):
         self.ax_area.clear()
         self.ax_FWHM.clear()
 
-    # Plot based on model and temperature flag
+    
         if self.fit_interval_window.fit_model == 'PseudoVoigt':
             self._plot_single_peak()
         else:
             self._plot_double_peak()
 
-    # Add shade to the fitting interval on the main plot
+    
         self.ax_main.axvspan(self.fit_interval[0], self.fit_interval[1], color='grey', alpha=0.5, label='Selected Fitting Interval')
         self.ax_main.legend()
         
     def _plot_single_peak(self):
+        """
+        Based on the x data type flag (temperature/XRD measure order), plots the fitting parameters (Peak Postion, Integrated Area and FWHM) as a function of x.
+        """
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
         x_label = 'XRD measure' if not self.plot_with_temp else 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)'
         self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0'], 'Peak position (°)', x_label, color='red')
@@ -194,10 +216,12 @@ class Window(QMainWindow, Ui_MainWindow):
         self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm'], 'FWHM (°)', x_label, color='blue')
 
     def _plot_double_peak(self):
+        """
+        Based on the x data type flag (temperature/XRD measure order), plots the fitting parameters (Peak Postion, Integrated Area and FWHM) as a function of x. In this version, the fitting model is the Split Pseudo-Voigt Model (2x Pseudo-Voigt)
+        """
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
         x_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)' if self.plot_with_temp else 'XRD measure'
 
-    # Plotting data for both peaks
         self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0'], 'Peak position (°)', x_label, 'PseudoVoigt #1', color='red')
         self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0_#2'], 'Peak position (°)', x_label, 'PseudoVoigt #2', color='red', marker='x')
 
@@ -208,6 +232,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm_#2'], 'FWHM (°)', x_label, 'PseudoVoigt #2', color='blue', marker='x')
 
     def _plot_parameter(self, ax, x, y, ylabel, xlabel, label=None, color=None, marker='o'):
+        """
+        Routine for plotting x and y on given axis (ax)
+        """
         ax.plot(x, y, marker, label=label if label else '', color = color)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -262,7 +289,7 @@ class Window(QMainWindow, Ui_MainWindow):
                     self.ax_area.clear()
                     self.ax_FWHM.clear()
                     self.fit_interval=None
-                    self.monitor.fit_data = self.monitor.fit_data.iloc[0:0]
+                    self.monitor.fit_data = self.monitor.fit_data.iloc[0:0] #Reset fitting data
                     self.fit_interval_window = FitWindow()
                     self.fit_interval_window.show()
             except AttributeError as e:
@@ -337,6 +364,9 @@ class Window(QMainWindow, Ui_MainWindow):
         })
 
     def validate_temp(self, min_value, max_value):
+        """
+        Validates the temperature selected at the SpinBoxes. 
+        """
         min_temp = min(self.monitor.data_frame['temp'], key=lambda x: abs(x-min_value))
         max_temp = min(self.monitor.data_frame['temp'], key=lambda x: abs(x-max_value))
         return min_temp, max_temp
@@ -393,7 +423,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self,
             "About Iguape",
             "<p>This is the Paineira Graphical User Interface</p>"
-            "<p>- Its usage is resttricted to data acquired via in-situ experiments at Paineira.</p>"
+            "<p>- Its usage is resttricted to data acquired via in-situ experiments at Paineira. The software is under the GNU GPL-3.0 License.</p>"
             "<p>- There's a brief tutorial for first time users, which can be helpful, altough the program's operation is very simple"
             "<p>- Paineira Beamline</p>"
             "<p>- LNLS - CNPEM</p>",
@@ -401,6 +431,9 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
 class Worker(QThread):
+    """
+    QThread Class for performing the Peak Fit. 
+    """
     progress = pyqtSignal(int)
     finished = pyqtSignal(float) 
     error = pyqtSignal(str) # Changed to emit multiple arrays
@@ -548,6 +581,9 @@ class FitWindow(QDialog, Ui_pk_window):
         self.indexes.clear()
 
     def preview(self):
+        """
+        Returns a Preview of the Peak Fitting for the selected Model and 2theta Interval.
+        """
         if len(self.ax.lines) > 2:
             while len(self.ax.lines) > 2:
                 self.ax.lines[len(self.ax.lines)-1].remove()

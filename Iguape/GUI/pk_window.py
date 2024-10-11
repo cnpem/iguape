@@ -90,7 +90,7 @@ class Ui_pk_window(object):
         self.preview_button.setText(_translate("pk_window", "Preview"))
         self.pk_button.setText(_translate("pk_window", "Fit"))
         self.pk_combo_box.setItemText(0, _translate("pk_window", "PseudoVoigt Model"))
-        self.pk_combo_box.setItemText(1, _translate("pk_window", "2x PseudoVoigt Model"))
+        self.pk_combo_box.setItemText(1, _translate("pk_window", "Split PseudoVoigt Model - 2x PseudoVoigt"))
         self.xrd_label.setText(_translate("pk_window", "<html><head/><body><p><span style=\" text-decoration: underline;\">XRD pattern:</span></p></body></html>"))
         self.distance_label.setText(_translate("pk_window", "<html><head/><body><p><span style=\" text-decoration: underline;\">Distance:</span></p></body></html>"))
         self.pk_label.setText(_translate("pk_window", "<html><head/><body><p><span style=\" text-decoration: underline;\">Peak Profile:</span></p></body></html>"))

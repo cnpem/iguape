@@ -46,7 +46,7 @@
        </item>
        <item>
         <property name="text">
-         <string>2x PseudoVoigt Model</string>
+         <string>Split PseudoVoigt Model - 2x PseudoVoigt</string>
         </property>
        </item>
       </widget>
