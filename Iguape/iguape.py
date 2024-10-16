@@ -29,7 +29,6 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QProgressDialog, QMessageBox, QVBoxLayout
 
 __version__ = '1.0'
-__name__ = 'Iguape - Paineira Graphical User Interface'
 license  = 'GNU GPL-3.0 License'
     
 counter.count = 0

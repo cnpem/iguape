@@ -7,5 +7,4 @@ In this script, both GUIs used by the program are called and all of the backend 
 """
 
 __version__ = '1.0'
-__name__ = 'Iguape - Paineira Graphical User Interface'
 license  = 'GNU GPL-3.0 License'

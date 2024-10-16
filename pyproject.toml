@@ -3,14 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Iguape - Paineira Graphical User Interface"
-version = "1.0"
-dependencies = [
-  "httpx",
-  "gidgethub[httpx]>4.0.0",
-  "django>2.1; os_name != 'nt'",
-  "django>2.0; os_name == 'nt'",
-]
+name = "iguape"
 requires-python = ">=3.12"
 authors = [
   {name = "João Luis Biondo Neto", email = "joaoluisbiondo@gmail.com"},
@@ -21,7 +14,7 @@ maintainers = [
   {name = "João Luis Biondo Neto", email = "joaoluisbiondo@gmail.com"}
 ]
 description = "Iguape is a Graphical User Interface for X-ray diffraction in situ experiments at Paineira beamline (LNLS/CNPEM)."
-readme = {file = "README.md"}
+#readme = {file = "README.md"}
 license = {file = "LICENSE.txt"}
 keywords = ["X-ray diffraction", 'in situ experiments', 'XRD synchrotron']
 classifiers = [
@@ -47,5 +40,15 @@ dynamic = ["version"]
 [project.urls]
 Repository = "https://github.com/cnpem/Iguape"
 
-[tools.setuptools.dynamic]
+[tool.setuptools.dynamic]
 version = { attr = "Iguape.__version__"}
+
+[project.scripts]
+iguape = "Iguape.launcher:main"
+
+[tool.setuptools]
+packages = ["Iguape"]
+
+[tool.setuptools.package-data]
+"Iguape" = ["Icons/*", "GUI/*"]
+
