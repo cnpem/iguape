@@ -1,3 +1,7 @@
+![License](https://img.shields.io/pypi/l/iguape?style=plastic&color=green&link=https%3A%2F%2Fpypi.org%2Fproject%2Figuape%2F)
+![Version](https://img.shields.io/pypi/v/iguape?style=plastic&color=pink&link=https%3A%2F%2Fpypi.org%2Fproject%2Figuape%2F)
+![Status](https://img.shields.io/pypi/status/iguape?style=plastic&link=https%3A%2F%2Fpypi.org%2Fproject%2Figuape%2F
+)
 # Iguape - Paineira Graphical User Interface
 
 
@@ -9,10 +13,12 @@ The GUI has two tabs and concentrate its features in a button panel at the botto
 ![Iguape_XRD_Data_Main_Window](https://github.com/user-attachments/assets/fffae287-6076-495d-a3fe-dc6e4289b7c0)
 ![Iguape_Peak_Fit_PsdVoigt](https://github.com/user-attachments/assets/4c7c9224-88ac-41ad-bcb7-c248986fdfb3)
 ## Installation
-#Windows
-For Windows users we'll make available a installer.
-#Linux
-We're still evaluating the availability of installation vai Linux-terminal.
+When using Linux, you can download Iguape via pip, with the console command:
+```bash
+pip install iguape
+iguape #this will open the software, once it's installed
+```
+For Windows, a instaler can be found in the following link: [Windows Installer]()
 ## Usage
 # **Initialization**
 The first step, once Iguape is initialized, is to select a folder to monitor. This can be done by clicking in the **Folder** option at the upper right corner of the window. It's important that the selected folder contains the iguape_fileslist.txt file. It is though this text document, that Iguape can read the XRD data available at the Folder. 
@@ -34,7 +40,7 @@ João Luis Biondo Neto;
 Junior Cintra Mauricio
 
 ## License
-
+This project is under the GNU-GPL 3.0. For more information, see LICENSE.txt
 
 ## Project status
-Iguape is fully operational at Paineira. Working on distribution for Paineira users. 
+Iguape is fully operational at Paineira. Working on distribution for Paineira users.
