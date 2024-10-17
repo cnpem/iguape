@@ -1,5 +1,5 @@
 ![License](https://img.shields.io/pypi/l/iguape?style=plastic&color=green&link=https%3A%2F%2Fpypi.org%2Fproject%2Figuape%2F)
-![Version](https://img.shields.io/pypi/v/iguape?style=plastic&color=pink&link=https%3A%2F%2Fpypi.org%2Fproject%2Figuape%2F)
+![Version](https://img.shields.io/pypi/v/iguape?style=plastic&color=pink)
 ![Status](https://img.shields.io/pypi/status/iguape?style=plastic&link=https%3A%2F%2Fpypi.org%2Fproject%2Figuape%2F
 )
 # Iguape - Paineira Graphical User Interface
