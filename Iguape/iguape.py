@@ -28,7 +28,7 @@ from Monitor import peak_fit, counter, peak_fit_split_gaussian
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QProgressDialog, QMessageBox, QVBoxLayout
 
-__version__ = '1.0'
+
 license  = 'GNU GPL-3.0 License'
     
 counter.count = 0
@@ -588,11 +588,11 @@ class FitWindow(QDialog, Ui_pk_window):
             for i in range(len(self.indexes)):
                 data = peak_fit(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval)
                 if win.plot_with_temp:
-                    self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - {win.plot_data['temp'][self.indexes[i]]} °C')
-                    self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - {win.plot_data['temp'][self.indexes[i]]} °C')
+                    self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - {win.plot_data["temp"][self.indexes[i]]} °C')
+                    self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - {win.plot_data["temp"][self.indexes[i]]} °C')
                 else:
-                    self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - #{win.plot_data['file_index'][self.indexes[i]]}')
-                    self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - #{win.plot_data['file_index'][self.indexes[i]]}')
+                    self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - #{win.plot_data["file_index"][self.indexes[i]]}')
+                    self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - #{win.plot_data["file_index"][self.indexes[i]]}')
                 self.ax.legend(fontsize='small')
                 self.canvas.draw()
         else:
@@ -600,11 +600,11 @@ class FitWindow(QDialog, Ui_pk_window):
                 try:
                     data = peak_fit_split_gaussian(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval, height = self.height, distance=self.distance)
                     if win.plot_with_temp:
-                        self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - {win.plot_data['temp'][self.indexes[i]]} °C')
-                        self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - {win.plot_data['temp'][self.indexes[i]]} °C')
+                        self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - {win.plot_data["temp"][self.indexes[i]]} °C')
+                        self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - {win.plot_data["temp"][self.indexes[i]]} °C')
                     else:
-                        self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - #{win.plot_data['file_index'][self.indexes[i]]}')
-                        self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - #{win.plot_data['file_index'][self.indexes[i]]}')
+                        self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - #{win.plot_data["file_index"][self.indexes[i]]}')
+                        self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - #{win.plot_data["file_index"][self.indexes[i]]}')
                     self.ax.legend(fontsize='small')
                     self.canvas.draw()
                 except UnboundLocalError as e:
