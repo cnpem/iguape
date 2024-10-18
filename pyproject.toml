@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "iguape"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 authors = [
   {name = "João Luis Biondo Neto", email = "joaoluisbiondo@gmail.com"},
   {name = "Junior Cintra Mauricio"},
