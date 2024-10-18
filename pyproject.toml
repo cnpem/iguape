@@ -15,7 +15,7 @@ maintainers = [
 ]
 description = "Iguape is a Graphical User Interface for X-ray diffraction in situ experiments at Paineira beamline (LNLS/CNPEM)."
 readme = "README.md"
-license = "LICENSE.txt"
+license = {file = "LICENSE.txt"}
 keywords = ["X-ray diffraction", 'in situ experiments', 'XRD synchrotron']
 classifiers = [
   "Development Status :: 4 - Beta",
