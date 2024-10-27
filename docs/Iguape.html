@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iguape package &mdash; Iguape - Paineira Graphical User Interface 1.0.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=baaebd52"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Iguape.GUI package" href="Iguape.GUI.html" />
+    <link rel="prev" title="iguape" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Iguape - Paineira Graphical User Interface
+              <img src="_static/Logo_IGUAPE.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">iguape</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Iguape package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.GUI.html">Iguape.GUI package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-Iguape.Monitor">Iguape.Monitor module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.FolderMonitor"><code class="docutils literal notranslate"><span class="pre">FolderMonitor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.counter"><code class="docutils literal notranslate"><span class="pre">counter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.data_read"><code class="docutils literal notranslate"><span class="pre">data_read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.peak_fit"><code class="docutils literal notranslate"><span class="pre">peak_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.peak_fit_split_gaussian"><code class="docutils literal notranslate"><span class="pre">peak_fit_split_gaussian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.pseudo_voigt"><code class="docutils literal notranslate"><span class="pre">pseudo_voigt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.split_pseudo_voigt"><code class="docutils literal notranslate"><span class="pre">split_pseudo_voigt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#iguape-iguape-module">Iguape.iguape module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-Iguape.launcher">Iguape.launcher module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.launcher.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-Iguape">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Iguape - Paineira Graphical User Interface</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">iguape</a></li>
+      <li class="breadcrumb-item active">Iguape package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Iguape.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="iguape-package">
+<h1>Iguape package<a class="headerlink" href="#iguape-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Iguape.GUI.html">Iguape.GUI package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Iguape.GUI.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Iguape.GUI.html#module-Iguape.GUI.iguape_GUI">Iguape.GUI.iguape_GUI module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Iguape.GUI.html#Iguape.GUI.iguape_GUI.Ui_MainWindow"><code class="docutils literal notranslate"><span class="pre">Ui_MainWindow</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.GUI.html#Iguape.GUI.iguape_GUI.Ui_MainWindow.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_MainWindow.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.GUI.html#Iguape.GUI.iguape_GUI.Ui_MainWindow.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_MainWindow.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Iguape.GUI.html#module-Iguape.GUI.pk_window">Iguape.GUI.pk_window module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Iguape.GUI.html#Iguape.GUI.pk_window.Ui_pk_window"><code class="docutils literal notranslate"><span class="pre">Ui_pk_window</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.GUI.html#Iguape.GUI.pk_window.Ui_pk_window.retranslateUi"><code class="docutils literal notranslate"><span class="pre">Ui_pk_window.retranslateUi()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.GUI.html#Iguape.GUI.pk_window.Ui_pk_window.setupUi"><code class="docutils literal notranslate"><span class="pre">Ui_pk_window.setupUi()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Iguape.GUI.html#module-Iguape.GUI">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-Iguape.Monitor">
+<span id="iguape-monitor-module"></span><h2>Iguape.Monitor module<a class="headerlink" href="#module-Iguape.Monitor" title="Link to this heading"></a></h2>
+<p>This is Monitor Class. It was built to track and read a given Folder for new XRD Data. It’s dependent on the iguape_fileslist.txt text file.
+It was built to work only for Paineira XRD Data, but it can easily be adjusted for other situations.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">FolderMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QThread</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.new_data_signal">
+<span class="sig-name descname"><span class="pre">new_data_signal</span></span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.new_data_signal" title="Link to this definition"></a></dt>
+<dd><p>pyqtSignal(<a href="#id1"><span class="problematic" id="id2">*</span></a>types, name: str = …, revision: int = …, arguments: Sequence = …) -&gt; PYQT_SIGNAL</p>
+<p>types is normally a sequence of individual types.  Each type is either a
+type object or a string that is the name of a C++ type.  Alternatively
+each type could itself be a sequence of types each describing a different
+overloaded signal.
+name is the optional C++ name of the signal.  If it is not specified then
+the name of the class attribute that is bound to the signal is used.
+revision is the optional revision of the signal that is exported to QML.
+If it is not specified then 0 is used.
+arguments is the optional sequence of the names of the signal’s arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.set_distance">
+<span class="sig-name descname"><span class="pre">set_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.set_distance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.set_fit_interval">
+<span class="sig-name descname"><span class="pre">set_fit_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.set_fit_interval" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.set_fit_model">
+<span class="sig-name descname"><span class="pre">set_fit_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.set_fit_model" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.set_height">
+<span class="sig-name descname"><span class="pre">set_height</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.set_height" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Iguape.Monitor.counter">
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">counter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.counter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Iguape.Monitor.data_read">
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">data_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.data_read" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Iguape.Monitor.peak_fit">
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">peak_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Linear'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.peak_fit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Iguape.Monitor.peak_fit_split_gaussian">
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">peak_fit_split_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.peak_fit_split_gaussian" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Iguape.Monitor.pseudo_voigt">
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">pseudo_voigt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.pseudo_voigt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Iguape.Monitor.split_pseudo_voigt">
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">split_pseudo_voigt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cen1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cen2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.split_pseudo_voigt" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="iguape-iguape-module">
+<h2>Iguape.iguape module<a class="headerlink" href="#iguape-iguape-module" title="Link to this heading"></a></h2>
+</section>
+<section id="module-Iguape.launcher">
+<span id="iguape-launcher-module"></span><h2>Iguape.launcher module<a class="headerlink" href="#module-Iguape.launcher" title="Link to this heading"></a></h2>
+<p>Execution script. It goes to the directory where Iguape is installed and it executes the program (iguape.py)</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="Iguape.launcher.main">
+<span class="sig-prename descclassname"><span class="pre">Iguape.launcher.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.launcher.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-Iguape">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-Iguape" title="Link to this heading"></a></h2>
+<p>This is the main script for the excution of the Paineira Graphical User Interface, a GUI for visualization and data processing during in situ experiments at Paineira.
+In this script, both GUIs used by the program are called and all of the backend functions and processes are defined.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="iguape" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Iguape.GUI.html" class="btn btn-neutral float-right" title="Iguape.GUI package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
