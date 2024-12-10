@@ -10,12 +10,11 @@ import sys, time
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QDialog, QProgressDialog, QPushButton
 from PyQt5.QtCore import Qt, QSize, QThread, pyqtSignal
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.widgets import SpanSelector
 from matplotlib.cm import ScalarMappable
-from matplotlib.backend_bases import MouseEvent
 import numpy as np
 import pandas as pd
 from PyQt5.QtWidgets import (
@@ -50,7 +49,7 @@ class Window(QMainWindow, Ui_MainWindow):
         # Creating the main Figure and Layout #
         self.fig_main = Figure(figsize=(8, 6), dpi=100)
         self.gs_main = self.fig_main.add_gridspec(1, 1)
-        self.ax_main = self.fig_main.add_subplot(self.gs_main[0, 0])
+        self.ax_main = self.fig_main.add_subplot()#self.ax_main = self.fig_main.add_subplot(self.gs_main[0, 0])
         self.fig_main.set_layout_engine('compressed')
         self.canvas_main = FigureCanvas(self.fig_main)
         self.XRD_data_layout.addWidget(self.canvas_main)
@@ -94,16 +93,21 @@ class Window(QMainWindow, Ui_MainWindow):
         #Create span selector on the main plot#
         self.span = SpanSelector(self.ax_main, self.onselect, 'horizontal', useblit=True,
                                 props=dict(alpha=0.3, facecolor='red', capstyle='round'))
-
-        self.XRD_data_layout.addWidget(NavigationToolbar(self.canvas_main))
-        self.peak_fit_layout.addWidget(NavigationToolbar(self.canvas_sub))
         
+        self.peak_fit_layout.addWidget(NavigationToolbar2QT(self.canvas_sub, self))
+        self.toolbar = NavigationToolbar2QT(self.canvas_main, self)
+        self.XRD_data_layout.addWidget(self.toolbar)
+        self.canvas_main.mpl_connect("motion_notify_event", self.on_mouse_move)
+
+
         self.actionOpen_New_Folder.triggered.connect(self.select_folder)
         self.actionAbout.triggered.connect(self.about)
         
+        
+
         self.offset_slider.setMinimum(1)
-        self.offset_slider.setMaximum(100)
-        self.offset_slider.setValue(10)
+        self.offset_slider.setMaximum(99)
+        self.offset_slider.setValue(90)
 
     
         self.XRD_measure_order_checkbox.stateChanged.connect(self.measure_order_index)
@@ -169,13 +173,15 @@ class Window(QMainWindow, Ui_MainWindow):
             self.max_temp_doubleSpinBox_2.setRange(min(self.monitor.data_frame['file_index']), max(self.monitor.data_frame['file_index']))
             self.min_temp_doubleSpinBox.setValue(min(self.plot_data['file_index']))
             self.max_temp_doubleSpinBox_2.setValue(max(self.plot_data['file_index']))
-        self.spacing = max(self.plot_data['max']) / self.offset_slider.value()
+        self.spacing = max(self.plot_data['max']) / (100 - self.offset_slider.value())
         offset = 0
         for i in range(len(self.plot_data['theta'])):
             norm_col = 'temp' if self.plot_with_temp else 'file_index' #Flag for chosing the XRD pattern index
             color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
             mask = self._get_mask(i)
-            self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color)
+            self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data['file_index'][i]} - Blower temperature {self.plot_data["temp"][i]} K' 
+                                                                                                                                    if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Blower temperature {self.plot_data["temp"][i]} °C' 
+                                                                                                                                    if self.plot_with_temp else f'XRD pattern #{self.plot_data['file_index'][i]}')
             offset += self.spacing
 
         self.ax_main.set_xlabel('2θ (°)')
@@ -199,8 +205,8 @@ class Window(QMainWindow, Ui_MainWindow):
             self._plot_double_peak()
 
     
-        self.ax_main.axvspan(self.fit_interval[0], self.fit_interval[1], color='grey', alpha=0.5, label='Selected Fitting Interval')
-        self.ax_main.legend()
+        avxspan = self.ax_main.axvspan(self.fit_interval[0], self.fit_interval[1], color='grey', alpha=0.5, label='Selected Fitting Interval')
+        self.ax_main.legend(handles=[avxspan], loc='upper right')
         
     def _plot_single_peak(self):
         """
@@ -294,8 +300,45 @@ class Window(QMainWindow, Ui_MainWindow):
                 QMessageBox.warning(self, '','Please, push the Refresh Button!') 
             except Exception as e:
                 print(f'Error: {e}')
-     
-
+    
+    def on_mouse_move(self, event):
+        """
+        Tracks the mouse motion and updates the toolbar with the event information.
+        """
+        self.canvas_main.mouse_event = event
+        x, y = event.xdata, event.ydata
+        label = None
+        try:
+            min_dist = self.spacing #float('inf')
+        except AttributeError:
+            pass
+        
+        if x is not None and y is not None:
+            # Iterate over all lines in the plot, fiding the closest line point to the mouse. 
+            for line in self.canvas_main.figure.axes[0].get_lines():
+                x_data, y_data = line.get_xdata(), line.get_ydata()
+                if len(x_data) > 0:
+                   #Find the closest point to the mouse on the line
+                    idx = np.argmin(np.sqrt((x_data - x) ** 2 + (y_data - y) ** 2))
+                    dist = np.sqrt((x_data[idx] - x) ** 2 + (y_data[idx] - y) ** 2)
+                    #print(f'Distance: {dist}', f'X_curve: {x_data[idx]}', f'Y_Curve: {y_data[idx]}', f'X_mouse: {x}', f'Y_mouse: {y}')
+                    if dist < min_dist:
+                        min_dist = dist 
+                        label = line.get_label()
+        
+        #print(f'Distance: {dist}', f'X_curve: {x_data[idx]}', f'Y_Curve: {y_data[idx]}', f'X_mouse: {x}', f'Y_mouse: {y}', f'Cruve label: {label}')
+                            
+        #print(label)
+        if label is not None and x is not None and y is not None:
+            s = f"Label: {label} | 2theta={x:.2f}, Intensity={y:.2f}"
+            self.toolbar.set_message(s)
+        else:
+            try:
+                s = f"2theta={x:.2f}, Intensity={y:.2f}"
+                self.toolbar.set_message(s)
+            except TypeError:
+                self.toolbar.set_message("")
+        
     def save_data_frame(self):
         try:
             options = QFileDialog.Options()
@@ -307,9 +350,9 @@ class Window(QMainWindow, Ui_MainWindow):
                 df = self._create_double_peak_dataframe()
 
             if df is not None:
-                file_path, _ = QFileDialog.getSaveFileName(self, "Save fitting Data", "", "Excel Files (*.xlsx);;All Files (*)", options=options)
+                file_path, _ = QFileDialog.getSaveFileName(self, "Save fitting Data", "", "CSV (*.csv);;All Files (*)", options=options)
                 if file_path:
-                    df.to_csv(file_path)
+                    df.to_csv(file_path, index=False)
         except AttributeError as e:
             print(f"No data available! Please, initialize the monitor! Error: {e}")
             QMessageBox.warning(self, '','Please initialize the monitor!')
@@ -495,7 +538,7 @@ class FitWindow(QDialog, Ui_pk_window):
         self.ax.legend(fontsize='small')
         self.canvas = FigureCanvas(self.fig)
         self.pk_layout.addWidget(self.canvas)
-        self.pk_layout.addWidget(NavigationToolbar(self.canvas, self))
+        self.pk_layout.addWidget(NavigationToolbar2QT(self.canvas, self))
         self.pk_frame.setLayout(self.pk_layout)
         self.span = SpanSelector(self.ax, self.onselect, 'horizontal', useblit=True,
                                 props=dict(alpha=0.3, facecolor='red', capstyle='round'))
