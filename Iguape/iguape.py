@@ -49,7 +49,7 @@ class Window(QMainWindow, Ui_MainWindow):
         # Creating the main Figure and Layout #
         self.fig_main = Figure(figsize=(8, 6), dpi=100)
         self.gs_main = self.fig_main.add_gridspec(1, 1)
-        self.ax_main = self.fig_main.add_subplot()#self.ax_main = self.fig_main.add_subplot(self.gs_main[0, 0])
+        self.ax_main = self.fig_main.add_subplot(self.gs_main[0, 0])
         self.fig_main.set_layout_engine('compressed')
         self.canvas_main = FigureCanvas(self.fig_main)
         self.XRD_data_layout.addWidget(self.canvas_main)
