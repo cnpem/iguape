@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath('..'))
 project = 'Iguape - Paineira Graphical User Interface'
 copyright = '2024, João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella'
 author = 'João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella'
-release = '1.0.3'
+release = '1.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
