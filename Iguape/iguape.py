@@ -142,6 +142,14 @@ class Window(QMainWindow, Ui_MainWindow):
         """
         Creates a mask, based on the interval selected by the user, for the i-th XRD measure.
         If no interval is selected, returns None.
+
+        Parameters
+        ----------
+            i (int): Index of the XRD measure
+        
+        Returns
+        -------
+            slice: Slice object for the mask
         """
         if self.selected_interval:
             return (self.plot_data['theta'][i] >= self.selected_interval[0]) & (self.plot_data['theta'][i] <= self.selected_interval[1])
@@ -157,6 +165,14 @@ class Window(QMainWindow, Ui_MainWindow):
             pass
         
         def update_colormap(color_map_type, label):
+            """
+            Updates the colormap based on the selected color map type (temperature or XRD measure order)
+
+            Parameters
+            ----------
+                color_map_type (str): Type of colormap to be used
+                label (str): Label for the colorbar
+            """
             self.norm.vmin, self.norm.vmax = min(self.plot_data[color_map_type]), max(self.plot_data[color_map_type])
             self.sm.set_norm(self.norm)
             self.cax.set_label(label)
@@ -245,6 +261,9 @@ class Window(QMainWindow, Ui_MainWindow):
             ax.legend()
 
     def select_folder(self):
+        """
+        Routine for selecting the folder to be monitored. It creates a FolderMonitor object and starts the monitoring process.
+        """
         if self.folder_selected:
             self.monitor.data_frame = self.monitor.data_frame.iloc[0:0]
             self.monitor.fit_data = self.monitor.fit_data.iloc[0:0]
@@ -268,18 +287,39 @@ class Window(QMainWindow, Ui_MainWindow):
             
 
     def handle_new_data(self, new_data):
+        """
+        Handles new data received from the FolderMonitor object. It updates the plot_data DataFrame and calls the update_graphs routine.
+
+        Parameters
+        ----------
+            new_data (DataFrame): New data received from the FolderMonitor object
+        """
         self.plot_data = pd.concat([self.plot_data, new_data], ignore_index=True)
         
     def onselect(self, xmin, xmax):
+        """
+        Routine for selecting the fitting interval. It updates the selected_interval attribute and calls the update_graphs routine.
+
+        Parameters
+        ----------
+            xmin (float): Minimum x value of the selected interval
+            xmax (float): Maximum x value of the selected interval
+        """
         self.selected_interval = (xmin, xmax)
         #print(f'Selected Interval: {self.selected_interval}')
         self.update_graphs()
     # Reset button function #     
     def reset_interval(self):
+        """
+        Routine for resetting the selected interval. It sets the selected_interval attribute to None and calls the update_graphs routine.
+        """
         self.selected_interval = None
         self.update_graphs()
     # Peak fit interval selection routine # 
     def select_fit_interval(self):
+        """
+        Routine for selecting the fitting interval. It checks if the monitor has been initialized and calls the FitWindow object.
+        """
         if not self.folder_selected:
             QMessageBox.warning(self, '','Please initialize the monitor!')
             pass
@@ -304,6 +344,10 @@ class Window(QMainWindow, Ui_MainWindow):
     def on_mouse_move(self, event):
         """
         Tracks the mouse motion and updates the toolbar with the event information.
+
+        Parameters
+        ----------
+            event (MouseEvent): Mouse event. Inherited from matplotlib.backend_bases.MouseEvent
         """
         self.canvas_main.mouse_event = event
         x, y = event.xdata, event.ydata
@@ -340,6 +384,9 @@ class Window(QMainWindow, Ui_MainWindow):
                 self.toolbar.set_message("")
         
     def save_data_frame(self):
+        """
+        Saves the fitting data to a CSV file. The user is prompted to select the file path.
+        """
         try:
             options = QFileDialog.Options()
 
@@ -360,6 +407,13 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f'Exception {e} encountered')
 
     def _create_single_peak_dataframe(self):
+        """
+        Creates a DataFrame with the fitting data for the PseudoVoigt model.
+
+        Returns
+        -------
+            DataFrame: DataFrame with the fitting data
+        """
         if self.plot_with_temp:
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)'
             return pd.DataFrame({
@@ -379,6 +433,13 @@ class Window(QMainWindow, Ui_MainWindow):
         })
 
     def _create_double_peak_dataframe(self):
+        """
+        Creates a DataFrame with the fitting data for the Split PseudoVoigt model (2x PseudoVoigt).
+
+        Returns
+        -------
+            DataFrame: DataFrame with the fitting data
+        """
         if self.plot_with_temp:
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)'
             return pd.DataFrame({
@@ -405,13 +466,25 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def validate_temp(self, min_value, max_value):
         """
-        Validates the temperature selected at the SpinBoxes. 
+        Validates the temperature selected at the SpinBoxes.
+
+        Parameters
+        ----------
+            min_value (float): Minimum temperature value
+            max_value (float): Maximum temperature value
+
+        Returns
+        -------
+            tuple: Tuple with the minimum and maximum temperature values
         """
         min_temp = min(self.monitor.data_frame['temp'], key=lambda x: abs(x-min_value))
         max_temp = min(self.monitor.data_frame['temp'], key=lambda x: abs(x-max_value))
         return min_temp, max_temp
     
     def apply_temp_mask(self):
+        """
+        Applies the temperature mask to the data. It validates the temperature selected at the SpinBoxes and updates the plot_data DataFrame.
+        """
         try:
             if self.plot_with_temp:
                 min_temp, max_temp = self.validate_temp(self.min_temp_doubleSpinBox.value(), self.max_temp_doubleSpinBox_2.value())
@@ -427,6 +500,13 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f'Exception {e} encountered')
 
     def measure_order_index(self, checked):
+        """
+        Routine for selecting the XRD measure order index. It updates the plot_with_temp flag and calls the update_graphs routine.
+
+        Parameters
+        ----------
+            checked (bool): Flag for the XRD measure order index checkbox
+        """
         if checked:
             self.temperature_checkbox.setCheckState(False)
             self.plot_with_temp = False
@@ -437,6 +517,13 @@ class Window(QMainWindow, Ui_MainWindow):
             self.temperature_checkbox.setCheckable(True)
 
     def temp_index(self, checked):
+        """
+        Routine for selecting the temperature index. It updates the plot_with_temp flag and calls the update_graphs routine.
+
+        Parameters
+        ----------
+            checked (bool): Flag for the temperature index checkbox
+        """
         try:
             if checked:
 
@@ -459,6 +546,9 @@ class Window(QMainWindow, Ui_MainWindow):
             
         
     def about(self):
+        """
+        Displays the About message box from PyQt.
+        """
         QMessageBox.about(
             self,
             "About Iguape",
@@ -472,7 +562,11 @@ class Window(QMainWindow, Ui_MainWindow):
 
 class Worker(QThread):
     """
-    QThread Class for performing the Peak Fit. 
+    QThread Class for performing the Peak Fit. It emits signals for progress, finished and error.
+
+    Parameters
+    ----------
+        interval (list): List with the fitting interval
     """
     progress = pyqtSignal(int)
     finished = pyqtSignal(float) 
@@ -484,6 +578,9 @@ class Worker(QThread):
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
     def run(self):
+        """
+        Peak Fitting routine. It calls the peak_fit or peak_fit_split_gaussian routine based on the selected fitting model.
+        """
         
         try:
             start = time.time()
@@ -512,7 +609,20 @@ class Worker(QThread):
 
 
 class FitWindow(QDialog, Ui_pk_window):
+    """
+    Fit Window Class. It creates a new window for the Peak Fitting routine. 
+    It allows the user to select the fitting model, the fitting interval and the fitting parameters.
+    It inherits the QDialog class from PyQt.
+    """
+
     def __init__(self, parent=None):
+        """
+        Constructor for the FitWindow class. It initializes the window and sets up the layout.
+
+        Parameters
+        ----------
+            parent (QWidget): Parent widget for the window
+        """
         super().__init__(parent)
         self.setupUi(self)
         self.fit_interval= None
@@ -524,6 +634,9 @@ class FitWindow(QDialog, Ui_pk_window):
         self.setup_layout()
 
     def setup_layout(self):
+        """
+        Routine for setting up the layout of the FitWindow. It creates the Figure and the layout for the Peak Fitting plot.
+        """
         self.setWindowTitle('Peak Fit')
         self.pk_layout = QVBoxLayout()
         self.fig = Figure(figsize=(20,10), dpi=100)
@@ -566,6 +679,14 @@ class FitWindow(QDialog, Ui_pk_window):
         self.height_spinBox.valueChanged[int].connect(self.onChanged_height_spinbox)
 
     def onChanged_xrd_combo_box(self, text):
+        """
+        Routine for selecting the XRD pattern to be displayed on the plot via the ComboBox.
+
+        Parameters
+        ----------
+            text (str): Text selected on the ComboBox
+        """
+
         self.text = text
         if len(self.ax.lines) == 2:
             QMessageBox.warning(self, '','Warning! It is possible to display only two XRD patterns in this window! Please press the Clear Plot button and select up to 2 XRD patterns to be displayed.')
@@ -584,6 +705,14 @@ class FitWindow(QDialog, Ui_pk_window):
             self.canvas.draw()
     
     def onChanged_pk_combo_box(self, text):
+        """
+        Routine for selecting the Peak Fitting Model via the ComboBox.
+        
+        Parameters 
+        ----------
+            text (str): Text selected on the ComboBox
+        """
+
         if text == 'PseudoVoigt Model':
             self.fit_model = 'PseudoVoigt'
             win.monitor.set_fit_model = 'PseudoVoigt'
@@ -595,12 +724,29 @@ class FitWindow(QDialog, Ui_pk_window):
             self.distance_spinBox.setReadOnly(False)
             self.height_spinBox.setReadOnly(False)
     def onChanged_bkg_combo_box(self, text):
+        """
+        Routine for selecting the Background Model via the ComboBox.
+
+        Parameters
+        ----------
+            text (str): Text selected on the ComboBox
+        """
+
         if text == 'Linear Model': 
             self.bkg_model = 'Linear'
         else:
             self.bkg_model = 'Spline'
 
     def onselect(self, xmin, xmax):
+        """
+        Routine for selecting the fitting interval. It updates the fit_interval attribute and the interval_label label.
+
+        Parameters
+        ----------
+            xmin (float): Minimum x value of the selected interval
+            xmax (float): Maximum x value of the selected interval
+        """
+
         if self.shade:
             self.shade.remove()
         self.fit_interval = [xmin, xmax]
@@ -609,13 +755,30 @@ class FitWindow(QDialog, Ui_pk_window):
         self.canvas.draw()
         
     def onChanged_distance_spinbox(self, value):
+        """
+        Method for setting the distance between the two peaks for the Split Pseudo-Voigt Model.
+
+        Parameters
+        ----------
+            value (int): Value selected on the SpinBox
+        """
         self.distance = value
 
     def onChanged_height_spinbox(self, value):
+        """
+        Method for setting the height for the peak search for the Split Pseudo-Voigt Model.
+
+        Parameters
+        ----------
+            value (int): Value selected on the SpinBox
+        """
         self.height = value*(1e+09)
         
 
     def clear_plot(self):
+        """
+        Clears the plot on the FitWindow.
+        """
         self.ax.clear()
         self.canvas.draw()
         self.indexes.clear()
@@ -654,6 +817,10 @@ class FitWindow(QDialog, Ui_pk_window):
                     QMessageBox.warning(self, '', 'The value given for distance and/or height for peak search are out of bounds, i.e., it was not possible to find two peaks mtaching the given parameters! Please, try again with different values for distance and height!')
 
     def fit(self):
+        """
+        Routine for starting the Peak Fitting process. It sets the fitting interval, the fitting model, the distance and the height for the Split Pseudo-Voigt Model.
+        It starts the Worker thread for the Peak Fitting process.
+        """
         win.monitor.set_fit_interval(self.fit_interval)
         win.monitor.set_distance(self.distance)
         win.monitor.set_height(self.height)
@@ -674,9 +841,25 @@ class FitWindow(QDialog, Ui_pk_window):
         self.worker.start()
 
     def update_progress(self, value):
+        """
+        Routine for updating the progress bar on the Peak Fitting process.
+
+        Parameters
+        ----------
+            value (int): Value for the progress bar
+        """
+
         self.progress_dialog.setValue(value)
 
     def peak_fitting_finished(self, time):
+        """
+        Routine for handling the Peak Fitting process completion. It updates the graphs and displays a message box with the elapsed time.
+
+        Parameters
+        ----------
+            time (float): Elapsed time for the Peak Fitting process
+        """
+
         self.progress_dialog.setValue(100)
         QMessageBox.information(self, "Peak Fitting", f"Peak fitting completed successfully! Elapsed time: {int(time)}s")
         win.update_graphs()
@@ -684,6 +867,13 @@ class FitWindow(QDialog, Ui_pk_window):
         self.close()
 
     def peak_fitting_error(self, error_message):
+        """
+        Routine for handling the Peak Fitting process error. It displays a message box with the error message.
+
+        Parameters
+        ----------
+            error_message (str): Error message for the Peak Fitting process
+        """
         self.progress_dialog.cancel()
         QMessageBox.warning(self, "Peak Fitting Error", error_message)
         self.show()

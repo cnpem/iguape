@@ -16,18 +16,44 @@ from PyQt5.QtCore import QThread, pyqtSignal
 
 # --- Monitor - Reading a '.txt' file for new data --- #
 class FolderMonitor(QThread):
+	"""
+    The Folder Monitor operates by tracking new or exiting data in a specified folder.
+
+    This class inherits the QThread class from PyQt. By reading the 'iguape_filelist.txt' file, it can track new or existing data files in the specified folder.
+	Later, it reads the data and stores it in a pandas DataFrame. If a fitting interval is specified, it fits the data to a desired model and stores the fitting parameters in another DataFrame.
+	
+
+    Parameters
+	----------
+        folder_path (str): Path to the data folder.
+        fit_interval (list): 2theta interval selected to perform the peak fit.
+    """ 
 	new_data_signal = pyqtSignal(pd.DataFrame)
 	def __init__(self, folder_path, fit_interval=None):
+		"""
+		The constructor for the FolderMonitor class. It defines all the flags necessary for the class to work,
+		like the folder path, the fit interval, the fit model and the DataFrames.
+
+		Parameters
+		----------
+			folder_path (str): Path to the data folder.
+			fit_interval (list, optional): 2theta interval selected to perform. Default is None
+
+		"""
 		super().__init__()
 		self.folder_path = folder_path
 		self.fit_interval = fit_interval
 		self.fit_model = 'PseudoVoigt'
 		self.kelvin_sginal = False
-		self.processed_files = set()  # Tracking the processed files
 		self.data_frame = pd.DataFrame(columns = ['theta', 'intensity', 'temp', 'max', 'file_index'])
 		self.fit_data = pd.DataFrame(columns=['dois_theta_0', 'fwhm', 'area', 'temp', 'file_index', 'R-squared'])
 
 	def run(self):
+		"""
+		The run method is the main method of the FolderMonitor class. It reads the 'iguape_filelist.txt' file 
+		tracking all the XRD data in the folder. Then it reads the data and stores it as DataFrames. I also performs
+		the peak fit, if a fit interval is specified.
+		"""
 		reading_status = 1
 		i = 0
 		print(f'Monitoring folder: {self.folder_path}')
@@ -68,15 +94,61 @@ class FolderMonitor(QThread):
 		
 
 	def set_fit_interval(self, interval):
+		"""
+		Method for defining the fit interval.
+
+		Parameters
+		----------
+			interval (list): The 2theta interval to be used for the peak fitting.
+		"""
 		self.fit_interval = interval
 	def set_fit_model(self, model):
+		"""
+		Method for defining the fit model.
+
+		Parameters
+		----------
+			model (str): The model to be used for the peak fitting. It can be 'PseudoVoigt' or 'SplitPseudoVoigt'.
+		"""
 		self.fit_model= model
 	def set_distance(self, distance):
+		"""
+		Method for defining the minimum distance between the two peak centers. Only used when the model is
+		Split PseduoVoigt.
+
+		Parameters
+		----------
+			distance (float): The minimum distance between the two peak centers.
+		"""
 		self.distance = distance
 	def set_height(self, height):
+		"""
+		Method for defining the minimum height of the two peaks. Only used when the model is
+		Split PseduoVoigt.
+
+		Parameters
+		----------
+			height (float): The minimum height of the two peaks.
+		"""
 		self.height = height
 # --- Defining the functions for data reading and peak fitting --- #
 def data_read(path):
+	"""
+	Data reading function. 
+	
+	It reads the data from a given path and returns the 2theta and Intensity arrays, Temperature and Kelvin Signal tag.
+
+	Parameters
+	----------
+		path (str): Path to the data file.
+
+	Returns
+	-------
+		x (np.array): 2theta array.
+		y (np.array): Intensity array.
+		temp (float): Temperature.
+		kelvin_signal (bool): Kelvin Signal tag.
+	"""
 	done = False
 	while not done:
 		time.sleep(0.1)
@@ -94,7 +166,7 @@ def data_read(path):
 					temp = float(i.split(sep='Kelvin')[0])
 					kelvin_signal = True
 			done = True
-			return x,y,temp, kelvin_signal
+			return x, y, temp, kelvin_signal
 		except pd.errors.EmptyDataError:
 			print(f"Warning: Empty file encountered: {path}. Trying to read the data again!")
 			#return None
@@ -106,6 +178,28 @@ def data_read(path):
 
 
 def peak_fit(theta, intensity, interval, bkg = 'Linear'):
+	"""
+	Peak fitting function for the PseudoVoigt model.
+	Given a set of 2theta and Intensity arrays, it fits the data to the
+	PseudoVoigt model and 2theta interval selected. It returns the fitting parameters.
+
+	Parameters
+	----------
+		theta (np.array): 2theta array.
+		intensity (np.array): Intensity array.
+		interval (list): 2theta interval for the peak fitting.
+		bkg (str, optional): Background model. Default is 'Linear'.
+
+	Returns
+	-------
+		dois_theta_0 (float): Peak center.
+		fwhm (float): Full Width at Half Maximum.
+		area (float): Area under the peak.
+		r_squared (float): R-squared value of the fit.
+		out (lmfit.ModelResult): ModelResult. Inherited from the lmfit package.
+		comps (dict): Fitting components such as the backgroud and model function. Inherited from the lmfit package.
+		theta_fit (np.array): 2theta array for the fitting interval.
+	"""
 	done = False
 	while not done:
 		#time.sleep(0.5)
@@ -145,16 +239,91 @@ def peak_fit(theta, intensity, interval, bkg = 'Linear'):
 			pass
 
 def pseudo_voigt(x, amplitude, center, sigma, eta):
+    r"""
+    PseudoVoigt function, a linear combination of a Gaussian and a Lorentzian function.
+
+	Parameters
+	----------
+		x (np.array): 2theta array.
+		amplitude (float): Peak amplitude.
+		center (float): Peak center.
+		sigma (float): Sigma value or standard deviation.
+		eta (float): Eta value (mixing parameter).
+
+	Returns
+	-------
+		np.array: PseudoVoigt function.
+
+	Notes
+	-----
+	The PseudoVoigt function is defined as:
+	.. math::
+			PV(x; A, \mu, \sigma, \eta) = \eta L(x; A, \mu, \sigma) + (1 - \eta) G(x; A, \mu, \sigma)
+			where:
+			- L(x; A, \mu, \sigma) is the Lorentzian function
+			- G(x; A, \mu, \sigma) is the Gaussian function
+    """
     sigma_g = sigma/math.sqrt(2*math.log(2))
     gaussian = (amplitude/(sigma_g*math.sqrt(2*math.pi)))*np.exp(-(x-center)**2/(2*sigma_g** 2))
     lorentzian = ((amplitude/math.pi)*sigma)/((x - center)**2 + sigma**2)
     return eta*lorentzian + (1 - eta)*gaussian
 
 def split_pseudo_voigt(x, amp1, cen1, sigma1, eta1, amp2, cen2, sigma2, eta2):
+    r"""
+    Split PseudoVoigt function, a linear combination of two PseudoVoigt functions.
+
+	Parameters
+	----------
+		x (np.array): 2theta array.
+		amp1 (float): Peak amplitude for the first peak.
+		cen1 (float): Peak center for the first peak.
+		sigma1 (float): Sigma value or standard deviation for the first peak.
+		eta1 (float): Eta value for the first peak (mixing parameter).
+		amp2 (float): Peak amplitude for the second peak.
+		cen2 (float): Peak center for the second peak.
+		sigma2 (float): Sigma value or standard deviation for the second peak.
+		eta2 (float): Eta value for the second peak (mixing parameter).
+	
+	Returns
+	-------
+		np.array: Split PseudoVoigt function.
+
+	Notes
+	-----
+	The Split PseudoVoigt function is defined as:
+		.. math::
+			SPV(x; A1, \mu1, \sigma1, \eta1, A2, \mu2, \sigma2, \eta2) = PV1(x; A1, \mu1, \sigma1, \eta1) + PV2(x; A2, \mu2, \sigma2, \eta2)
+	
+
+    """
     return (pseudo_voigt(x, amplitude=amp1, center=cen1, sigma=sigma1, eta=eta1) +
             pseudo_voigt(x, amplitude=amp2, center=cen2, sigma=sigma2, eta=eta2))
 
 def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1e+09, distance = 35):
+	"""
+	Peak fitting function for the Split PseudoVoigt model.
+	Given a set of 2theta and Intensity arrays, it fits the data to the
+	Split PseudoVoigt model and 2theta interval selected. It returns the fitting parameters.
+
+	Parameters
+	----------
+		theta (np.array): 2theta array.
+		intensity (np.array): Intensity array.
+		interval (list): 2theta interval for the peak fitting.
+		bkg (str, optional): Background model. Default is 'Linear'.
+		height (float, optional): Minimum height for the peaks. Default is 1e+09.
+		distance (float, optional): Minimum distance between the peaks. Default is 35.
+	
+	Returns
+	-------
+		dois_theta_0 (list): Peak centers.
+		fwhm (list): Full Width at Half Maximum.
+		area (list): Area under the peaks.
+		r_squared (float): R-squared value of the fit.
+		out (lmfit.ModelResult): ModelResult. Inherited from the lmfit package.
+		comps (dict): Fitting components such as the backgroud and model function. Inherited from the lmfit package.
+		theta_fit (np.array): 2theta array for the fitting interval.
+	"""
 	done = False
 	while not done:
 		#time.sleep(0.5)
@@ -219,6 +388,14 @@ def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1
 
 # --- A counter function to index the created curves --- #
 def counter():
+	"""
+	Counter function. It counts the number of XRD data and returns its index.
+
+	Returns
+	-------
+		int: Index of the XRD data.
+	"""
+
 	counter.count += 1
 	return counter.count
 	
