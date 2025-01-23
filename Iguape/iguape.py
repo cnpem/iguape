@@ -27,6 +27,8 @@ from Monitor import peak_fit, counter, peak_fit_split_gaussian
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QProgressDialog, QMessageBox, QVBoxLayout
 
+if getattr(sys, 'frozen', False): 
+    import pyi_splash #If the program is executed as a pyinstaller executable, import pyi_splash for the Splash Screen
 
 license  = 'GNU GPL-3.0 License'
     
@@ -40,6 +42,8 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.create_graphs_layout()
+        if getattr(sys, 'frozen', False):
+            pyi_splash.close() #After the GUI initialization, close the Splash Screen
 
     def create_graphs_layout(self):
         """
