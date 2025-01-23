@@ -16,6 +16,7 @@
       <script src="_static/documentation_options.js?v=fc837d61"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -142,16 +143,11 @@ It was built to work only for Paineira XRD Data, but it can easily be adjusted f
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">FolderMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QThread</span></code></p>
 <p>The Folder Monitor operates by tracking new or exiting data in a specified folder.</p>
-<dl>
+<dl class="simple">
 <dt>This class inherits the QThread class from PyQt. By reading the ‘iguape_filelist.txt’ file, it can track new or existing data files in the specified folder.</dt><dd><p>Later, it reads the data and stores it in a pandas DataFrame. If a fitting interval is specified, it fits the data to a desired model and stores the fitting parameters in another DataFrame.</p>
 </dd>
-<dt>Parameters</dt><dd><dl class="field-list simple">
-<dt class="field-odd">param<span class="colon">:</span></dt>
-<dd class="field-odd"><p>[folder_path]: [Path to the data folder]
-:type [folder_path]: [str]</p>
-</dd>
-</dl>
-<p>fit_interval (list): 2theta interval selected to perform the peak fit.</p>
+<dt>Parameters</dt><dd><p>folder_path (str): Path to the data folder.
+fit_interval (list): 2theta interval selected to perform the peak fit.</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -368,11 +364,11 @@ eta2 (float): Eta value for the second peak (mixing parameter).</p>
 <blockquote>
 <div><p>np.array: Split PseudoVoigt function.</p>
 </div></blockquote>
-<p>The Split PseudoVoigt function is defined as:
-.. math:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SPV</span><span class="p">(</span><span class="n">x</span><span class="p">;</span> <span class="n">A1</span><span class="p">,</span> \<span class="n">mu1</span><span class="p">,</span> \<span class="n">sigma1</span><span class="p">,</span> \<span class="n">eta1</span><span class="p">,</span> <span class="n">A2</span><span class="p">,</span> \<span class="n">mu2</span><span class="p">,</span> \<span class="n">sigma2</span><span class="p">,</span> \<span class="n">eta2</span><span class="p">)</span> <span class="o">=</span> <span class="n">PV1</span><span class="p">(</span><span class="n">x</span><span class="p">;</span> <span class="n">A1</span><span class="p">,</span> \<span class="n">mu1</span><span class="p">,</span> \<span class="n">sigma1</span><span class="p">,</span> \<span class="n">eta1</span><span class="p">)</span> <span class="o">+</span> <span class="n">PV2</span><span class="p">(</span><span class="n">x</span><span class="p">;</span> <span class="n">A2</span><span class="p">,</span> \<span class="n">mu2</span><span class="p">,</span> \<span class="n">sigma2</span><span class="p">,</span> \<span class="n">eta2</span><span class="p">)</span>
-</pre></div>
-</div>
+<dl>
+<dt>The Split PseudoVoigt function is defined as:</dt><dd><div class="math notranslate nohighlight">
+\[SPV(x; A1, \mu1, \sigma1, \eta1, A2, \mu2, \sigma2, \eta2) = PV1(x; A1, \mu1, \sigma1, \eta1) + PV2(x; A2, \mu2, \sigma2, \eta2)\]</div>
+</dd>
+</dl>
 </div></blockquote>
 </dd></dl>
 
