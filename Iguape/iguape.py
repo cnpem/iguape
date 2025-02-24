@@ -199,9 +199,9 @@ class Window(QMainWindow, Ui_MainWindow):
             norm_col = 'temp' if self.plot_with_temp else 'file_index' #Flag for chosing the XRD pattern index
             color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
             mask = self._get_mask(i)
-            self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data['file_index'][i]} - Blower temperature {self.plot_data["temp"][i]} K' 
+            self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Blower temperature {self.plot_data["temp"][i]} K' 
                                                                                                                                     if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Blower temperature {self.plot_data["temp"][i]} °C' 
-                                                                                                                                    if self.plot_with_temp else f'XRD pattern #{self.plot_data['file_index'][i]}')
+                                                                                                                                    if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
             offset += self.spacing
 
         self.ax_main.set_xlabel('2θ (°)')
