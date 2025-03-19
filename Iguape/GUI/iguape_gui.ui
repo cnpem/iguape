@@ -187,7 +187,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Blower Temperature</string>
+         <string>Temperature</string>
         </property>
        </widget>
       </item>
@@ -239,7 +239,7 @@
          </size>
         </property>
         <property name="text">
-         <string>XRD measure order</string>
+         <string>XRD acquisition time</string>
         </property>
         <property name="checkable">
          <bool>true</bool>

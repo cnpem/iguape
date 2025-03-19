@@ -13,6 +13,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from matplotlib.widgets import SpanSelector
 from matplotlib.cm import ScalarMappable
 import numpy as np
@@ -77,7 +78,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.sm = ScalarMappable(cmap=self.cmap, norm=self.norm)
         self.sm.set_array([])
         self.cax = self.fig_main.colorbar(self.sm, ax=self.ax_main) # Creating the colorbar axes #
-        
+        self.cax_2 = self.fig_sub.colorbar(self.sm, ax=self.ax_area) # Creating the colorbar axes #
         #Connecting functions to buttons#
         self.refresh_button.clicked.connect(self.update_graphs)
         
@@ -133,6 +134,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.canvas_main.draw()
             self.canvas_sub.draw()
             self.cax.update_normal(self.sm)
+            self.cax_2.update_normal(self.sm)
 
         except Exception as e:
             print(f'Please, initialize the monitor! Error: {e}')
@@ -159,16 +161,7 @@ class Window(QMainWindow, Ui_MainWindow):
             return (self.plot_data['theta'][i] >= self.selected_interval[0]) & (self.plot_data['theta'][i] <= self.selected_interval[1])
         return slice(None)
 
-    def _update_main_figure(self):
-        """
-        Main Figure (XRD Data) refreshing routine. It plots the XRD patterns, with the customizations selected by the user (2theta mask, temperature mask, XRD index, etc.)
-        """
-        try:
-            self.plot_data = self.monitor.data_frame[self.temp_mask].reset_index(drop=True) if self.temp_mask_signal else self.monitor.data_frame
-        except (AttributeError, pd.errors.IndexingError):
-            pass
-        
-        def update_colormap(color_map_type, label):
+    def update_colormap(self, color_map_type, label):
             """
             Updates the colormap based on the selected color map type (temperature or XRD measure order)
 
@@ -180,15 +173,25 @@ class Window(QMainWindow, Ui_MainWindow):
             self.norm.vmin, self.norm.vmax = min(self.plot_data[color_map_type]), max(self.plot_data[color_map_type])
             self.sm.set_norm(self.norm)
             self.cax.set_label(label)
+            self.cax_2.set_label(label)
+
+    def _update_main_figure(self):
+        """
+        Main Figure (XRD Data) refreshing routine. It plots the XRD patterns, with the customizations selected by the user (2theta mask, temperature mask, XRD index, etc.)
+        """
+        try:
+            self.plot_data = self.monitor.data_frame[self.temp_mask].reset_index(drop=True) if self.temp_mask_signal else self.monitor.data_frame
+        except (AttributeError, pd.errors.IndexingError):
+            pass
 
         if self.plot_with_temp:
-            update_colormap('temp', 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)')
+            self.update_colormap('temp', 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)')
             self.min_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['temp']), max(self.monitor.data_frame['temp']))
             self.max_temp_doubleSpinBox_2.setRange(min(self.monitor.data_frame['temp']), max(self.monitor.data_frame['temp']))
             self.min_temp_doubleSpinBox.setValue(min(self.plot_data['temp']))
             self.max_temp_doubleSpinBox_2.setValue(max(self.plot_data['temp']))
         else:
-            update_colormap('file_index', 'XRD measure order')
+            self.update_colormap('file_index', 'XRD acquisition time')
             self.min_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['file_index']), max(self.monitor.data_frame['file_index']))
             self.max_temp_doubleSpinBox_2.setRange(min(self.monitor.data_frame['file_index']), max(self.monitor.data_frame['file_index']))
             self.min_temp_doubleSpinBox.setValue(min(self.plot_data['file_index']))
@@ -199,8 +202,8 @@ class Window(QMainWindow, Ui_MainWindow):
             norm_col = 'temp' if self.plot_with_temp else 'file_index' #Flag for chosing the XRD pattern index
             color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
             mask = self._get_mask(i)
-            self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Blower temperature {self.plot_data["temp"][i]} K' 
-                                                                                                                                    if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Blower temperature {self.plot_data["temp"][i]} °C' 
+            self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
+                                                                                                                                    if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} °C' 
                                                                                                                                     if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
             offset += self.spacing
 
@@ -233,7 +236,7 @@ class Window(QMainWindow, Ui_MainWindow):
         Based on the x data type flag (temperature/XRD measure order), plots the fitting parameters (Peak Postion, Integrated Area and FWHM) as a function of x.
         """
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
-        x_label = 'XRD measure' if not self.plot_with_temp else 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)'
+        x_label = 'XRD measure' if not self.plot_with_temp else 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
         self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0'], 'Peak position (°)', x_label, color='red')
         self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type], self.monitor.fit_data['area'], 'Peak integrated area', x_label, color='green')
         self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm'], 'FWHM (°)', x_label, color='blue')
@@ -243,26 +246,31 @@ class Window(QMainWindow, Ui_MainWindow):
         Based on the x data type flag (temperature/XRD measure order), plots the fitting parameters (Peak Postion, Integrated Area and FWHM) as a function of x. In this version, the fitting model is the Split Pseudo-Voigt Model (2x Pseudo-Voigt)
         """
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
-        x_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)' if self.plot_with_temp else 'XRD measure'
+        x_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)' if self.plot_with_temp else 'XRD measure'
 
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0'], 'Peak position (°)', x_label, 'PseudoVoigt #1', color='red')
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0_#2'], 'Peak position (°)', x_label, 'PseudoVoigt #2', color='red', marker='x')
+        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0'], 'Peak position (°)', x_label, label=True, color='red')
+        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0_#2'], 'Peak position (°)', x_label, label=True, color='red', marker='x')
 
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type], self.monitor.fit_data['area'], 'Peak integrated area', x_label, 'PseudoVoigt #1', color='green')
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type], self.monitor.fit_data['area_#2'], 'Peak integrated area', x_label, 'PseudoVoigt #2', color='green', marker='x')
+        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type], self.monitor.fit_data['area'], 'Peak integrated area', x_label, label=True, color='green')
+        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type], self.monitor.fit_data['area_#2'], 'Peak integrated area', x_label, label=True, color='green', marker='x')
 
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm'], 'FWHM (°)', x_label, 'PseudoVoigt #1', color='blue')
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm_#2'], 'FWHM (°)', x_label, 'PseudoVoigt #2', color='blue', marker='x')
+        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm'], 'FWHM (°)', x_label, label = True, color='blue')
+        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm_#2'], 'FWHM (°)', x_label, label = True, color='blue', marker='x')
 
     def _plot_parameter(self, ax, x, y, ylabel, xlabel, label=None, color=None, marker='o'):
         """
         Routine for plotting x and y on given axis (ax)
         """
-        ax.plot(x, y, marker, label=label if label else '', color = color)
+        for i in range(len(x)):
+            norm_col = 'temp' if self.plot_with_temp else 'file_index'
+            color = self.cmap(self.norm(self.plot_data[norm_col][i]))
+            ax.plot(x[i], y[i], marker, color = color)
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
         if label:
-            ax.legend()
+            peak1 = Line2D([0], [0], color='black', marker='o', markersize=5, linestyle="", label='PseudoVoigt #1')
+            peak2 = Line2D([0], [0], color='black', marker='x', markersize=5, linestyle="", label='PseudoVoigt #2')
+            ax.legend(handles = [peak1, peak2])
 
     def select_folder(self):
         """
@@ -419,7 +427,7 @@ class Window(QMainWindow, Ui_MainWindow):
             DataFrame: DataFrame with the fitting data
         """
         if self.plot_with_temp:
-            temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)'
+            temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
             return pd.DataFrame({
             temp_label: self.monitor.fit_data['temp'],
             'Peak position (degree)': self.monitor.fit_data['dois_theta_0'],
@@ -445,7 +453,7 @@ class Window(QMainWindow, Ui_MainWindow):
             DataFrame: DataFrame with the fitting data
         """
         if self.plot_with_temp:
-            temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Blower Temperature (°C)'
+            temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
             return pd.DataFrame({
             temp_label: self.monitor.fit_data['temp'],
             'Peak position #1 (degree)': self.monitor.fit_data['dois_theta_0'],
