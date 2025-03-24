@@ -208,7 +208,7 @@ class Window(QMainWindow, Ui_MainWindow):
             offset += self.spacing
 
         self.ax_main.set_xlabel('2θ (°)')
-        self.ax_main.set_ylabel('Intensity (u.a.)')
+        self.ax_main.set_ylabel('Intensity (a.u.)')
 
     def _plot_fitting_parameters(self):
         """

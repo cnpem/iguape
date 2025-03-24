@@ -13,7 +13,11 @@ def main():
     iguape_path = os.path.join(os.path.dirname(__file__), "iguape.py")
     iguape_dir = os.path.dirname(__file__)
     os.chdir(iguape_dir)
-    subprocess.run(["python3", 'iguape.py'])
+    try:
+        subprocess.run(["python3", 'iguape.py'])
+    except Exception as e:
+        subprocess.run(["python", 'iguape.py'])
+
 
 if __name__=='__main__':
     main()
