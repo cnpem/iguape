@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>852</width>
-    <height>605</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,6 +57,11 @@
         <widget class="QWidget" name="peak_fit_tab">
          <attribute name="title">
           <string>Peak Fitting</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="contour_tab">
+         <attribute name="title">
+          <string>Contour Plot</string>
          </attribute>
         </widget>
        </widget>
@@ -363,6 +368,36 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="3">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="contour_button">
+          <property name="text">
+           <string>Generate Contour</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox">
+          <item>
+           <property name="text">
+            <string>LogNorm</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>PowerNorm</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>CenteredNorm</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </item>
    </layout>
@@ -373,7 +408,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFolder">

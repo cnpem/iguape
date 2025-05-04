@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.widgets import SpanSelector
 from matplotlib.cm import ScalarMappable
+from matplotlib.colors import LogNorm, PowerNorm, CenteredNorm
 import numpy as np
 import pandas as pd
 from PyQt5.QtWidgets import (
@@ -71,6 +72,15 @@ class Window(QMainWindow, Ui_MainWindow):
         self.canvas_sub = FigureCanvas(self.fig_sub)
         self.peak_fit_layout.addWidget(self.canvas_sub)
         self.peak_fit_tab.setLayout(self.peak_fit_layout)
+        
+        self.contour_layout = QVBoxLayout()
+        self.fig_contour = Figure(figsize=(8, 6), dpi = 100)
+        self.gs_contour = self.fig_contour.add_gridspec(1,1)
+        self.ax_contour = self.fig_contour.add_subplot(self.gs_contour[0,0])
+        self.fig_contour.set_layout_engine('compressed')
+        self.canvas_contour = FigureCanvas(self.fig_contour)
+        self.contour_layout.addWidget(self.canvas_contour)
+        self.contour_tab.setLayout(self.contour_layout)
 
         #Creating a colormap on the main canvas#
         self.cmap = plt.get_cmap('coolwarm') 
@@ -79,6 +89,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.sm.set_array([])
         self.cax = self.fig_main.colorbar(self.sm, ax=self.ax_main) # Creating the colorbar axes #
         self.cax_2 = self.fig_sub.colorbar(self.sm, ax=self.ax_area) # Creating the colorbar axes #
+        self.cax_3 = self.fig_contour.colorbar(self.sm, ax = self.ax_contour)
         #Connecting functions to buttons#
         self.refresh_button.clicked.connect(self.update_graphs)
         
@@ -86,10 +97,12 @@ class Window(QMainWindow, Ui_MainWindow):
         
         self.peak_fit_button.clicked.connect(self.select_fit_interval)
         self.save_peak_fit_data_button.clicked.connect(self.save_data_frame)
+        self.contour_button.clicked.connect(self.contour)
     
         self.plot_with_temp = False
         self.selected_interval = None
         self.fit_interval = None
+        self.norms = {'LogNorm': LogNorm(), "PowerNorm": PowerNorm(gamma=0.5), 'CenteredNorm': CenteredNorm()}
         
         self.folder_selected = False
         self.temp_mask_signal = False
@@ -101,6 +114,7 @@ class Window(QMainWindow, Ui_MainWindow):
         
         self.peak_fit_layout.addWidget(NavigationToolbar2QT(self.canvas_sub, self))
         self.toolbar = NavigationToolbar2QT(self.canvas_main, self)
+        self.contour_layout.addWidget(NavigationToolbar2QT(self.canvas_contour, self))
         self.XRD_data_layout.addWidget(self.toolbar)
         self.canvas_main.mpl_connect("motion_notify_event", self.on_mouse_move)
 
@@ -127,12 +141,15 @@ class Window(QMainWindow, Ui_MainWindow):
             QApplication.setOverrideCursor(Qt.WaitCursor)
 
             self.ax_main.clear()
-        
+            
+
             self._update_main_figure()
             self._plot_fitting_parameters()
+            
 
             self.canvas_main.draw()
             self.canvas_sub.draw()
+
             self.cax.update_normal(self.sm)
             self.cax_2.update_normal(self.sm)
 
@@ -158,7 +175,10 @@ class Window(QMainWindow, Ui_MainWindow):
             slice: Slice object for the mask
         """
         if self.selected_interval:
-            return (self.plot_data['theta'][i] >= self.selected_interval[0]) & (self.plot_data['theta'][i] <= self.selected_interval[1])
+            data = pd.read_csv(self.plot_data['file_name'][i], sep = ',', header = 0)
+            dois_theta = data.iloc[:, 0]
+            #intensity = data.iloc[:, 1]
+            return (dois_theta >= self.selected_interval[0]) & (dois_theta <= self.selected_interval[1])
         return slice(None)
 
     def update_colormap(self, color_map_type, label):
@@ -198,14 +218,21 @@ class Window(QMainWindow, Ui_MainWindow):
             self.max_temp_doubleSpinBox_2.setValue(max(self.plot_data['file_index']))
         self.spacing = max(self.plot_data['max']) / (100 - self.offset_slider.value())
         offset = 0
-        for i in range(len(self.plot_data['theta'])):
+        mask = self._get_mask(0)
+        for i in range(len(self.plot_data['file_name'])):
             norm_col = 'temp' if self.plot_with_temp else 'file_index' #Flag for chosing the XRD pattern index
             color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
-            mask = self._get_mask(i)
-            self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
-                                                                                                                                    if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} °C' 
+            #mask = self._get_mask(i)
+            #data = pd.read_csv(self.plot_data['file_name'][i], sep = ',', header = 0)
+            #dois_theta = data.iloc[:, 0]
+            #intensity = data.iloc[:, 1]
+            dois_theta, intensity = self.read_data(self.plot_data['file_name'][i])
+            #self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
+            self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
+                                                                                                                        if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} °C' 
                                                                                                                                     if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
             offset += self.spacing
+            del dois_theta, intensity
 
         self.ax_main.set_xlabel('2θ (°)')
         self.ax_main.set_ylabel('Intensity (a.u.)')
@@ -276,6 +303,9 @@ class Window(QMainWindow, Ui_MainWindow):
         """
         Routine for selecting the folder to be monitored. It creates a FolderMonitor object and starts the monitoring process.
         """
+        folder_path = QFileDialog.getExistingDirectory(self, 'Select the data folder to monitor', '', options=QFileDialog.Options()) # Selection of monitoring folder
+        if folder_path == "":
+            return
         if self.folder_selected:
             self.monitor.data_frame = self.monitor.data_frame.iloc[0:0]
             self.monitor.fit_data = self.monitor.fit_data.iloc[0:0]
@@ -286,9 +316,8 @@ class Window(QMainWindow, Ui_MainWindow):
         
         self.folder_selected = False
         self.temp_mask_signal = False
-        folder_path = QFileDialog.getExistingDirectory(self, 'Select the data folder to monitor', '', options=QFileDialog.Options()) # Selection of monitoring folder
+        #folder_path = QFileDialog.getExistingDirectory(self, 'Select the data folder to monitor', '', options=QFileDialog.Options()) # Selection of monitoring folder
         if folder_path:
-            
             self.folder_selected = True
             self.monitor = FolderMonitor(folder_path=folder_path)
             self.monitor.new_data_signal.connect(self.handle_new_data)
@@ -337,7 +366,7 @@ class Window(QMainWindow, Ui_MainWindow):
             pass
         else: 
             try:
-                if len(self.plot_data['theta']) == 0:
+                if len(self.plot_data['file_name']) == 0:
                     print('No data available. Wait for the first measure!')
                 else:
                     self.ax_2theta.clear()
@@ -550,12 +579,44 @@ class Window(QMainWindow, Ui_MainWindow):
                     self.temperature_checkbox.setCheckState(False)
             else:
                 pass
-                
+                    
         except AttributeError as e:
             self.temperature_checkbox.setCheckState(False)
             print(f'Please initizalie the Monitor! Error {e}')
             QMessageBox.warning(self, '','Please initialize the monitor!')     
-            
+    
+    def read_data(self, path):
+        data = pd.read_csv(path, sep = ',', header=0, engine='pyarrow')
+        theta = np.array(data.iloc[:, 0])
+        intensity = np.array(data.iloc[:, 1])
+        return theta, intensity
+    
+    def contour(self):
+        self.ax_contour.clear()
+        theta, intensity = self.read_data(self.plot_data['file_name'][0])
+        if self.plot_with_temp:
+            y = np.array(self.plot_data['temp'], dtype="float64")
+            self.ax_contour.set_ylabel("Temperature (°C)")
+        else:
+            y = np.array(self.plot_data['file_index'], dtype="float64")
+            self.ax_contour.set_ylabel("Acquisition time")
+        mask = self._get_mask(0)
+        X, Y = np.meshgrid(theta[mask], y)
+        z = []
+        for item in self.plot_data['file_name']:
+            intensity = np.array(self.read_data(item)[1][mask]) 
+            z.append(intensity)
+        z = np.array(z)
+
+        #print(f'Shape X and Y: {np.shape(X)}, {np.shape(Y)}. Z shape: {np.shape(z)}')
+        norm = self.norms[self.comboBox.currentText()]
+        colormesh = self.ax_contour.pcolormesh(X, Y, z, cmap = 'plasma', norm = norm, shading='auto')
+        self.cax_3.update_normal(colormesh)
+        self.cax_3.set_label("Intensity") 
+        self.canvas_contour.draw()
+        del X, Y, mask, z
+    
+        
         
     def about(self):
         """
@@ -596,20 +657,23 @@ class Worker(QThread):
         
         try:
             start = time.time()
-            for i in range(len(win.plot_data['theta'])):
+            pars = None
+            for i in range(len(win.plot_data['file_name'])):
                 if win.fit_interval_window.fit_model == 'PseudoVoigt':
-                    fit = peak_fit(win.plot_data['theta'][i], win.plot_data['intensity'][i], self.fit_interval)
+                    theta, intensity = win.read_data(win.plot_data['file_name'][i])
+                    fit = peak_fit(theta, intensity, self.fit_interval, pars)
                     new_fit_data = pd.DataFrame({'dois_theta_0': [fit[0]], 'fwhm': [fit[1]], 'area': [fit[2]], 'temp': [win.plot_data['temp'][i]], 'file_index': [win.plot_data['file_index'][i]], 'R-squared': [fit[3]]})
                     win.monitor.fit_data = pd.concat([win.monitor.fit_data, new_fit_data], ignore_index=True)
-                    progress_value = int((i + 1) / len(win.plot_data['theta']) * 100)
+                    pars = fit[7]
+                    progress_value = int((i + 1) / len(win.plot_data['file_name']) * 100)
                     self.progress.emit(progress_value)  # Emit progress signal with percentage
                 else:
-                    fit = peak_fit_split_gaussian(win.plot_data['theta'][i], win.plot_data['intensity'][i], self.fit_interval, height = win.fit_interval_window.height, distance=win.fit_interval_window.distance)
+                    theta, intensity = win.read_data(win.plot_data['file_name'][i])
+                    fit = peak_fit_split_gaussian(theta, intensity, self.fit_interval, height = win.fit_interval_window.height, distance=win.fit_interval_window.distance, pars=pars)
                     new_fit_data = pd.DataFrame({'dois_theta_0': [fit[0][0]], 'dois_theta_0_#2': [fit[0][1]], 'fwhm': [fit[1][0]], 'fwhm_#2': [fit[1][1]], 'area': [fit[2][0]], 'area_#2': [fit[2][1]], 'temp': [win.plot_data['temp'][i]], 'file_index': [win.plot_data['file_index'][i]], 'R-squared': [fit[3]]})
                     win.monitor.fit_data =pd.concat([win.monitor.fit_data, new_fit_data], ignore_index=True)
-               
-
-                    progress_value = int((i + 1) / len(win.plot_data['theta']) * 100)
+                    pars = fit[7]
+                    progress_value = int((i + 1) / len(win.plot_data['file_name']) * 100)
                     self.progress.emit(progress_value)  # Emit progress signal with percentage
             #self.finished.emit(win.monitor.fit_data['dois_theta_0'], win.monitor.fit_data['area'], win.monitor.fit_data['fwhm'])  # Emit finished signal with results
             finish = time.time()
@@ -653,11 +717,15 @@ class FitWindow(QDialog, Ui_pk_window):
         self.pk_layout = QVBoxLayout()
         self.fig = Figure(figsize=(20,10), dpi=100)
         self.ax = self.fig.add_subplot(1,1,1)
+        theta, intensity = win.read_data(win.plot_data['file_name'][0])
         if win.plot_with_temp:
-            self.ax.plot(win.plot_data['theta'][0], win.plot_data['intensity'][0],'o', markersize=3, label = 'XRD pattern ' + str(win.plot_data['temp'][0]) + '°C')
+            #theta, intensity = win.read_data(win.plot_data['file_name'][0])
+            self.ax.plot(theta, intensity,'o', markersize=3, label = 'XRD pattern ' + str(win.plot_data['temp'][0]) + '°C')
+            #self.ax.plot(win.plot_data['theta'][0], win.plot_data['intensity'][0],'o', markersize=3, label = 'XRD pattern ' + str(win.plot_data['temp'][0]) + '°C')
         
         else:
-            self.ax.plot(win.plot_data['theta'][0], win.plot_data['intensity'][0], 'o', markersize=3, label = 'XRD pattern #' + str(win.plot_data['file_index'][0]))
+            self.ax.plot(theta, intensity, 'o', markersize=3, label = 'XRD pattern #' + str(win.plot_data['file_index'][0]))
+            #self.ax.plot(win.plot_data['theta'][0], win.plot_data['intensity'][0], 'o', markersize=3, label = 'XRD pattern #' + str(win.plot_data['file_index'][0]))
         self.ax.set_xlabel("2θ (°)")
         self.ax.set_ylabel("Intensity (u.a.)")
         self.ax.legend(fontsize='small')
@@ -706,10 +774,14 @@ class FitWindow(QDialog, Ui_pk_window):
         else:
             i = self.xrd_combo_box.currentIndex()
             self.indexes.append(i)
+            theta, intensity = win.read_data(win.plot_data['file_name'][i])
             if win.plot_with_temp:
-                self.ax.plot(win.plot_data['theta'][i], win.plot_data['intensity'][i], 'o', markersize=3, label = ('XRD pattern ' + text))
+                self.ax.plot(theta, intensity, 'o', markersize=3, label = ('XRD pattern ' + text))
+
+                #self.ax.plot(win.plot_data['theta'][i], win.plot_data['intensity'][i], 'o', markersize=3, label = ('XRD pattern ' + text))
             else:
-                self.ax.plot(win.plot_data['theta'][i], win.plot_data['intensity'][i], 'o', markersize=3, label = ('XRD pattern #' + text))
+                self.ax.plot(theta, intensity, 'o', markersize=3, label = ('XRD pattern #' + text))
+                #self.ax.plot(win.plot_data['theta'][i], win.plot_data['intensity'][i], 'o', markersize=3, label = ('XRD pattern #' + text))
         
             self.ax.set_xlabel("2θ (°)")
             self.ax.set_ylabel("Intensity (u.a.)")
@@ -804,7 +876,9 @@ class FitWindow(QDialog, Ui_pk_window):
                 self.ax.lines[len(self.ax.lines)-1].remove()
         if self.fit_model == "PseudoVoigt":
             for i in range(len(self.indexes)):
-                data = peak_fit(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval)
+                theta, intensity = win.read_data(win.plot_data['file_name'][self.indexes[i]])
+                #data = peak_fit(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval)
+                data = peak_fit(theta, intensity, self.fit_interval)
                 if win.plot_with_temp:
                     self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - {win.plot_data["temp"][self.indexes[i]]} °C')
                     self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - {win.plot_data["temp"][self.indexes[i]]} °C')
@@ -816,7 +890,9 @@ class FitWindow(QDialog, Ui_pk_window):
         else:
             for i in range(len(self.indexes)):
                 try:
-                    data = peak_fit_split_gaussian(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval, height = self.height, distance=self.distance)
+                    theta, intensity = win.read_data(win.plot_data['file_name'][self.indexes[i]])
+                    #data = peak_fit_split_gaussian(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval, height = self.height, distance=self.distance)
+                    data = peak_fit_split_gaussian(theta, intensity, self.fit_interval, height = self.height, distance=self.distance)
                     if win.plot_with_temp:
                         self.ax.plot(data[6], data[4].best_fit, '--', label = f'Best Fit - {win.plot_data["temp"][self.indexes[i]]} °C')
                         self.ax.plot(data[6], data[5]['bkg_'], '-', label = f'Background - {win.plot_data["temp"][self.indexes[i]]} °C')

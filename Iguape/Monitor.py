@@ -6,28 +6,29 @@ This is Monitor Class. It was built to track and read a given Folder for new XRD
 It was built to work only for Paineira XRD Data, but it can easily be adjusted for other situations.
 """
 
-import time, os, math
+import time, os, math, sys
 import numpy as np
 import lmfit as lm
 from lmfit.models import PseudoVoigtModel, LinearModel
 import pandas as pd
 from scipy.signal import find_peaks
 from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import QApplication, QFileDialog
 
 # --- Monitor - Reading a '.txt' file for new data --- #
 class FolderMonitor(QThread):
 	"""
-    The Folder Monitor operates by tracking new or exiting data in a specified folder.
+	The Folder Monitor operates by tracking new or exiting data in a specified folder.
 
-    This class inherits the QThread class from PyQt. By reading the 'iguape_filelist.txt' file, it can track new or existing data files in the specified folder.
+	This class inherits the QThread class from PyQt. By reading the 'iguape_filelist.txt' file, it can track new or existing data files in the specified folder.
 	Later, it reads the data and stores it in a pandas DataFrame. If a fitting interval is specified, it fits the data to a desired model and stores the fitting parameters in another DataFrame.
 	
 
-    Parameters
+	Parameters
 	----------
-        folder_path (str): Path to the data folder.
-        fit_interval (list): 2theta interval selected to perform the peak fit.
-    """ 
+		folder_path (str): Path to the data folder.
+		fit_interval (list): 2theta interval selected to perform the peak fit.
+	""" 
 	new_data_signal = pyqtSignal(pd.DataFrame)
 	def __init__(self, folder_path, fit_interval=None):
 		"""
@@ -45,7 +46,8 @@ class FolderMonitor(QThread):
 		self.fit_interval = fit_interval
 		self.fit_model = 'PseudoVoigt'
 		self.kelvin_sginal = False
-		self.data_frame = pd.DataFrame(columns = ['theta', 'intensity', 'temp', 'max', 'file_index'])
+		#self.data_frame = pd.DataFrame(columns = ['theta', 'intensity', 'temp', 'max', 'file_index'])
+		self.data_frame = pd.DataFrame(columns=['file_name', 'temp', 'max', 'file_index'])
 		self.fit_data = pd.DataFrame(columns=['dois_theta_0', 'fwhm', 'area', 'temp', 'file_index', 'R-squared'])
 
 	def run(self):
@@ -67,7 +69,7 @@ class FolderMonitor(QThread):
 						data = data_read(os.path.join(self.folder_path,line))
 						self.kelvin_sginal = data[3]
 						file_index = counter()
-						new_data = pd.DataFrame({'theta': [data[0]], 'intensity': [data[1]], 'temp': [data[2]], 'max': [data[1].max()], 'file_index': [file_index]})
+						new_data = pd.DataFrame({'file_name':[os.path.join(self.folder_path,line)], 'temp': [data[2]], 'max': [data[1].max()], 'file_index': [file_index]})
 						self.data_frame = pd.concat([self.data_frame, new_data], ignore_index=True)
 						self.new_data_signal.emit(new_data)
 						print(f"New data created at: {self.folder_path}. File name: {lines[i+1]}")
@@ -88,7 +90,8 @@ class FolderMonitor(QThread):
 					break
 				except Exception as e:
 					#print(f'Exception: {e}')
-					time.sleep(0.1)
+					#time.sleep(0.01)
+					pass
 			
 			i+=2
 		
@@ -151,7 +154,7 @@ def data_read(path):
 	"""
 	done = False
 	while not done:
-		time.sleep(0.1)
+		#time.sleep(0.01)
 		try:
 			dados = pd.read_csv(path, sep=',')
 			x = np.array(dados.get('2theta (degree)'))
@@ -177,7 +180,7 @@ def data_read(path):
 # --- Defining the storaging lists --- #		
 
 
-def peak_fit(theta, intensity, interval, bkg = 'Linear'):
+def peak_fit(theta, intensity, interval, bkg = 'Linear', pars = None):
 	"""
 	Peak fitting function for the PseudoVoigt model.
 	Given a set of 2theta and Intensity arrays, it fits the data to the
@@ -206,25 +209,26 @@ def peak_fit(theta, intensity, interval, bkg = 'Linear'):
 		try:
 			theta_fit = []
 			intensity_fit = []
-  
-  # Slicing the data for the selected peak fitting interval #
+
+		# Slicing the data for the selected peak fitting interval #
 			for i in range(len(theta)):
 				if theta[i] > interval[0] and theta[i] < interval[1]: 
 					theta_fit.append(theta[i])
 					intensity_fit.append(intensity[i])
 			theta_fit=np.array(theta_fit)
 			intensity_fit=np.array(intensity_fit)
-  # Building the Voigt model with lmfit #
+		# Building the Voigt model with lmfit #
 			
 			mod = PseudoVoigtModel(nan_policy='omit')
-			pars = mod.guess(data= intensity_fit, x = theta_fit)
+			if pars == None:
+				pars = mod.guess(data= intensity_fit, x = theta_fit)
 			background = LinearModel(prefix='bkg_')
 			pars.update(background.guess(data=intensity_fit, x = theta_fit))
 			mod += background
 			
 			out = mod.fit(intensity_fit, pars, x=theta_fit) # Fitting the data to the Voigt model #
 			comps = out.eval_components(x=theta_fit)
-  # Getting the parameters from the optimal fit #, bkg= self.bkg_model
+		# Getting the parameters from the optimal fit #, bkg= self.bkg_model
 			
 			dois_theta_0 = out.params['center']*1
 			fwhm = out.params['fwhm']*1
@@ -232,15 +236,16 @@ def peak_fit(theta, intensity, interval, bkg = 'Linear'):
 			r_squared = out.rsquared
 
 			done = True
-			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit
+			
+			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit, out.params
 		except ValueError or TypeError as e:
 			print(f'Fitting error, please wait: {e}! Please select a new fitting interval')
 			done = True
 			pass
 
 def pseudo_voigt(x, amplitude, center, sigma, eta):
-    r"""
-    PseudoVoigt function, a linear combination of a Gaussian and a Lorentzian function.
+	r"""
+	PseudoVoigt function, a linear combination of a Gaussian and a Lorentzian function.
 
 	Parameters
 	----------
@@ -262,15 +267,15 @@ def pseudo_voigt(x, amplitude, center, sigma, eta):
 			where:
 			- L(x; A, \mu, \sigma) is the Lorentzian function
 			- G(x; A, \mu, \sigma) is the Gaussian function
-    """
-    sigma_g = sigma/math.sqrt(2*math.log(2))
-    gaussian = (amplitude/(sigma_g*math.sqrt(2*math.pi)))*np.exp(-(x-center)**2/(2*sigma_g** 2))
-    lorentzian = ((amplitude/math.pi)*sigma)/((x - center)**2 + sigma**2)
-    return eta*lorentzian + (1 - eta)*gaussian
+	"""
+	sigma_g = sigma/math.sqrt(2*math.log(2))
+	gaussian = (amplitude/(sigma_g*math.sqrt(2*math.pi)))*np.exp(-(x-center)**2/(2*sigma_g** 2))
+	lorentzian = ((amplitude/math.pi)*sigma)/((x - center)**2 + sigma**2)
+	return eta*lorentzian + (1 - eta)*gaussian
 
 def split_pseudo_voigt(x, amp1, cen1, sigma1, eta1, amp2, cen2, sigma2, eta2):
-    r"""
-    Split PseudoVoigt function, a linear combination of two PseudoVoigt functions.
+	r"""
+	Split PseudoVoigt function, a linear combination of two PseudoVoigt functions.
 
 	Parameters
 	----------
@@ -295,11 +300,11 @@ def split_pseudo_voigt(x, amp1, cen1, sigma1, eta1, amp2, cen2, sigma2, eta2):
 			SPV(x; A1, \mu1, \sigma1, \eta1, A2, \mu2, \sigma2, \eta2) = PV1(x; A1, \mu1, \sigma1, \eta1) + PV2(x; A2, \mu2, \sigma2, \eta2)
 	
 
-    """
-    return (pseudo_voigt(x, amplitude=amp1, center=cen1, sigma=sigma1, eta=eta1) +
-            pseudo_voigt(x, amplitude=amp2, center=cen2, sigma=sigma2, eta=eta2))
+	"""
+	return (pseudo_voigt(x, amplitude=amp1, center=cen1, sigma=sigma1, eta=eta1) +
+			pseudo_voigt(x, amplitude=amp2, center=cen2, sigma=sigma2, eta=eta2))
 
-def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1e+09, distance = 35):
+def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1e+09, distance = 35, pars = None):
 	"""
 	Peak fitting function for the Split PseudoVoigt model.
 	Given a set of 2theta and Intensity arrays, it fits the data to the
@@ -360,7 +365,8 @@ def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1
 				
 
 			model = lm.Model(split_pseudo_voigt)
-			pars = model.make_params(amp1=amp1, cen1=cen1, sigma1=sigma1, eta1=0.5, amp2=amp2, cen2=cen2, sigma2=sigma2, eta2=0.5)
+			if pars == None:
+				pars = model.make_params(amp1=amp1, cen1=cen1, sigma1=sigma1, eta1=0.5, amp2=amp2, cen2=cen2, sigma2=sigma2, eta2=0.5)
 			pars['eta1'].min, pars['eta1'].max = 0, 1
 			pars['eta2'].min, pars['eta2'].max = 0, 1
 			background = LinearModel(prefix='bkg_')
@@ -377,7 +383,7 @@ def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1
 			area = [out.params['amp1']*1, out.params['amp2']*1]
 			r_squared = out.rsquared
 			done = True
-			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit
+			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit, out.params
 		except ValueError or TypeError as e:
 			print(f'Fitting error, please wait: {e}! Please select a new fitting interval')
 			done = True
@@ -400,3 +406,11 @@ def counter():
 	return counter.count
 	
 counter.count = 0
+
+if __name__ == "__main__":
+	app = QApplication(sys.argv)
+	path = QFileDialog.getExistingDirectory(None, 'Select the data folder to monitor', '', options=QFileDialog.Options()) # Selection of monitoring folder
+	monitor = FolderMonitor(path)
+	monitor.start()
+	print(monitor.data_frame)
+	sys.exit(app.exec())
