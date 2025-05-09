@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import (
 from Monitor import FolderMonitor
 from GUI.iguape_GUI import Ui_MainWindow
 from GUI.pk_window import Ui_pk_window
-from Monitor import peak_fit, counter, peak_fit_split_gaussian
+from Monitor import peak_fit, counter, peak_fit_split_gaussian, normalize_array
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import QProgressDialog, QMessageBox, QVBoxLayout
 
@@ -83,7 +83,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.contour_tab.setLayout(self.contour_layout)
 
         #Creating a colormap on the main canvas#
-        self.cmap = plt.get_cmap('coolwarm') 
+        self.cmap = plt.get_cmap("coolwarm") 
         self.norm = plt.Normalize(vmin=0, vmax=1) # Initial placeholder values for norm #
         self.sm = ScalarMappable(cmap=self.cmap, norm=self.norm)
         self.sm.set_array([])
@@ -102,6 +102,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.plot_with_temp = False
         self.selected_interval = None
         self.fit_interval = None
+        self.normalize_state = False
         self.norms = {'LogNorm': LogNorm(), "PowerNorm": PowerNorm(gamma=0.5), 'CenteredNorm': CenteredNorm()}
         
         self.folder_selected = False
@@ -112,13 +113,15 @@ class Window(QMainWindow, Ui_MainWindow):
         self.span = SpanSelector(self.ax_main, self.onselect, 'horizontal', useblit=True,
                                 props=dict(alpha=0.3, facecolor='red', capstyle='round'))
         
+        self.comboBox_2.addItems([cmap for cmap in plt.colormaps()])
+        
         self.peak_fit_layout.addWidget(NavigationToolbar2QT(self.canvas_sub, self))
         self.toolbar = NavigationToolbar2QT(self.canvas_main, self)
         self.contour_layout.addWidget(NavigationToolbar2QT(self.canvas_contour, self))
         self.XRD_data_layout.addWidget(self.toolbar)
         self.canvas_main.mpl_connect("motion_notify_event", self.on_mouse_move)
 
-
+        self.normalize_checkBox.stateChanged.connect(self.normalize)
         self.actionOpen_New_Folder.triggered.connect(self.select_folder)
         self.actionAbout.triggered.connect(self.about)
         
@@ -194,6 +197,8 @@ class Window(QMainWindow, Ui_MainWindow):
             self.sm.set_norm(self.norm)
             self.cax.set_label(label)
             self.cax_2.set_label(label)
+            self.cmap = plt.get_cmap(self.comboBox_2.currentText())
+            self.sm.set_cmap(self.cmap)
 
     def _update_main_figure(self):
         """
@@ -216,7 +221,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.max_temp_doubleSpinBox_2.setRange(min(self.monitor.data_frame['file_index']), max(self.monitor.data_frame['file_index']))
             self.min_temp_doubleSpinBox.setValue(min(self.plot_data['file_index']))
             self.max_temp_doubleSpinBox_2.setValue(max(self.plot_data['file_index']))
-        self.spacing = max(self.plot_data['max']) / (100 - self.offset_slider.value())
+        if not self.normalize_state:
+            self.spacing = max(self.plot_data['max']) / (100 - self.offset_slider.value())
+        else:
+            self.spacing = 1 / (100 - self.offset_slider.value())
         offset = 0
         mask = self._get_mask(0)
         for i in range(len(self.plot_data['file_name'])):
@@ -228,7 +236,13 @@ class Window(QMainWindow, Ui_MainWindow):
             #intensity = data.iloc[:, 1]
             dois_theta, intensity = self.read_data(self.plot_data['file_name'][i])
             #self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
-            self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
+            if self.normalize_state:
+                self.ax_main.plot(dois_theta[mask], normalize_array(intensity[mask]) + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
+                                                                                                                            if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} °C' 
+                                                                                                                                        if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
+                #offset += 0.5
+            else:
+                self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
                                                                                                                         if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} °C' 
                                                                                                                                     if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
             offset += self.spacing
@@ -591,6 +605,13 @@ class Window(QMainWindow, Ui_MainWindow):
         intensity = np.array(data.iloc[:, 1])
         return theta, intensity
     
+    def normalize(self, checked):
+        if checked:
+            self.normalize_state = True
+        else:
+            self.normalize_state = False
+        self.update_graphs()
+        return 
     def contour(self):
         self.ax_contour.clear()
         theta, intensity = self.read_data(self.plot_data['file_name'][0])
@@ -610,7 +631,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         #print(f'Shape X and Y: {np.shape(X)}, {np.shape(Y)}. Z shape: {np.shape(z)}')
         norm = self.norms[self.comboBox.currentText()]
-        colormesh = self.ax_contour.pcolormesh(X, Y, z, cmap = 'plasma', norm = norm, shading='auto')
+        colormesh = self.ax_contour.pcolormesh(X, Y, z, cmap = self.comboBox_2.currentText(), norm = norm, shading='auto')
         self.cax_3.update_normal(colormesh)
         self.cax_3.set_label("Intensity") 
         self.canvas_contour.draw()

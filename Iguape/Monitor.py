@@ -390,7 +390,8 @@ def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1
 			pass
 
 
-
+def normalize_array(array: np.array):
+    return array/np.max(array)
 
 # --- A counter function to index the created curves --- #
 def counter():
