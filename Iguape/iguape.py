@@ -6,7 +6,7 @@ This is the main script for the excution of the Paineira Graphical User Interfac
 In this script, both GUIs used by the program are called and all of the backend functions and processes are defined. 
 """
 
-import sys, time
+import sys, time, gc
 from PyQt5.QtWidgets import QApplication, QVBoxLayout, QFileDialog, QDialog, QProgressDialog, QPushButton
 from PyQt5.QtCore import Qt, QSize, QThread, pyqtSignal
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -44,6 +44,8 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.create_graphs_layout()
+        self.gc_collector = GarbageCollector()
+        self.gc_collector.start()
         if getattr(sys, 'frozen', False):
             pyi_splash.close() #After the GUI initialization, close the Splash Screen
 
@@ -98,10 +100,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.peak_fit_button.clicked.connect(self.select_fit_interval)
         self.save_peak_fit_data_button.clicked.connect(self.save_data_frame)
         self.contour_button.clicked.connect(self.contour)
-    
+        self.comboBox_2.activated.connect(self.update_graphs)
         self.plot_with_temp = False
         self.selected_interval = None
         self.fit_interval = None
+        self.monitor = None
         self.normalize_state = False
         self.norms = {'LogNorm': LogNorm(), "PowerNorm": PowerNorm(gamma=0.5), 'CenteredNorm': CenteredNorm()}
         
@@ -114,6 +117,7 @@ class Window(QMainWindow, Ui_MainWindow):
                                 props=dict(alpha=0.3, facecolor='red', capstyle='round'))
         
         self.comboBox_2.addItems([cmap for cmap in plt.colormaps()])
+        self.comboBox_2.setCurrentIndex(44)
         
         self.peak_fit_layout.addWidget(NavigationToolbar2QT(self.canvas_sub, self))
         self.toolbar = NavigationToolbar2QT(self.canvas_main, self)
@@ -152,6 +156,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
             self.canvas_main.draw()
             self.canvas_sub.draw()
+            gc.collect()
 
             self.cax.update_normal(self.sm)
             self.cax_2.update_normal(self.sm)
@@ -178,8 +183,8 @@ class Window(QMainWindow, Ui_MainWindow):
             slice: Slice object for the mask
         """
         if self.selected_interval:
-            data = pd.read_csv(self.plot_data['file_name'][i], sep = ',', header = 0)
-            dois_theta = data.iloc[:, 0]
+            #data = pd.read_csv(self.plot_data['file_name'][i], sep = ',', header = 0)
+            dois_theta = self.read_data(self.plot_data['file_name'][i])[0]
             #intensity = data.iloc[:, 1]
             return (dois_theta >= self.selected_interval[0]) & (dois_theta <= self.selected_interval[1])
         return slice(None)
@@ -199,6 +204,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.cax_2.set_label(label)
             self.cmap = plt.get_cmap(self.comboBox_2.currentText())
             self.sm.set_cmap(self.cmap)
+            gc.collect()
 
     def _update_main_figure(self):
         """
@@ -234,15 +240,10 @@ class Window(QMainWindow, Ui_MainWindow):
             #data = pd.read_csv(self.plot_data['file_name'][i], sep = ',', header = 0)
             #dois_theta = data.iloc[:, 0]
             #intensity = data.iloc[:, 1]
-            dois_theta, intensity = self.read_data(self.plot_data['file_name'][i])
+            dois_theta, intensity = self.read_data(self.plot_data['file_name'][i], normalize=self.normalize_state)
             #self.ax_main.plot(self.plot_data['theta'][i][mask], self.plot_data['intensity'][i][mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
-            if self.normalize_state:
-                self.ax_main.plot(dois_theta[mask], normalize_array(intensity[mask]) + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
-                                                                                                                            if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} °C' 
-                                                                                                                                        if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
-                #offset += 0.5
-            else:
-                self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
+            
+            self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
                                                                                                                         if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} °C' 
                                                                                                                                     if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
             offset += self.spacing
@@ -250,6 +251,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.ax_main.set_xlabel('2θ (°)')
         self.ax_main.set_ylabel('Intensity (a.u.)')
+        gc.collect()
 
     def _plot_fitting_parameters(self):
         """
@@ -321,8 +323,12 @@ class Window(QMainWindow, Ui_MainWindow):
         if folder_path == "":
             return
         if self.folder_selected:
-            self.monitor.data_frame = self.monitor.data_frame.iloc[0:0]
-            self.monitor.fit_data = self.monitor.fit_data.iloc[0:0]
+            self.monitor.data_frame = pd.DataFrame(columns=['file_name', 'temp', 'max', 'file_index'])
+            self.monitor.fit_data = pd.DataFrame(columns=['dois_theta_0', 'fwhm', 'area', 'temp', 'file_index', 'R-squared'])
+            #self.monitor = None
+            self.plot_data = None
+            print(self.monitor.data_frame, self.monitor.fit_data, self.plot_data)
+            gc.collect()
         counter.count = 0
         self.plot_with_temp = False
         self.selected_interval = None
@@ -333,9 +339,16 @@ class Window(QMainWindow, Ui_MainWindow):
         #folder_path = QFileDialog.getExistingDirectory(self, 'Select the data folder to monitor', '', options=QFileDialog.Options()) # Selection of monitoring folder
         if folder_path:
             self.folder_selected = True
+            self.ax_main.clear()
+            self.ax_contour.clear()
+            self.ax_2theta.clear()
+            self.ax_area.clear()
+            self.ax_FWHM.clear()
+            self.canvas_main.draw()
             self.monitor = FolderMonitor(folder_path=folder_path)
             self.monitor.new_data_signal.connect(self.handle_new_data)
             self.monitor.start()
+            gc.collect()
 
         else:
             print('No folder selected. Exiting')
@@ -599,10 +612,12 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f'Please initizalie the Monitor! Error {e}')
             QMessageBox.warning(self, '','Please initialize the monitor!')     
     
-    def read_data(self, path):
+    def read_data(self, path, normalize = False):
         data = pd.read_csv(path, sep = ',', header=0, engine='pyarrow')
         theta = np.array(data.iloc[:, 0])
         intensity = np.array(data.iloc[:, 1])
+        if normalize:
+            return theta, normalize_array(intensity)
         return theta, intensity
     
     def normalize(self, checked):
@@ -636,6 +651,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.cax_3.set_label("Intensity") 
         self.canvas_contour.draw()
         del X, Y, mask, z
+        gc.collect()
+        return
     
         
         
@@ -652,6 +669,15 @@ class Window(QMainWindow, Ui_MainWindow):
             "<p>- Paineira Beamline</p>"
             "<p>- LNLS - CNPEM</p>",
         )
+
+class GarbageCollector(QThread):
+    def __init__(self):
+        super().__init__()
+    def run(self):
+        while True:
+            gc.collect()
+            time.sleep(10)
+
 
 
 class Worker(QThread):
