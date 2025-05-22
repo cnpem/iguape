@@ -9,7 +9,7 @@ It was built to work only for Paineira XRD Data, but it can easily be adjusted f
 import time, os, math, sys
 import numpy as np
 import lmfit as lm
-from lmfit.models import PseudoVoigtModel, LinearModel
+from lmfit.models import PseudoVoigtModel, LinearModel, GaussianModel
 import pandas as pd
 from scipy.signal import find_peaks
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -47,7 +47,7 @@ class FolderMonitor(QThread):
 		self.fit_model = 'PseudoVoigt'
 		self.kelvin_sginal = False
 		#self.data_frame = pd.DataFrame(columns = ['theta', 'intensity', 'temp', 'max', 'file_index'])
-		self.data_frame = pd.DataFrame(columns=['file_name', 'temp', 'max', 'file_index'])
+		self.data_frame = pd.DataFrame(columns=['file_name', 'temp', 'file_index', 'max'])
 		self.fit_data = pd.DataFrame(columns=['dois_theta_0', 'fwhm', 'area', 'temp', 'file_index', 'R-squared'])
 
 	def run(self):
@@ -69,7 +69,7 @@ class FolderMonitor(QThread):
 						data = data_read(os.path.join(self.folder_path,line))
 						self.kelvin_sginal = data[3]
 						file_index = counter()
-						new_data = pd.DataFrame({'file_name':[os.path.join(self.folder_path,line)], 'temp': [data[2]], 'max': [data[1].max()], 'file_index': [file_index]})
+						new_data = pd.DataFrame({'file_name':[os.path.join(self.folder_path,line)], 'temp': [data[2]], 'file_index': [file_index], 'max': [data[1].max()]})
 						self.data_frame = pd.concat([self.data_frame, new_data], ignore_index=True)
 						self.new_data_signal.emit(new_data)
 						print(f"New data created at: {self.folder_path}. File name: {lines[i+1]}")
@@ -230,14 +230,17 @@ def peak_fit(theta, intensity, interval, bkg = 'Linear', pars = None):
 			comps = out.eval_components(x=theta_fit)
 		# Getting the parameters from the optimal fit #, bkg= self.bkg_model
 			
-			dois_theta_0 = out.params['center']*1
-			fwhm = out.params['fwhm']*1
-			area = out.params['amplitude']*1
+			dois_theta_0 = out.params['center'].value
+			dois_theta_0_stderr = out.params['center'].stderr*1
+			fwhm = out.params['fwhm'].value
+			fwhm_stderr = out.params['fwhm'].stderr*1
+			area = out.params['amplitude'].value
+			area_stderr = out.params['amplitude'].stderr*1
 			r_squared = out.rsquared
 
 			done = True
 			
-			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit, out.params
+			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit, out.params#, dois_theta_0_stderr, fwhm_stderr, area_stderr
 		except ValueError or TypeError as e:
 			print(f'Fitting error, please wait: {e}! Please select a new fitting interval')
 			done = True
@@ -388,7 +391,6 @@ def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1
 			print(f'Fitting error, please wait: {e}! Please select a new fitting interval')
 			done = True
 			pass
-
 
 def normalize_array(array: np.array):
     return array/np.max(array)

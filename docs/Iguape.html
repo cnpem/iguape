@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Iguape package &mdash; Iguape - Paineira Graphical User Interface 1.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
@@ -58,6 +58,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.FolderMonitor"><code class="docutils literal notranslate"><span class="pre">FolderMonitor</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.counter"><code class="docutils literal notranslate"><span class="pre">counter()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.data_read"><code class="docutils literal notranslate"><span class="pre">data_read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.normalize_array"><code class="docutils literal notranslate"><span class="pre">normalize_array()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.peak_fit"><code class="docutils literal notranslate"><span class="pre">peak_fit()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.peak_fit_split_gaussian"><code class="docutils literal notranslate"><span class="pre">peak_fit_split_gaussian()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#Iguape.Monitor.pseudo_voigt"><code class="docutils literal notranslate"><span class="pre">pseudo_voigt()</span></code></a></li>
@@ -143,13 +144,14 @@ It was built to work only for Paineira XRD Data, but it can easily be adjusted f
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">FolderMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QThread</span></code></p>
 <p>The Folder Monitor operates by tracking new or exiting data in a specified folder.</p>
-<dl class="simple">
-<dt>This class inherits the QThread class from PyQt. By reading the ‘iguape_filelist.txt’ file, it can track new or existing data files in the specified folder.</dt><dd><p>Later, it reads the data and stores it in a pandas DataFrame. If a fitting interval is specified, it fits the data to a desired model and stores the fitting parameters in another DataFrame.</p>
-</dd>
-<dt>Parameters</dt><dd><p>folder_path (str): Path to the data folder.
+<p>This class inherits the QThread class from PyQt. By reading the ‘iguape_filelist.txt’ file, it can track new or existing data files in the specified folder.
+Later, it reads the data and stores it in a pandas DataFrame. If a fitting interval is specified, it fits the data to a desired model and stores the fitting parameters in another DataFrame.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>folder_path (str): Path to the data folder.
 fit_interval (list): 2theta interval selected to perform the peak fit.</p>
-</dd>
-</dl>
+</div></blockquote>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.new_data_signal">
 <span class="sig-name descname"><span class="pre">new_data_signal</span></span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.new_data_signal" title="Link to this definition"></a></dt>
@@ -178,8 +180,8 @@ the peak fit, if a fit interval is specified.</p>
 <span class="sig-name descname"><span class="pre">set_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.set_distance" title="Link to this definition"></a></dt>
 <dd><p>Method for defining the minimum distance between the two peak centers. Only used when the model is
 Split PseduoVoigt.</p>
-<section id="parameters">
-<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<section id="id3">
+<h4>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
 <blockquote>
 <div><p>distance (float): The minimum distance between the two peak centers.</p>
 </div></blockquote>
@@ -190,8 +192,8 @@ Split PseduoVoigt.</p>
 <dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.set_fit_interval">
 <span class="sig-name descname"><span class="pre">set_fit_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.set_fit_interval" title="Link to this definition"></a></dt>
 <dd><p>Method for defining the fit interval.</p>
-<section id="id3">
-<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id4">
+<h4>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
 <blockquote>
 <div><p>interval (list): The 2theta interval to be used for the peak fitting.</p>
 </div></blockquote>
@@ -202,8 +204,8 @@ Split PseduoVoigt.</p>
 <dt class="sig sig-object py" id="Iguape.Monitor.FolderMonitor.set_fit_model">
 <span class="sig-name descname"><span class="pre">set_fit_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.set_fit_model" title="Link to this definition"></a></dt>
 <dd><p>Method for defining the fit model.</p>
-<section id="id4">
-<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="id5">
+<h4>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
 <blockquote>
 <div><p>model (str): The model to be used for the peak fitting. It can be ‘PseudoVoigt’ or ‘SplitPseudoVoigt’.</p>
 </div></blockquote>
@@ -215,14 +217,15 @@ Split PseduoVoigt.</p>
 <span class="sig-name descname"><span class="pre">set_height</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.FolderMonitor.set_height" title="Link to this definition"></a></dt>
 <dd><p>Method for defining the minimum height of the two peaks. Only used when the model is
 Split PseduoVoigt.</p>
-<section id="id5">
-<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<section id="id6">
+<h4>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
 <blockquote>
 <div><p>height (float): The minimum height of the two peaks.</p>
 </div></blockquote>
 </section>
 </dd></dl>
 
+</section>
 </dd></dl>
 
 <dl class="py function">
@@ -242,14 +245,14 @@ Split PseduoVoigt.</p>
 <span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">data_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.data_read" title="Link to this definition"></a></dt>
 <dd><p>Data reading function.</p>
 <p>It reads the data from a given path and returns the 2theta and Intensity arrays, Temperature and Kelvin Signal tag.</p>
-<section id="id6">
-<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>path (str): Path to the data file.</p>
 </div></blockquote>
 </section>
-<section id="id7">
-<h3>Returns<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>x (np.array): 2theta array.
 y (np.array): Intensity array.
@@ -260,13 +263,18 @@ kelvin_signal (bool): Kelvin Signal tag.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="Iguape.Monitor.normalize_array">
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">normalize_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.normalize_array" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="Iguape.Monitor.peak_fit">
-<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">peak_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Linear'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.peak_fit" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">peak_fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.peak_fit" title="Link to this definition"></a></dt>
 <dd><p>Peak fitting function for the PseudoVoigt model.
 Given a set of 2theta and Intensity arrays, it fits the data to the
 PseudoVoigt model and 2theta interval selected. It returns the fitting parameters.</p>
-<section id="id8">
-<h3>Parameters<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>theta (np.array): 2theta array.
 intensity (np.array): Intensity array.
@@ -274,8 +282,8 @@ interval (list): 2theta interval for the peak fitting.
 bkg (str, optional): Background model. Default is ‘Linear’.</p>
 </div></blockquote>
 </section>
-<section id="id9">
-<h3>Returns<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>dois_theta_0 (float): Peak center.
 fwhm (float): Full Width at Half Maximum.
@@ -290,12 +298,12 @@ theta_fit (np.array): 2theta array for the fitting interval.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Iguape.Monitor.peak_fit_split_gaussian">
-<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">peak_fit_split_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.peak_fit_split_gaussian" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">peak_fit_split_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intensity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bkg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.peak_fit_split_gaussian" title="Link to this definition"></a></dt>
 <dd><p>Peak fitting function for the Split PseudoVoigt model.
 Given a set of 2theta and Intensity arrays, it fits the data to the
 Split PseudoVoigt model and 2theta interval selected. It returns the fitting parameters.</p>
-<section id="id10">
-<h3>Parameters<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<section id="id11">
+<h3>Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>theta (np.array): 2theta array.
 intensity (np.array): Intensity array.
@@ -305,8 +313,8 @@ height (float, optional): Minimum height for the peaks. Default is 1e+09.
 distance (float, optional): Minimum distance between the peaks. Default is 35.</p>
 </div></blockquote>
 </section>
-<section id="id11">
-<h3>Returns<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<section id="id12">
+<h3>Returns<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>dois_theta_0 (list): Peak centers.
 fwhm (list): Full Width at Half Maximum.
@@ -323,17 +331,24 @@ theta_fit (np.array): 2theta array for the fitting interval.</p>
 <dt class="sig sig-object py" id="Iguape.Monitor.pseudo_voigt">
 <span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">pseudo_voigt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.pseudo_voigt" title="Link to this definition"></a></dt>
 <dd><p>PseudoVoigt function, a linear combination of a Gaussian and a Lorentzian function.</p>
+<section id="id13">
+<h3>Parameters<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
 <blockquote>
-<div><blockquote>
 <div><p>x (np.array): 2theta array.
 amplitude (float): Peak amplitude.
 center (float): Peak center.
 sigma (float): Sigma value or standard deviation.
 eta (float): Eta value (mixing parameter).</p>
 </div></blockquote>
+</section>
+<section id="id14">
+<h3>Returns<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>np.array: PseudoVoigt function.</p>
 </div></blockquote>
+</section>
+<section id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h3>
 <p>The PseudoVoigt function is defined as:
 .. math:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PV</span><span class="p">(</span><span class="n">x</span><span class="p">;</span> <span class="n">A</span><span class="p">,</span> \<span class="n">mu</span><span class="p">,</span> \<span class="n">sigma</span><span class="p">,</span> \<span class="n">eta</span><span class="p">)</span> <span class="o">=</span> \<span class="n">eta</span> <span class="n">L</span><span class="p">(</span><span class="n">x</span><span class="p">;</span> <span class="n">A</span><span class="p">,</span> \<span class="n">mu</span><span class="p">,</span> \<span class="n">sigma</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> \<span class="n">eta</span><span class="p">)</span> <span class="n">G</span><span class="p">(</span><span class="n">x</span><span class="p">;</span> <span class="n">A</span><span class="p">,</span> \<span class="n">mu</span><span class="p">,</span> \<span class="n">sigma</span><span class="p">)</span>
@@ -342,15 +357,16 @@ eta (float): Eta value (mixing parameter).</p>
 <span class="o">-</span> <span class="n">G</span><span class="p">(</span><span class="n">x</span><span class="p">;</span> <span class="n">A</span><span class="p">,</span> \<span class="n">mu</span><span class="p">,</span> \<span class="n">sigma</span><span class="p">)</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">Gaussian</span> <span class="n">function</span>
 </pre></div>
 </div>
-</div></blockquote>
+</section>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Iguape.Monitor.split_pseudo_voigt">
 <span class="sig-prename descclassname"><span class="pre">Iguape.Monitor.</span></span><span class="sig-name descname"><span class="pre">split_pseudo_voigt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cen1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amp2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cen2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Iguape.Monitor.split_pseudo_voigt" title="Link to this definition"></a></dt>
 <dd><p>Split PseudoVoigt function, a linear combination of two PseudoVoigt functions.</p>
+<section id="id15">
+<h3>Parameters<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
 <blockquote>
-<div><blockquote>
 <div><p>x (np.array): 2theta array.
 amp1 (float): Peak amplitude for the first peak.
 cen1 (float): Peak center for the first peak.
@@ -361,15 +377,21 @@ cen2 (float): Peak center for the second peak.
 sigma2 (float): Sigma value or standard deviation for the second peak.
 eta2 (float): Eta value for the second peak (mixing parameter).</p>
 </div></blockquote>
+</section>
+<section id="id16">
+<h3>Returns<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
 <blockquote>
 <div><p>np.array: Split PseudoVoigt function.</p>
 </div></blockquote>
+</section>
+<section id="id17">
+<h3>Notes<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
 <dl>
 <dt>The Split PseudoVoigt function is defined as:</dt><dd><div class="math notranslate nohighlight">
 \[SPV(x; A1, \mu1, \sigma1, \eta1, A2, \mu2, \sigma2, \eta2) = PV1(x; A1, \mu1, \sigma1, \eta1) + PV2(x; A2, \mu2, \sigma2, \eta2)\]</div>
 </dd>
 </dl>
-</div></blockquote>
+</section>
 </dd></dl>
 
 </section>

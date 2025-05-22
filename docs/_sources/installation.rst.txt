@@ -39,7 +39,7 @@ To install Iguape on Windows, ensure you have **Python 3.10** or higher:
 
 Once Python 3.10 is set up, download the installer for Iguape from the following link:
 
-- `Windows Installer <https://github.com/cnpem/iguape/releases/download/v1.1.0/iguape_installer_v110.exe>`_
+- `Windows Installer <https://github.com/cnpem/iguape/releases/download/v1.1.4/IGUAPE_installer_v114.exe>`_
 
 After downloading, double-click the installer and follow the on-screen instructions.
 
