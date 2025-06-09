@@ -40,9 +40,13 @@ fonts_list = [font.name for font in matplotlib.font_manager.fontManager.ttflist]
 cmaps = [cmap for cmap in plt.colormaps()]
 
 class Window(QMainWindow, Ui_MainWindow):
-    """ 
-    Main window Class
-    """
+    """_summary_
+
+    :param QMainWindow: _description_
+    :type QMainWindow: _type_
+    :param Ui_MainWindow: _description_
+    :type Ui_MainWindow: _type_
+    """    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -57,9 +61,8 @@ class Window(QMainWindow, Ui_MainWindow):
             pyi_splash.close() #After the GUI initialization, close the Splash Screen
 
     def create_graphs_layout(self):
-        """
-        Routine to create the layout for the XRD and Fitting Data Graphs
-        """
+        """_summary_
+        """        
         self.url_data = {self.paineira_logo: "https://lnls.cnpem.br/facilities/paineira-en/", self.LNLS_logo: "https://lnls.cnpem.br/en/", self.CNPEM_logo: "https://cnpem.br/en/", self.iguape_logo: "https://cnpem.github.io/iguape/"}
         for logo in self.url_data.keys():
             logo.installEventFilter(self)
@@ -86,7 +89,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.canvas_sub = FigureCanvas(self.fig_sub)
         self.peak_fit_layout.addWidget(self.canvas_sub)
         #self.peak_fit_tab.setLayout(self.peak_fit_layout)
-        self.cursor = Cursor(self.ax_main, useblit=True, color='red', linewidth=1, horizOn=False)
+        self.cursor = None #Cursor(self.ax_main, useblit=True, color='red', linewidth=1, horizOn=False)
         
         
         self.fig_contour = Figure(figsize=(8, 6), dpi = 100)
@@ -117,6 +120,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.cax_4 = self.fig_norm.colorbar(self.sm, ax = self.ax_norm)
         #Connecting functions to buttons#
         self.refresh_button.clicked.connect(self.update_graphs)
+        self.refresh_button_peak_fit.clicked.connect(self.update_graphs)
         
         self.reset_button.clicked.connect(self.reset_interval)
         
@@ -125,6 +129,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.contour_button.clicked.connect(self.contour)
         self.color_pallete_comboBox.activated.connect(self.on_change_color_pallete)
         self.color_pallete_comboBox_2.activated.connect(self.on_change_color_pallete)
+        #self.checkBox.setChecked(True)
+        self.checkBox.stateChanged.connect(self.on_change_vline_checkbox)
         self.plot_with_temp = False
         self.export_window = None
         self.selected_interval = None
@@ -173,12 +179,26 @@ class Window(QMainWindow, Ui_MainWindow):
     
     
     def _open_url(self, url):
+        """_summary_
+
+        :param url: _description_
+        :type url: _type_
+        """        
         try:
             QDesktopServices.openUrl(QUrl(url))
         except Exception:
             pass
     
     def eventFilter(self, source, event):
+        """_summary_
+
+        :param source: _description_
+        :type source: _type_
+        :param event: _description_
+        :type event: _type_
+        :return: _description_
+        :rtype: _type_
+        """        
         if event.type() == QEvent.MouseButtonPress:
             if source in self.url_data:
                 url = self.url_data[source]
@@ -188,10 +208,10 @@ class Window(QMainWindow, Ui_MainWindow):
         return super().eventFilter(source, event)
 
     def update_graphs(self):
-        """
-        Clears plotted axis, updates the colormap normalization and calls refreshing routines (_update_main_figure and _plot_fitting_parameters)
-        """
+        """_summary_
+        """        
         #try:
+        t_i = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
         self.ax_main.clear()
@@ -214,7 +234,7 @@ class Window(QMainWindow, Ui_MainWindow):
         #    pass
 
         QApplication.restoreOverrideCursor()
-        
+
 
     def _get_mask(self, i):
         """
@@ -263,12 +283,14 @@ class Window(QMainWindow, Ui_MainWindow):
             pass
 
         if self.plot_with_temp:
+            norm_col = 'temp'
             self.update_colormap('temp', 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)')
             self.min_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['temp']), max(self.monitor.data_frame['temp']))
             self.max_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['temp']), max(self.monitor.data_frame['temp']))
             self.min_temp_doubleSpinBox.setValue(min(self.plot_data['temp']))
             self.max_temp_doubleSpinBox.setValue(max(self.plot_data['temp']))
         else:
+            norm_col = 'file_index'
             self.update_colormap('file_index', 'XRD acquisition time')
             self.min_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['file_index']), max(self.monitor.data_frame['file_index']))
             self.max_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['file_index']), max(self.monitor.data_frame['file_index']))
@@ -280,7 +302,6 @@ class Window(QMainWindow, Ui_MainWindow):
         offset = 0
         mask = self._get_mask(0)
         for i in range(len(self.plot_data['file_name'])):
-            norm_col = 'temp' if self.plot_with_temp else 'file_index' #Flag for chosing the XRD pattern index
             color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
             dois_theta, intensity = self.read_data(self.plot_data['file_name'][i], normalize=False)
             self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
@@ -289,9 +310,9 @@ class Window(QMainWindow, Ui_MainWindow):
             offset += self.spacing
             del dois_theta, intensity
 
-        self.ax_main.set_xlabel('2θ (°)', fontsize = 15)
-        self.ax_main.set_ylabel('Intensity (a.u.)', fontsize = 15)
-        
+            self.ax_main.set_xlabel('2θ (°)', fontsize = 15)
+            self.ax_main.set_ylabel('Intensity (a.u.)', fontsize = 15)
+        QApplication.restoreOverrideCursor()
         gc.collect()
 
     def _plot_fitting_parameters(self):
@@ -314,16 +335,23 @@ class Window(QMainWindow, Ui_MainWindow):
     
         avxspan = self.ax_main.axvspan(self.fit_interval[0], self.fit_interval[1], color='grey', alpha=0.5, label='Selected Fitting Interval')
         self.ax_main.legend(handles=[avxspan], loc='upper right')
+       
+       # self.canvas_sub.draw()
+       # gc.collect()
+
+        
+       # self.cax_2.update_normal(self.sm)
         
     def _plot_single_peak(self):
         """
         Based on the x data type flag (temperature/XRD measure order), plots the fitting parameters (Peak Postion, Integrated Area and FWHM) as a function of x.
         """
+        mask = self.temp_mask if self.temp_mask_signal else slice(None)
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
         x_label = 'XRD measure' if not self.plot_with_temp else 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
+        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0'].values[mask], 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
+        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area'].values[mask], 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
+        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm'].values[mask], 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
 
     def _plot_double_peak(self):
         """
@@ -629,10 +657,10 @@ class Window(QMainWindow, Ui_MainWindow):
         
         
         self.temp_mask_signal = True
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        #QApplication.setOverrideCursor(Qt.WaitCursor)
         self.ax_main.clear()
-        self._update_main_figure()
-        QApplication.restoreOverrideCursor()
+        self.update_graphs()
+        #QApplication.restoreOverrideCursor()
         self.canvas_main.draw()
 
     def measure_order_index(self, checked):
@@ -763,6 +791,12 @@ class Window(QMainWindow, Ui_MainWindow):
         except AttributeError or Exception:
             QMessageBox.warning(self, "No folder was selected", "Select a folder to monitor!")
 
+    def on_change_vline_checkbox(self):
+        if self.cursor == None:
+            self.cursor = Cursor(self.ax_main, useblit=True, color='red', linewidth=1, horizOn=False)
+        else:
+            self.cursor = None
+    
     def about(self):
         """
         Displays the About message box from PyQt.
@@ -784,8 +818,6 @@ class GarbageCollector(QThread):
         while True:
             gc.collect()
             time.sleep(10)
-
-
 
 class Worker(QThread):
     """
@@ -963,7 +995,8 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         self.color_pallete.clicked.connect(self.get_color)
         self.color_pallete.setFixedSize(QSize(22,22))
         #self.setGeometry(QRect(0, 0, 500,  500))
-        
+        self.height = None
+        self.width = None
         self.label_font = {'family': self.font_comboBox.currentText(),
                      'color':  'black',
                      'weight': 'normal',
@@ -1015,8 +1048,8 @@ class ExportWindow(QDialog, Ui_Export_Figure):
     def redraw_fig(self):
         
         try:
-            height = self.height_doubleSpinBox.value()
-            width = self.width_doubleSpinBox.value()
+            self.height = self.height_doubleSpinBox.value()
+            self.width = self.width_doubleSpinBox.value()
         except Exception as e:
             print('{e}')
             return
@@ -1036,9 +1069,9 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         for label in self.cmap_ax.get_yticklabels():
             label.set_fontproperties(tickfont)
         
-        self.edit_fig.set_size_inches(width, height)
-        self.canvas.resize(int(width*self.edit_fig.dpi), int(height*self.edit_fig.dpi))
-        self.setGeometry(0, 0, int(width*self.edit_fig.dpi), int(height*self.edit_fig.dpi))
+        self.edit_fig.set_size_inches(self.width, self.height)
+        #self.canvas.resize(int(width*self.edit_fig.dpi), int(height*self.edit_fig.dpi))
+        #self.setGeometry(0, 0, int(width*self.edit_fig.dpi), int(height*self.edit_fig.dpi))
         
         
 
@@ -1054,7 +1087,9 @@ class ExportWindow(QDialog, Ui_Export_Figure):
             QMessageBox.warning(self, 'Saving Error', "Please, select a valid path for your Figure")
             return
         print(path)
-        self.edit_fig.savefig(path, dpi = self.dpi_spinBox.value(),
+        #self.canvas.resize(int(width*self.edit_fig.dpi), int(height*self.edit_fig.dpi))
+        self.edit_fig.set_size_inches(self.width, self.height)
+        self.edit_fig.savefig(path+f".{self.format_comboBox.currentText()}", dpi = self.dpi_spinBox.value(),
                          format = self.format_comboBox.currentText(),
                          bbox_inches = 'tight')
         

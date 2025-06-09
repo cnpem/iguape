@@ -63,6 +63,7 @@ class FolderMonitor(QThread):
 		while reading_status == 1:
 			while True:
 				try:
+					#time.sleep(15)
 					with open(os.path.join(self.folder_path,'iguape_filelist.txt'),"r") as file:
 						lines = file.read().splitlines()
 						line = lines[i+1]
