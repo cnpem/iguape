@@ -157,9 +157,9 @@ def data_read(path):
 	while not done:
 		#time.sleep(0.01)
 		try:
-			dados = pd.read_csv(path, sep=',')
-			x = np.array(dados.get('2theta (degree)'))
-			y = np.array(dados.get('Intensity'))
+			data = pd.read_csv(path, sep = ',', header=0, comment="#")
+			x = np.array(data.iloc[:, 0])
+			y = np.array(data.iloc[:, 1])
 			file_name = path.split(sep='/')[len(path.split(sep='/'))-1]
 			temp = None
 			kelvin_signal = None

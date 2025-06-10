@@ -154,11 +154,11 @@ class Window(QMainWindow, Ui_MainWindow):
                                 props=dict(alpha=0.3, facecolor='red', capstyle='round'))
         
         self.color_pallete_comboBox.addItems(cmaps)
-        self.color_pallete_comboBox.setCurrentIndex(44)
+        self.color_pallete_comboBox.setCurrentIndex(47)
 
         self.color_pallete_comboBox_2.addItems(cmaps)
-        self.color_pallete_comboBox_2.setCurrentIndex(44)
-        
+        self.color_pallete_comboBox_2.setCurrentIndex(47)
+
         self.peak_fit_layout.addWidget(NavigationToolbar2QT(self.canvas_sub, self))
         self.toolbar = NavigationToolbar2QT(self.canvas_main, self)
         self.contour_layout.addWidget(NavigationToolbar2QT(self.canvas_contour, self))
@@ -215,28 +215,28 @@ class Window(QMainWindow, Ui_MainWindow):
     def update_graphs(self):
         """_summary_
         """        
-        #try:
-        t_i = time.time()
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-
-        self.ax_main.clear()
+        try:
         
+            QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        self._update_main_figure()
-        self._plot_fitting_parameters()
-        
+            self.ax_main.clear()
+            
 
-        self.canvas_main.draw()
-        self.canvas_sub.draw()
-        gc.collect()
+            self._update_main_figure()
+            self._plot_fitting_parameters()
+            
 
-        self.cax.update_normal(self.sm)
-        self.cax_2.update_normal(self.sm)
+            self.canvas_main.draw()
+            self.canvas_sub.draw()
+            gc.collect()
 
-        #except Exception as e:
-        #    print(f'Please, initialize the monitor! Error: {e}')
-        #    QMessageBox.warning(self, '','Please initialize the monitor!') 
-        #    pass
+            self.cax.update_normal(self.sm)
+            self.cax_2.update_normal(self.sm)
+
+        except KeyError as e:
+            print(f'Please, initialize the monitor! Error: {e}')
+            QMessageBox.warning(self, '','Please initialize the monitor!') 
+            pass
 
         QApplication.restoreOverrideCursor()
 
@@ -343,27 +343,51 @@ class Window(QMainWindow, Ui_MainWindow):
         """_summary_
         """        
         
+        mask = self.temp_mask if self.temp_mask_signal else slice(None)
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
         x_label = 'XRD measure' if not self.plot_with_temp else 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
+        try:
+            
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0'].values[mask], 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area'].values[mask], 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm'].values[mask], 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
+        
+        except IndexError:
+            
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
 
+        
     def _plot_double_peak(self):
         """_summary_
         """        
         
+        mask = self.temp_mask
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
         x_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)' if self.plot_with_temp else 'XRD measure'
+        
+        try:
+            
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0'].values[mask], 'Peak position (°)', x_label, label=True, color='red')
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0_#2'].values[mask], 'Peak position (°)', x_label, label=True, color='red', marker='x')
 
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label, label=True, color='red')
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0_#2'].values, 'Peak position (°)', x_label, label=True, color='red', marker='x')
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area'].values[mask], 'Peak integrated area', x_label, label=True, color='green')
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area_#2'].values[mask], 'Peak integrated area', x_label, label=True, color='green', marker='x')
 
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label, label=True, color='green')
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area_#2'].values, 'Peak integrated area', x_label, label=True, color='green', marker='x')
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm'].values[mask], 'FWHM (°)', x_label, label = True, color='blue')
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm_#2'].values[mask], 'FWHM (°)', x_label, label = True, color='blue', marker='x')
+       
+        except IndexError:
+            
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label, label=True, color='red')
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0_#2'].values, 'Peak position (°)', x_label, label=True, color='red', marker='x')
 
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label, label = True, color='blue')
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm_#2'].values, 'FWHM (°)', x_label, label = True, color='blue', marker='x')
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label, label=True, color='green')
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area_#2'].values, 'Peak integrated area', x_label, label=True, color='green', marker='x')
+
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label, label = True, color='blue')
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm_#2'].values, 'FWHM (°)', x_label, label = True, color='blue', marker='x')
 
     def _plot_parameter(self, ax, x, y, ylabel, xlabel, label=None, color=None, marker='o', yerr = None):
         """_summary_
