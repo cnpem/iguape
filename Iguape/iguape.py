@@ -40,14 +40,19 @@ fonts_list = [font.name for font in matplotlib.font_manager.fontManager.ttflist]
 cmaps = [cmap for cmap in plt.colormaps()]
 
 class Window(QMainWindow, Ui_MainWindow):
-    """_summary_
+    """Class for IGUAPE main window. It inherits QMainWindow from PyQt5 and Ui_MainWindow from GUI.iguape_GUI
 
-    :param QMainWindow: _description_
-    :type QMainWindow: _type_
-    :param Ui_MainWindow: _description_
-    :type Ui_MainWindow: _type_
+    :param QMainWindow: QMainWindow from PyQt5
+    :type QMainWindow: QMainWindow
+    :param Ui_MainWindow: Ui_MainWindow from GUI.iguape_GUI
+    :type Ui_MainWindow: QMainWindow
     """    
     def __init__(self, parent=None):
+        """Constructor for Window class
+
+        Args:
+            parent (optional): Defaults to None.
+        """        
         super().__init__(parent)
         self.setupUi(self)
         geometry = QGuiApplication.screens()[-1].availableGeometry()
@@ -61,7 +66,7 @@ class Window(QMainWindow, Ui_MainWindow):
             pyi_splash.close() #After the GUI initialization, close the Splash Screen
 
     def create_graphs_layout(self):
-        """_summary_
+        """Routine to initialize and connect UI elements. All parameters and flags are initiated and UI element's signals are connected to its functions.
         """        
         self.url_data = {self.paineira_logo: "https://lnls.cnpem.br/facilities/paineira-en/", self.LNLS_logo: "https://lnls.cnpem.br/en/", self.CNPEM_logo: "https://cnpem.br/en/", self.iguape_logo: "https://cnpem.github.io/iguape/"}
         for logo in self.url_data.keys():
@@ -179,10 +184,10 @@ class Window(QMainWindow, Ui_MainWindow):
     
     
     def _open_url(self, url):
-        """_summary_
+        """Uses QDesktopServices to open URL from logos.
 
-        :param url: _description_
-        :type url: _type_
+        :param url: url to website
+        :type url: str
         """        
         try:
             QDesktopServices.openUrl(QUrl(url))
@@ -190,7 +195,7 @@ class Window(QMainWindow, Ui_MainWindow):
             pass
     
     def eventFilter(self, source, event):
-        """_summary_
+        """eventFilter method for logo QLabel. It tracks a mouse press event and calls  
 
         :param source: _description_
         :type source: _type_
@@ -237,45 +242,38 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def _get_mask(self, i):
-        """
-        Creates a mask, based on the interval selected by the user, for the i-th XRD measure.
-        If no interval is selected, returns None.
+        """_summary_
 
-        Parameters
-        ----------
-            i (int): Index of the XRD measure
-        
-        Returns
-        -------
-            slice: Slice object for the mask
-        """
+        Args:
+            i (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """    
         if self.selected_interval:
             dois_theta = self.read_data(self.plot_data['file_name'][i])[0]
             return (dois_theta >= self.selected_interval[0]) & (dois_theta <= self.selected_interval[1])
         return slice(None)
 
     def update_colormap(self, color_map_type, label):
-            """
-            Updates the colormap based on the selected color map type (temperature or XRD measure order)
+        """_summary_
 
-            Parameters
-            ----------
-                color_map_type (str): Type of colormap to be used
-                label (str): Label for the colorbar
-            """
-            self.norm.vmin, self.norm.vmax = min(self.plot_data[color_map_type]), max(self.plot_data[color_map_type])
-            self.sm.set_norm(self.norm)
-            self.cax.set_label(label, fontsize = 15)
-            self.cax_2.set_label(label, fontsize = 15)
-            #self.cax_3.set_label(label)
-            self.cmap = plt.get_cmap(self.color_pallete_comboBox.currentText())
-            self.sm.set_cmap(self.cmap)
-            gc.collect()
+        Args:
+            color_map_type (_type_): _description_
+            label (_type_): _description_
+        """        
+        self.norm.vmin, self.norm.vmax = min(self.plot_data[color_map_type]), max(self.plot_data[color_map_type])
+        self.sm.set_norm(self.norm)
+        self.cax.set_label(label, fontsize = 15)
+        self.cax_2.set_label(label, fontsize = 15)
+        #self.cax_3.set_label(label)
+        self.cmap = plt.get_cmap(self.color_pallete_comboBox.currentText())
+        self.sm.set_cmap(self.cmap)
+        gc.collect()
 
     def _update_main_figure(self):
-        """
-        Main Figure (XRD Data) refreshing routine. It plots the XRD patterns, with the customizations selected by the user (2theta mask, temperature mask, XRD index, etc.)
-        """
+        """_summary_
+        """        
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
             self.plot_data = self.monitor.data_frame[self.temp_mask].reset_index(drop=True) if self.temp_mask_signal else self.monitor.data_frame
@@ -316,8 +314,7 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def _plot_fitting_parameters(self):
-        """
-        Calls the fitting parameters plotting routines (_plot_single_peak or _plot_double_peak) 
+        """_summary_
         """
         if not self.fit_interval:
             return
@@ -343,35 +340,44 @@ class Window(QMainWindow, Ui_MainWindow):
        # self.cax_2.update_normal(self.sm)
         
     def _plot_single_peak(self):
-        """
-        Based on the x data type flag (temperature/XRD measure order), plots the fitting parameters (Peak Postion, Integrated Area and FWHM) as a function of x.
-        """
-        mask = self.temp_mask if self.temp_mask_signal else slice(None)
+        """_summary_
+        """        
+        
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
         x_label = 'XRD measure' if not self.plot_with_temp else 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0'].values[mask], 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area'].values[mask], 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm'].values[mask], 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
+        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
+        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
+        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
 
     def _plot_double_peak(self):
-        """
-        Based on the x data type flag (temperature/XRD measure order), plots the fitting parameters (Peak Postion, Integrated Area and FWHM) as a function of x. In this version, the fitting model is the Split Pseudo-Voigt Model (2x Pseudo-Voigt)
-        """
+        """_summary_
+        """        
+        
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
         x_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)' if self.plot_with_temp else 'XRD measure'
 
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0'], 'Peak position (°)', x_label, label=True, color='red')
-        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type], self.monitor.fit_data['dois_theta_0_#2'], 'Peak position (°)', x_label, label=True, color='red', marker='x')
+        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label, label=True, color='red')
+        self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0_#2'].values, 'Peak position (°)', x_label, label=True, color='red', marker='x')
 
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type], self.monitor.fit_data['area'], 'Peak integrated area', x_label, label=True, color='green')
-        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type], self.monitor.fit_data['area_#2'], 'Peak integrated area', x_label, label=True, color='green', marker='x')
+        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label, label=True, color='green')
+        self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area_#2'].values, 'Peak integrated area', x_label, label=True, color='green', marker='x')
 
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm'], 'FWHM (°)', x_label, label = True, color='blue')
-        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type], self.monitor.fit_data['fwhm_#2'], 'FWHM (°)', x_label, label = True, color='blue', marker='x')
+        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label, label = True, color='blue')
+        self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm_#2'].values, 'FWHM (°)', x_label, label = True, color='blue', marker='x')
 
     def _plot_parameter(self, ax, x, y, ylabel, xlabel, label=None, color=None, marker='o', yerr = None):
-        """
-        Routine for plotting x and y on given axis (ax)
+        """_summary_
+
+        Args:
+            ax (_type_): _description_
+            x (_type_): _description_
+            y (_type_): _description_
+            ylabel (_type_): _description_
+            xlabel (_type_): _description_
+            label (_type_, optional): _description_. Defaults to None.
+            color (_type_, optional): _description_. Defaults to None.
+            marker (str, optional): _description_. Defaults to 'o'.
+            yerr (_type_, optional): _description_. Defaults to None.
         """
         
         for i in range(len(x)):
@@ -387,9 +393,8 @@ class Window(QMainWindow, Ui_MainWindow):
             ax.legend(handles = [peak1, peak2])
 
     def select_folder(self):
-        """
-        Routine for selecting the folder to be monitored. It creates a FolderMonitor object and starts the monitoring process.
-        """
+        """_summary_
+        """        
         folder_path = QFileDialog.getExistingDirectory(self, 'Select the data folder to monitor', '', options=QFileDialog.Options()) # Selection of monitoring folder
         if folder_path == "":
             return
@@ -426,39 +431,33 @@ class Window(QMainWindow, Ui_MainWindow):
             
 
     def handle_new_data(self, new_data):
-        """
-        Handles new data received from the FolderMonitor object. It updates the plot_data DataFrame and calls the update_graphs routine.
+        """_summary_
 
-        Parameters
-        ----------
-            new_data (DataFrame): New data received from the FolderMonitor object
-        """
+        Args:
+            new_data (_type_): _description_
+        """        
         self.plot_data = pd.concat([self.plot_data, new_data], ignore_index=True)
         
     def onselect(self, xmin, xmax):
-        """
-        Routine for selecting the fitting interval. It updates the selected_interval attribute and calls the update_graphs routine.
+        """_summary_
 
-        Parameters
-        ----------
-            xmin (float): Minimum x value of the selected interval
-            xmax (float): Maximum x value of the selected interval
-        """
+        Args:
+            xmin (_type_): _description_
+            xmax (_type_): _description_
+        """        
         self.selected_interval = (xmin, xmax)
         #print(f'Selected Interval: {self.selected_interval}')
         self.update_graphs()
     # Reset button function #     
     def reset_interval(self):
-        """
-        Routine for resetting the selected interval. It sets the selected_interval attribute to None and calls the update_graphs routine.
-        """
+        """_summary_
+        """        
         self.selected_interval = None
         self.update_graphs()
     # Peak fit interval selection routine # 
     def select_fit_interval(self):
-        """
-        Routine for selecting the fitting interval. It checks if the monitor has been initialized and calls the FitWindow object.
-        """
+        """_summary_
+        """        
         if not self.folder_selected:
             QMessageBox.warning(self, '','Please initialize the monitor!')
             pass
@@ -482,6 +481,8 @@ class Window(QMainWindow, Ui_MainWindow):
     
 
     def export_figure(self):
+        """_summary_
+        """        
         tab_dict = {0: self.fig_main, 1: self.fig_sub, 2: self.fig_contour, 3: self.fig_norm}
         cur_index = self.tabWidget.currentIndex()
         self.export_window = ExportWindow(tab_dict[cur_index])
@@ -489,13 +490,11 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def on_mouse_move(self, event):
-        """
-        Tracks the mouse motion and updates the toolbar with the event information.
+        """_summary_
 
-        Parameters
-        ----------
-            event (MouseEvent): Mouse event. Inherited from matplotlib.backend_bases.MouseEvent
-        """
+        Args:
+            event (_type_): _description_
+        """        
         self.canvas_main.mouse_event = event
         x, y = event.xdata, event.ydata
         label = None
@@ -533,9 +532,8 @@ class Window(QMainWindow, Ui_MainWindow):
                 self.toolbar.set_message("")
         
     def save_data_frame(self):
-        """
-        Saves the fitting data to a CSV file. The user is prompted to select the file path.
-        """
+        """_summary_
+        """        
         try:
             options = QFileDialog.Options()
 
@@ -556,13 +554,11 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f'Exception {e} encountered')
 
     def _create_single_peak_dataframe(self):
-        """
-        Creates a DataFrame with the fitting data for the PseudoVoigt model.
+        """_summary_
 
-        Returns
-        -------
-            DataFrame: DataFrame with the fitting data
-        """
+        Returns:
+            _type_: _description_
+        """        
         if self.plot_with_temp:
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
             return pd.DataFrame({
@@ -582,13 +578,11 @@ class Window(QMainWindow, Ui_MainWindow):
         })
 
     def _create_double_peak_dataframe(self):
-        """
-        Creates a DataFrame with the fitting data for the Split PseudoVoigt model (2x PseudoVoigt).
+        """_summary_
 
-        Returns
-        -------
-            DataFrame: DataFrame with the fitting data
-        """
+        Returns:
+            _type_: _description_
+        """        
         if self.plot_with_temp:
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
             return pd.DataFrame({
@@ -614,26 +608,25 @@ class Window(QMainWindow, Ui_MainWindow):
         })
 
     def validate_temp(self, min_value, max_value):
-        """
-        Validates the temperature selected at the SpinBoxes.
+        """_summary_
 
-        Parameters
-        ----------
-            min_value (float): Minimum temperature value
-            max_value (float): Maximum temperature value
+        Args:
+            min_value (_type_): _description_
+            max_value (_type_): _description_
 
-        Returns
-        -------
-            tuple: Tuple with the minimum and maximum temperature values
-        """
+        Returns:
+            _type_: _description_
+        """        
         min_temp = min(self.monitor.data_frame['temp'], key=lambda x: abs(x-min_value))
         max_temp = min(self.monitor.data_frame['temp'], key=lambda x: abs(x-max_value))
         return min_temp, max_temp
     
     def apply_temp_mask(self, mask):
-        """
-        Applies the temperature mask to the data. It validates the temperature selected at the SpinBoxes and updates the plot_data DataFrame.
-        """
+        """_summary_
+
+        Args:
+            mask (_type_): _description_
+        """        
         def a():
             try:
                 if self.plot_with_temp:
@@ -664,13 +657,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.canvas_main.draw()
 
     def measure_order_index(self, checked):
-        """
-        Routine for selecting the XRD measure order index. It updates the plot_with_temp flag and calls the update_graphs routine.
+        """_summary_
 
-        Parameters
-        ----------
-            checked (bool): Flag for the XRD measure order index checkbox
-        """
+        Args:
+            checked (_type_): _description_
+        """        
         if checked:
             self.temperature_checkbox.setCheckState(False)
             self.plot_with_temp = False
@@ -681,13 +672,11 @@ class Window(QMainWindow, Ui_MainWindow):
             self.temperature_checkbox.setCheckable(True)
 
     def temp_index(self, checked):
-        """
-        Routine for selecting the temperature index. It updates the plot_with_temp flag and calls the update_graphs routine.
+        """_summary_
 
-        Parameters
-        ----------
-            checked (bool): Flag for the temperature index checkbox
-        """
+        Args:
+            checked (_type_): _description_
+        """        
         try:
             if checked:
 
@@ -709,7 +698,16 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(self, '','Please initialize the monitor!')     
     
     def read_data(self, path, normalize = False):
-        data = pd.read_csv(path, sep = ',', header=0, engine='pyarrow')
+        """_summary_
+
+        Args:
+            path (_type_): _description_
+            normalize (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            _type_: _description_
+        """        
+        data = pd.read_csv(path, sep = ',', header=0, comment="#")
         theta = np.array(data.iloc[:, 0])
         intensity = np.array(data.iloc[:, 1])
         if normalize:
@@ -717,6 +715,8 @@ class Window(QMainWindow, Ui_MainWindow):
         return theta, intensity
     
     def normalize(self):
+        """_summary_
+        """        
         try:
             self.ax_norm.clear()
             mask = self._get_mask(0)
@@ -747,6 +747,8 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f"Error: {e}")
     
     def contour(self):
+        """_summary_
+        """        
         try:
             self.ax_contour.clear()
             theta, intensity = self.read_data(self.plot_data['file_name'][0])
@@ -779,11 +781,18 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f"Error: {e}")
     
     def on_change_color_pallete(self, index):
+        """_summary_
+
+        Args:
+            index (_type_): _description_
+        """        
         self.color_pallete_comboBox.setCurrentIndex(index)
         self.color_pallete_comboBox_2.setCurrentIndex(index)
         self.update_graphs()
 
     def apply_filter(self):
+        """_summary_
+        """        
         try:
             self.filter_window = FilterWindow(self.monitor.data_frame.iloc[:, 0:3], self.monitor.kelvin_sginal)
             self.filter_window.mask.connect(self.apply_temp_mask)
@@ -792,15 +801,17 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(self, "No folder was selected", "Select a folder to monitor!")
 
     def on_change_vline_checkbox(self):
+        """_summary_
+        """        
+        
         if self.cursor == None:
             self.cursor = Cursor(self.ax_main, useblit=True, color='red', linewidth=1, horizOn=False)
         else:
             self.cursor = None
     
     def about(self):
-        """
-        Displays the About message box from PyQt.
-        """
+        """_summary_
+        """        
         QMessageBox.about(
             self,
             "About Iguape",
@@ -812,34 +823,46 @@ class Window(QMainWindow, Ui_MainWindow):
         )
 
 class GarbageCollector(QThread):
+    """_summary_
+
+    Args:
+        QThread (_type_): _description_
+    """    
     def __init__(self):
+        """_summary_
+        """        
         super().__init__()
+        
     def run(self):
+        """_summary_
+        """        
         while True:
             gc.collect()
             time.sleep(10)
 
 class Worker(QThread):
-    """
-    QThread Class for performing the Peak Fit. It emits signals for progress, finished and error.
+    """_summary_
 
-    Parameters
-    ----------
-        interval (list): List with the fitting interval
-    """
+    Args:
+        QThread (_type_): _description_
+    """    
     progress = pyqtSignal(int)
     finished = pyqtSignal(float) 
     error = pyqtSignal(str) # Changed to emit multiple arrays
 
     def __init__(self, interval):
+        """_summary_
+
+        Args:
+            interval (_type_): _description_
+        """    
         super().__init__()
         self.fit_interval = interval
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
     def run(self):
-        """
-        Peak Fitting routine. It calls the peak_fit or peak_fit_split_gaussian routine based on the selected fitting model.
-        """
+        """_summary_
+        """        
         
         try:
             start = time.time()
@@ -870,8 +893,21 @@ class Worker(QThread):
             print(f'Exception {e}. Please select a new Fit Interval')
 
 class FilterWindow(QDialog, Ui_Filter_Dialog):
+    """_summary_
+
+    Args:
+        QDialog (_type_): _description_
+        Ui_Filter_Dialog (_type_): _description_
+    """    
     mask = pyqtSignal(list)
     def __init__(self, data = None, kelvin_signal = None, parent = None):
+        """_summary_
+
+        Args:
+            data (_type_, optional): _description_. Defaults to None.
+            kelvin_signal (_type_, optional): _description_. Defaults to None.
+            parent (_type_, optional): _description_. Defaults to None.
+        """        
         super().__init__(parent)
         self.setupUi(self)
         
@@ -894,27 +930,37 @@ class FilterWindow(QDialog, Ui_Filter_Dialog):
         
         
     def setup_df(self):
+        """_summary_
+        """        
         checked = np.full_like(np.array(self.data.iloc[:, 0]), False)
         self.data['checked'] = checked
         return
     
     def set_state_checked(self):
+        """_summary_
+        """        
         for row in range(self.model.rowCount()):
             index = self.model.index(row)
             self.model.setData(index, Qt.Checked, role=Qt.CheckStateRole)
     
     def set_state_unchecked(self):
+        """_summary_
+        """        
         for row in range(self.model.rowCount()):
             index = self.model.index(row)
             self.model.setData(index, Qt.Unchecked, role=Qt.CheckStateRole)
     
     def set_state_selected(self):
+        """_summary_
+        """        
         selected = self.list.selectedIndexes()
         for index in selected:
             self.model.setData(index, Qt.Checked, role=Qt.CheckStateRole)
 
 
     def apply(self):
+        """_summary_
+        """        
         if True in list(self.model._data.iloc[:, -1]):
             self.mask.emit(list(self.model._data.iloc[:, -1]))
             self.close()
@@ -924,15 +970,43 @@ class FilterWindow(QDialog, Ui_Filter_Dialog):
 
 
 class CustomListViewModel(QAbstractListModel):
+    """_summary_
+
+    Args:
+        QAbstractListModel (_type_): _description_
+    """    
     def __init__(self, data = None, unit = None):
+        """_summary_
+
+        Args:
+            data (_type_, optional): _description_. Defaults to None.
+            unit (_type_, optional): _description_. Defaults to None.
+        """        
         super().__init__()
         self._data = data.copy()
         self.unit = unit
 
     def rowCount(self, parent=QModelIndex()):
+        """_summary_
+
+        Args:
+            parent (_type_, optional): _description_. Defaults to QModelIndex().
+
+        Returns:
+            _type_: _description_
+        """        
         return len(self._data)
 
     def data(self, index, role=Qt.DisplayRole):
+        """_summary_
+
+        Args:
+            index (_type_): _description_
+            role (_type_, optional): _description_. Defaults to Qt.DisplayRole.
+
+        Returns:
+            _type_: _description_
+        """        
         if not index.isValid():
             return QVariant()
 
@@ -945,6 +1019,16 @@ class CustomListViewModel(QAbstractListModel):
         return QVariant()
 
     def setData(self, index, value, role=Qt.EditRole):
+        """_summary_
+
+        Args:
+            index (_type_): _description_
+            value (_type_): _description_
+            role (_type_, optional): _description_. Defaults to Qt.EditRole.
+
+        Returns:
+            _type_: _description_
+        """        
         if not index.isValid():
             return False
 
@@ -956,12 +1040,32 @@ class CustomListViewModel(QAbstractListModel):
         return False
 
     def flags(self, index):
+        """_summary_
+
+        Args:
+            index (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """        
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable
 
 
 
 class ExportWindow(QDialog, Ui_Export_Figure):
+    """_summary_
+
+    Args:
+        QDialog (_type_): _description_
+        Ui_Export_Figure (_type_): _description_
+    """    
     def __init__(self, figure, parent=None):
+        """_summary_
+
+        Args:
+            figure (_type_): _description_
+            parent (_type_, optional): _description_. Defaults to None.
+        """        
         super().__init__(parent)
         self.setupUi(self)
         self.edit_fig = copy.deepcopy(figure)
@@ -1010,6 +1114,8 @@ class ExportWindow(QDialog, Ui_Export_Figure):
                      'style': 'normal',
                     }
     def get_color(self):
+        """_summary_
+        """        
         color = QColorDialog().getColor()
         if color.isValid():
             self.label_font['color'] = color.name()
@@ -1018,19 +1124,39 @@ class ExportWindow(QDialog, Ui_Export_Figure):
     
     
     def on_change_font_comboBox(self, font):
+        """_summary_
+
+        Args:
+            font (_type_): _description_
+        """        
         self.label_font['family'] = font
         self.tick_font['family'] = font
         return
     
     def on_change_label_size_spinBox(self, value):
+        """_summary_
+
+        Args:
+            value (_type_): _description_
+        """        
         self.label_font['size'] = value
         return
 
     def on_change_tick_size_spinBox(self, value):
+        """_summary_
+
+        Args:
+            value (_type_): _description_
+        """        
         self.tick_font['size'] = value
         return
 
     def on_change_label_style_comboBox(self, style):
+        """_summary_
+
+        Args:
+            style (_type_): _description_
+        """        
         if style == 'bold':
             self.label_font['weight'] = style
             return
@@ -1038,6 +1164,11 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         return
 
     def on_change_tick_style_comboBox(self, style):
+        """_summary_
+
+        Args:
+            style (_type_): _description_
+        """        
         if style == 'bold':
             self.tick_font['weight'] = style
             return
@@ -1046,6 +1177,8 @@ class ExportWindow(QDialog, Ui_Export_Figure):
     
 
     def redraw_fig(self):
+        """_summary_
+        """        
         
         try:
             self.height = self.height_doubleSpinBox.value()
@@ -1082,6 +1215,8 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         return
     
     def save_fig(self):
+        """_summary_
+        """        
         path = QFileDialog.getSaveFileName(self, "Select Save Path", os.path.expanduser('~'), options=QFileDialog.Options())[0]
         if path == "":
             QMessageBox.warning(self, 'Saving Error', "Please, select a valid path for your Figure")
@@ -1098,20 +1233,19 @@ class ExportWindow(QDialog, Ui_Export_Figure):
             
 
 class FitWindow(QDialog, Ui_pk_window):
-    """
-    Fit Window Class. It creates a new window for the Peak Fitting routine. 
-    It allows the user to select the fitting model, the fitting interval and the fitting parameters.
-    It inherits the QDialog class from PyQt.
-    """
+    """_summary_
 
+    Args:
+        QDialog (_type_): _description_
+        Ui_pk_window (_type_): _description_
+    """    
     def __init__(self, parent=None):
-        """
-        Constructor for the FitWindow class. It initializes the window and sets up the layout.
+        """_summary_
 
-        Parameters
-        ----------
-            parent (QWidget): Parent widget for the window
-        """
+        Args:
+            parent (_type_, optional): _description_. Defaults to None.
+        """        
+        
         super().__init__(parent)
         self.setupUi(self)
         self.fit_interval= None
@@ -1124,9 +1258,8 @@ class FitWindow(QDialog, Ui_pk_window):
         self.setup_layout()
 
     def setup_layout(self):
-        """
-        Routine for setting up the layout of the FitWindow. It creates the Figure and the layout for the Peak Fitting plot.
-        """
+        """_summary_
+        """        
         self.setWindowTitle('Peak Fit')
         self.pk_layout = QVBoxLayout()
         self.fig = Figure(figsize=(20,10), dpi=100)
@@ -1174,13 +1307,11 @@ class FitWindow(QDialog, Ui_pk_window):
         self.prominence_spinBox.valueChanged[int].connect(self.onChanged_prominence_spinbox)
 
     def onChanged_xrd_combo_box(self, text):
-        """
-        Routine for selecting the XRD pattern to be displayed on the plot via the ComboBox.
+        """_summary_
 
-        Parameters
-        ----------
-            text (str): Text selected on the ComboBox
-        """
+        Args:
+            text (_type_): _description_
+        """        
 
         self.text = text
         if len(self.ax.lines) == 2:
@@ -1204,7 +1335,11 @@ class FitWindow(QDialog, Ui_pk_window):
             self.canvas.draw()
     
     def onChanged_pk_combo_box(self, text):
-        """
+        """_summary_
+
+        Args:
+            text (_type_): _description_
+        """        """
         Routine for selecting the Peak Fitting Model via the ComboBox.
         
         Parameters 
@@ -1228,13 +1363,11 @@ class FitWindow(QDialog, Ui_pk_window):
             self.distance_spinBox.setReadOnly(False)
             self.height_spinBox.setReadOnly(False)
     def onChanged_bkg_combo_box(self, text):
-        """
-        Routine for selecting the Background Model via the ComboBox.
+        """_summary_
 
-        Parameters
-        ----------
-            text (str): Text selected on the ComboBox
-        """
+        Args:
+            text (_type_): _description_
+        """        
 
         if text == 'Linear Model': 
             self.bkg_model = 'Linear'
@@ -1242,15 +1375,12 @@ class FitWindow(QDialog, Ui_pk_window):
             self.bkg_model = 'Spline'
 
     def onselect(self, xmin, xmax):
-        """
-        Routine for selecting the fitting interval. It updates the fit_interval attribute and the interval_label label.
+        """_summary_
 
-        Parameters
-        ----------
-            xmin (float): Minimum x value of the selected interval
-            xmax (float): Maximum x value of the selected interval
-        """
-
+        Args:
+            xmin (_type_): _description_
+            xmax (_type_): _description_
+        """        
         if self.shade:
             self.shade.remove()
         self.fit_interval = [xmin, xmax]
@@ -1259,40 +1389,39 @@ class FitWindow(QDialog, Ui_pk_window):
         self.canvas.draw()
         
     def onChanged_distance_spinbox(self, value):
-        """
-        Method for setting the distance between the two peaks for the Split Pseudo-Voigt Model.
+        """_summary_
 
-        Parameters
-        ----------
-            value (int): Value selected on the SpinBox
-        """
+        Args:
+            value (_type_): _description_
+        """        
         self.distance = value
 
     def onChanged_height_spinbox(self, value):
-        """
-        Method for setting the height for the peak search for the Split Pseudo-Voigt Model.
+        """_summary_
 
-        Parameters
-        ----------
-            value (int): Value selected on the SpinBox
-        """
+        Args:
+            value (_type_): _description_
+        """        
         self.height = value*(1e+09)
     
     def onChanged_prominence_spinbox(self, value):
+        """_summary_
+
+        Args:
+            value (_type_): _description_
+        """        
         self.prominence = value
 
     def clear_plot(self):
-        """
-        Clears the plot on the FitWindow.
+        """_summary_
         """
         self.ax.clear()
         self.canvas.draw()
         self.indexes.clear()
 
     def preview(self):
-        """
-        Returns a Preview of the Peak Fitting for the selected Model and 2theta Interval.
-        """
+        """_summary_
+        """        
         if len(self.ax.lines) > 2:
             while len(self.ax.lines) > 2:
                 self.ax.lines[len(self.ax.lines)-1].remove()
@@ -1337,10 +1466,8 @@ class FitWindow(QDialog, Ui_pk_window):
                     QMessageBox.warning(self, '', 'The value given for distance and/or height for peak search are out of bounds, i.e., it was not possible to find two peaks mtaching the given parameters! Please, try again with different values for distance and height!')
 
     def fit(self):
-        """
-        Routine for starting the Peak Fitting process. It sets the fitting interval, the fitting model, the distance and the height for the Split Pseudo-Voigt Model.
-        It starts the Worker thread for the Peak Fitting process.
-        """
+        """_summary_
+        """        
         win.monitor.set_fit_interval(self.fit_interval)
         win.monitor.set_distance(self.distance)
         win.monitor.set_height(self.height)
@@ -1361,24 +1488,20 @@ class FitWindow(QDialog, Ui_pk_window):
         self.worker.start()
 
     def update_progress(self, value):
-        """
-        Routine for updating the progress bar on the Peak Fitting process.
+        """_summary_
 
-        Parameters
-        ----------
-            value (int): Value for the progress bar
-        """
+        Args:
+            value (_type_): _description_
+        """        
 
         self.progress_dialog.setValue(value)
 
     def peak_fitting_finished(self, time):
-        """
-        Routine for handling the Peak Fitting process completion. It updates the graphs and displays a message box with the elapsed time.
+        """_summary_
 
-        Parameters
-        ----------
-            time (float): Elapsed time for the Peak Fitting process
-        """
+        Args:
+            time (_type_): _description_
+        """        
 
         self.progress_dialog.setValue(100)
         QMessageBox.information(self, "Peak Fitting", f"Peak fitting completed successfully! Elapsed time: {int(time)}s")
@@ -1387,13 +1510,11 @@ class FitWindow(QDialog, Ui_pk_window):
         self.close()
 
     def peak_fitting_error(self, error_message):
-        """
-        Routine for handling the Peak Fitting process error. It displays a message box with the error message.
+        """_summary_
 
-        Parameters
-        ----------
-            error_message (str): Error message for the Peak Fitting process
-        """
+        Args:
+            error_message (_type_): _description_
+        """        
         self.progress_dialog.cancel()
         QMessageBox.warning(self, "Peak Fitting Error", error_message)
         self.show()

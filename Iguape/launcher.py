@@ -10,6 +10,8 @@ import os
 
 
 def main():
+    """_summary_
+    """    
     iguape_path = os.path.join(os.path.dirname(__file__), "iguape.py")
     iguape_dir = os.path.dirname(__file__)
     os.chdir(iguape_dir)

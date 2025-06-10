@@ -232,11 +232,11 @@ def peak_fit(theta, intensity, interval, bkg = 'Linear', pars = None):
 		# Getting the parameters from the optimal fit #, bkg= self.bkg_model
 			
 			dois_theta_0 = out.params['center'].value
-			dois_theta_0_stderr = out.params['center'].stderr*1
+			#dois_theta_0_stderr = out.params['center'].stderr*1
 			fwhm = out.params['fwhm'].value
-			fwhm_stderr = out.params['fwhm'].stderr*1
+			#fwhm_stderr = out.params['fwhm'].stderr*1
 			area = out.params['amplitude'].value
-			area_stderr = out.params['amplitude'].stderr*1
+			#area_stderr = out.params['amplitude'].stderr*1
 			r_squared = out.rsquared
 
 			done = True
