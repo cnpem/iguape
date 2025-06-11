@@ -154,10 +154,10 @@ class Window(QMainWindow, Ui_MainWindow):
                                 props=dict(alpha=0.3, facecolor='red', capstyle='round'))
         
         self.color_pallete_comboBox.addItems(cmaps)
-        self.color_pallete_comboBox.setCurrentIndex(47)
+        self.color_pallete_comboBox.setCurrentIndex(44)
 
         self.color_pallete_comboBox_2.addItems(cmaps)
-        self.color_pallete_comboBox_2.setCurrentIndex(47)
+        self.color_pallete_comboBox_2.setCurrentIndex(44)
 
         self.peak_fit_layout.addWidget(NavigationToolbar2QT(self.canvas_sub, self))
         self.toolbar = NavigationToolbar2QT(self.canvas_main, self)
@@ -215,28 +215,28 @@ class Window(QMainWindow, Ui_MainWindow):
     def update_graphs(self):
         """_summary_
         """        
-        try:
+        #try:
         
-            QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
 
-            self.ax_main.clear()
-            
+        self.ax_main.clear()
+        
 
-            self._update_main_figure()
-            self._plot_fitting_parameters()
-            
+        self._update_main_figure()
+        self._plot_fitting_parameters()
+        
 
-            self.canvas_main.draw()
-            self.canvas_sub.draw()
-            gc.collect()
+        self.canvas_main.draw()
+        self.canvas_sub.draw()
+        gc.collect()
 
-            self.cax.update_normal(self.sm)
-            self.cax_2.update_normal(self.sm)
+        self.cax.update_normal(self.sm)
+        self.cax_2.update_normal(self.sm)
 
-        except KeyError as e:
-            print(f'Please, initialize the monitor! Error: {e}')
-            QMessageBox.warning(self, '','Please initialize the monitor!') 
-            pass
+        #except KeyError as e:
+        #    print(f'Please, initialize the monitor! Error: {e}')
+        #    QMessageBox.warning(self, '','Please initialize the monitor!') 
+        #    pass
 
         QApplication.restoreOverrideCursor()
 
