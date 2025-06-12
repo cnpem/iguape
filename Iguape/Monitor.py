@@ -46,7 +46,6 @@ class FolderMonitor(QThread):
 		self.fit_interval = fit_interval
 		self.fit_model = 'PseudoVoigt'
 		self.kelvin_sginal = False
-		#self.data_frame = pd.DataFrame(columns = ['theta', 'intensity', 'temp', 'max', 'file_index'])
 		self.data_frame = pd.DataFrame(columns=['file_name', 'temp', 'file_index', 'max'])
 		self.fit_data = pd.DataFrame(columns=['dois_theta_0', 'fwhm', 'area', 'temp', 'file_index', 'R-squared'])
 
@@ -63,7 +62,6 @@ class FolderMonitor(QThread):
 		while reading_status == 1:
 			while True:
 				try:
-					#time.sleep(15)
 					with open(os.path.join(self.folder_path,'iguape_filelist.txt'),"r") as file:
 						lines = file.read().splitlines()
 						line = lines[i+1]
@@ -88,10 +86,9 @@ class FolderMonitor(QThread):
 								self.fit_data.insert(5, 'area_#2', [fit[2][1]])
 
 						reading_status = int(lines[i+2])
+
 					break
 				except Exception as e:
-					#print(f'Exception: {e}')
-					#time.sleep(0.01)
 					pass
 			
 			i+=2
@@ -155,7 +152,7 @@ def data_read(path):
 	"""
 	done = False
 	while not done:
-		#time.sleep(0.01)
+
 		try:
 			data = pd.read_csv(path, sep = ',', header=0, comment="#")
 			x = np.array(data.iloc[:, 0])
@@ -173,10 +170,10 @@ def data_read(path):
 			return x, y, temp, kelvin_signal
 		except pd.errors.EmptyDataError:
 			print(f"Warning: Empty file encountered: {path}. Trying to read the data again!")
-			#return None
+
 		except Exception as e:
 			print(f"An error occurred while reading data: {e}. Trying to read the data again!")
-			#return None
+
 
 # --- Defining the storaging lists --- #		
 
@@ -206,7 +203,7 @@ def peak_fit(theta, intensity, interval, bkg = 'Linear', pars = None):
 	"""
 	done = False
 	while not done:
-		#time.sleep(0.5)
+
 		try:
 			theta_fit = []
 			intensity_fit = []
@@ -241,7 +238,7 @@ def peak_fit(theta, intensity, interval, bkg = 'Linear', pars = None):
 
 			done = True
 			
-			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit, out.params#, dois_theta_0_stderr, fwhm_stderr, area_stderr
+			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit, out.params
 		except ValueError or TypeError as e:
 			print(f'Fitting error, please wait: {e}! Please select a new fitting interval')
 			done = True

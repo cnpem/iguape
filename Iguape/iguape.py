@@ -147,6 +147,7 @@ class Window(QMainWindow, Ui_MainWindow):
         
         self.folder_selected = False
         self.temp_mask_signal = False
+        self.temp_mask = slice(None)
         self.plot_data = pd.DataFrame()
 
         #Create span selector on the main plot#
@@ -183,10 +184,10 @@ class Window(QMainWindow, Ui_MainWindow):
         self.filter_button.clicked.connect(self.apply_filter)
     
     
-    def _open_url(self, url):
+    def _open_url(self, url: str):
         """Uses QDesktopServices to open URL from logos.
 
-        :param url: url to website
+        :param url: url to websites (as strings)
         :type url: str
         """        
         try:
@@ -194,22 +195,23 @@ class Window(QMainWindow, Ui_MainWindow):
         except Exception:
             pass
     
-    def eventFilter(self, source, event):
-        """eventFilter method for logo QLabel. It tracks a mouse press event and calls  
+    def eventFilter(self, source: QLabel, event: QEvent):
+        """eventFilter method for logo QLabel. It tracks a mouse press event and calls the :meth: `~Window._open_url`
 
-        :param source: _description_
-        :type source: _type_
-        :param event: _description_
-        :type event: _type_
-        :return: _description_
-        :rtype: _type_
+        :param source: Object name of logo in IGUAPE UI (QLabel)
+        :type source: QLabel
+        :param event: QEvent to track mouse click
+        :type event: QEvent
+        :return: Boolean value that determines the excution of :meth: `~Window._open_url`
+        :rtype: Bool
         """        
+            
         if event.type() == QEvent.MouseButtonPress:
             if source in self.url_data:
                 url = self.url_data[source]
                 self._open_url(url)
                 return True
-            
+          
         return super().eventFilter(source, event)
 
     def update_graphs(self):
@@ -277,7 +279,8 @@ class Window(QMainWindow, Ui_MainWindow):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
             self.plot_data = self.monitor.data_frame[self.temp_mask].reset_index(drop=True) if self.temp_mask_signal else self.monitor.data_frame
-        except (AttributeError, pd.errors.IndexingError):
+        except (AttributeError, pd.errors.IndexingError, ValueError):
+            self.plot_data = self.monitor.data_frame
             pass
 
         if self.plot_with_temp:
@@ -363,7 +366,7 @@ class Window(QMainWindow, Ui_MainWindow):
         """_summary_
         """        
         
-        mask = self.temp_mask
+        mask = self.temp_mask if self.temp_mask_signal else slice(None)
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
         x_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)' if self.plot_with_temp else 'XRD measure'
         
@@ -406,7 +409,7 @@ class Window(QMainWindow, Ui_MainWindow):
         
         for i in range(len(x)):
             norm_col = 'temp' if self.plot_with_temp else 'file_index'
-            color = self.cmap(self.norm(self.plot_data[norm_col][i]))
+            color = self.cmap(self.norm(x[i]))
             ax.plot(x[i], y[i], marker = marker, color = color)
             #ax.errorbar(x[i], y[i], ystderr, marker =marker, color = color, capsize=2)
         ax.set_xlabel(xlabel, fontsize = 15)
