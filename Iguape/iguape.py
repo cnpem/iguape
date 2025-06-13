@@ -80,6 +80,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.canvas_main = FigureCanvas(self.fig_main)
         self.ax_main.set_xlabel('2θ (°)', fontsize = 15)
         self.ax_main.set_ylabel('Intensity (a.u.)', fontsize = 15)
+        self.ax_main.text(0.5, 0.5, "Biondo Neto, J. L., Cintra Mauricio, J. & Rodella, C. B. (2025). \n J. Appl. Cryst. 58, 1061-1067.", 
+                          fontsize=40, color="grey", alpha=0.8, ha="center", va="center", rotation=10)
         self.XRD_data_layout.addWidget(self.canvas_main)
         #self.XRD_data_tab.setLayout(self.XRD_data_layout)
     
@@ -196,13 +198,13 @@ class Window(QMainWindow, Ui_MainWindow):
             pass
     
     def eventFilter(self, source: QLabel, event: QEvent):
-        """eventFilter method for logo QLabel. It tracks a mouse press event and calls the :meth: `~Window._open_url`
+        """eventFilter method for logo QLabel. It tracks a mouse press event and calls the :func:`Window._open_url`
 
         :param source: Object name of logo in IGUAPE UI (QLabel)
         :type source: QLabel
         :param event: QEvent to track mouse click
         :type event: QEvent
-        :return: Boolean value that determines the excution of :meth: `~Window._open_url`
+        :return: Boolean value that determines the excution of :func:`Window._open_url`
         :rtype: Bool
         """        
             
@@ -215,54 +217,56 @@ class Window(QMainWindow, Ui_MainWindow):
         return super().eventFilter(source, event)
 
     def update_graphs(self):
-        """_summary_
+        """Method to update Main Figure (XRD Data tab) and Plotting Parameters Figure (Peak Fitting tab).
         """        
-        #try:
+        try:
         
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+            QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        self.ax_main.clear()
-        
+            self.ax_main.clear()
+            
 
-        self._update_main_figure()
-        self._plot_fitting_parameters()
-        
+            self._update_main_figure()
+            self._plot_fitting_parameters()
+            
 
-        self.canvas_main.draw()
-        self.canvas_sub.draw()
-        gc.collect()
+            self.canvas_main.draw()
+            self.canvas_sub.draw()
+            gc.collect()
 
-        self.cax.update_normal(self.sm)
-        self.cax_2.update_normal(self.sm)
+            self.cax.update_normal(self.sm)
+            self.cax_2.update_normal(self.sm)
 
-        #except KeyError as e:
-        #    print(f'Please, initialize the monitor! Error: {e}')
-        #    QMessageBox.warning(self, '','Please initialize the monitor!') 
-        #    pass
+        except KeyError as e:
+            print(f'Please, initialize the monitor! Error: {e}')
+            QMessageBox.warning(self, '','Please initialize the monitor!') 
+            pass
 
         QApplication.restoreOverrideCursor()
 
 
-    def _get_mask(self, i):
-        """_summary_
+    def _get_mask(self, i: int):
+        """
+        Method for getting the :math:`2\\theta` mask, given the selection of interval by `SpanSelector` in the XRD Data tab.
 
-        Args:
-            i (_type_): _description_
-
-        Returns:
-            _type_: _description_
-        """    
+        :param i: index of the XRD pattern
+        :type i: int
+        :return: slice object as a mask.
+        :rtype: slice
+        """        
         if self.selected_interval:
             dois_theta = self.read_data(self.plot_data['file_name'][i])[0]
             return (dois_theta >= self.selected_interval[0]) & (dois_theta <= self.selected_interval[1])
         return slice(None)
 
-    def update_colormap(self, color_map_type, label):
-        """_summary_
+    def update_colormap(self, color_map_type: str, label:str):
+        """
+        Routine for updating the colormaps and norm used in the XRD Data and PeakFit tabs.
 
-        Args:
-            color_map_type (_type_): _description_
-            label (_type_): _description_
+        :param color_map_type: Column label of XRD patterns DataFrame. It can be `temp` or `file_index`
+        :type color_map_type: str
+        :param label: _description_
+        :type label: str
         """        
         self.norm.vmin, self.norm.vmax = min(self.plot_data[color_map_type]), max(self.plot_data[color_map_type])
         self.sm.set_norm(self.norm)
@@ -844,7 +848,7 @@ class Window(QMainWindow, Ui_MainWindow):
             "About Iguape",
             "<p>This is the Paineira Graphical User Interface</p>"
             "<p>- Its usage is resttricted to data acquired via in-situ experiments at Paineira. The software is under the GNU GPL-3.0 License.</p>"
-            "<p>- There's a brief tutorial for first time users, which can be helpful, altough the program's operation is very simple"
+            "<p>- For more information, please refer to the <a href='https://github.com/cnpem/iguape'>GitHub</a> page or <a href='https://cnpem.github.io/iguape/'>IGUAPE</a> documentation page</p>"
             "<p>- Paineira Beamline</p>"
             "<p>- LNLS - CNPEM</p>",
         )

@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, os.path.abspath('../Iguape'))
 
 project = 'Iguape - Paineira Graphical User Interface'
-copyright = '2024, João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella'
+copyright = u'2024, João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella'
 author = 'João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella'
 release = '1.1.0'
 
@@ -42,7 +42,6 @@ napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
 
-
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
@@ -53,4 +52,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'sphinx_rtd_theme'
 html_logo = '_static/Logo_IGUAPE.png'
+pygments_style = 'sphinx'
+html_css_files=['theme_overrides.css',]
 html_static_path = ['_static']
+html_theme_options = {"collapse_navigation": False}

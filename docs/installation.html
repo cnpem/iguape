@@ -7,8 +7,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Installation Guide &mdash; Iguape - Paineira Graphical User Interface 1.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b76e3c8a" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/theme_overrides.css" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -50,7 +51,43 @@
 <li class="toctree-l2"><a class="reference internal" href="#windows">Windows</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">iguape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">iguape</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Iguape.html">Iguape package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Iguape.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.GUI.html">Iguape.GUI package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Iguape.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Iguape.html#module-Iguape.Monitor">Iguape.Monitor module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.FolderMonitor"><code class="docutils literal notranslate"><span class="pre">FolderMonitor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.counter"><code class="docutils literal notranslate"><span class="pre">counter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.data_read"><code class="docutils literal notranslate"><span class="pre">data_read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.normalize_array"><code class="docutils literal notranslate"><span class="pre">normalize_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.peak_fit"><code class="docutils literal notranslate"><span class="pre">peak_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.peak_fit_split_gaussian"><code class="docutils literal notranslate"><span class="pre">peak_fit_split_gaussian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.pseudo_voigt"><code class="docutils literal notranslate"><span class="pre">pseudo_voigt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.split_pseudo_voigt"><code class="docutils literal notranslate"><span class="pre">split_pseudo_voigt()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Iguape.html#module-Iguape.iguape">Iguape.iguape module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.CustomListViewModel"><code class="docutils literal notranslate"><span class="pre">CustomListViewModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.ExportWindow"><code class="docutils literal notranslate"><span class="pre">ExportWindow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.FilterWindow"><code class="docutils literal notranslate"><span class="pre">FilterWindow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.FitWindow"><code class="docutils literal notranslate"><span class="pre">FitWindow</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.GarbageCollector"><code class="docutils literal notranslate"><span class="pre">GarbageCollector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.Window"><code class="docutils literal notranslate"><span class="pre">Window</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.Worker"><code class="docutils literal notranslate"><span class="pre">Worker</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Iguape.html#module-Iguape.launcher">Iguape.launcher module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.launcher.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Iguape.html#module-Iguape">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -97,6 +134,25 @@ python3<span class="w"> </span>--version
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>iguape
 </pre></div>
 </div>
+<p>It’s always better to setup a python environment before installing any package. I you are familiar with Anaconda, you can create a conda environment (with python 3.10 or higher)
+and then install iguape via pip.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>iguape-env<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11
+conda<span class="w"> </span>activate<span class="w"> </span>iguape-env
+pip<span class="w"> </span>install<span class="w"> </span>iguape
+iguape
+</pre></div>
+</div>
+<p>Alternatively you can write a <cite>environment.yml</cite> file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">iguape-env</span>
+<span class="nt">channels</span><span class="p">:</span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">conda-forge</span>
+<span class="nt">dependencies</span><span class="p">:</span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python = 3.11</span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">pip</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">iguape</span>
+</pre></div>
+</div>
+<p>And then, run in your conda prompt (or base environment):</p>
 </section>
 <section id="windows">
 <h2>Windows<a class="headerlink" href="#windows" title="Link to this heading"></a></h2>

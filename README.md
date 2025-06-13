@@ -42,5 +42,25 @@ Junior Cintra Mauricio
 ## License
 This project is under the GNU-GPL 3.0. For more information, see LICENSE.txt
 
+## Citation
+Biondo Neto, J. L., Cintra Mauricio, J. & Rodella, C. B. (2025). J. Appl. Cryst. 58, 1061-1067. **DOI**: https://doi.org/10.1107/S1600576725003309
+```bibtext
+    @article{BiondoNeto:yr5153,
+        author = "Biondo Neto, Jo{\~{a}}o L. and Cintra Mauricio, Junior and Rodella, Cristiane B.",
+        title = "{{\it IGUAPE}, a graphical user interface for {\it in situ/operando} X-ray diffraction experiments at the PAINEIRA beamline: development and application}",
+        journal = "Journal of Applied Crystallography",
+        year = "2025",
+        volume = "58",
+        number = "3",
+        pages = "1061--1067",
+        month = "Jun",
+        doi = {10.1107/S1600576725003309},
+        url = {https://doi.org/10.1107/S1600576725003309},
+        abstract = {Synchrotron radiation X-ray diffraction facilities equipped with fast area detectors can generate X-ray diffraction (XRD) patterns in seconds. This capability is fundamental to revealing transient crystalline phases and the structural evolution of samples and devices for technology applications. However, it generates XRD patterns usually faster than the user can process during the experiment. Thus, an open-source and user-friendly software package named {\it IGUAPE} was developed for the PAINEIRA beamline (Sirius, Brazil). It allows visualization of the X-ray diffractograms as soon as the azimuthal integration of the Debye rings is processed and the XRD pattern is created. The software can also perform a single-peak qualitative analysis of the diffraction data. Upon selecting a diffraction peak in the XRD pattern, the peak position, integrated area and full width at half-maximum variation during the {\it in situ} or {\it operando} experiment are given.},
+        keywords = {open-source software, <it>IGUAPE</it>, X-ray diffraction, XRD, PAINEIRA beamline, <it>in situ</it> experiments},
+    }
+```
+
+
 ## Project status
 Iguape is fully operational at Paineira. Working on distribution for Paineira users.

@@ -29,6 +29,33 @@ To verify the installation, you can run:
 
    iguape
 
+It's always better to setup a python environment before installing any package. I you are familiar with Anaconda, you can create a conda environment (with python 3.10 or higher)
+and then install iguape via pip.
+
+.. code-block:: bash
+
+   conda env create -n iguape-env python=3.11
+   conda activate iguape-env
+   pip install iguape
+   iguape
+
+Alternatively you can write a `environment.yml` file:
+
+.. code-block:: yaml
+
+   name: iguape-env
+   channels: 
+      - conda-forge
+   dependencies:
+      - python = 3.11
+      - pip:
+         - iguape
+
+And then, run in your conda prompt (or base environment):
+
+.. code-block:: bash
+   conda env create --file environment.yml
+
 Windows
 -------
 
