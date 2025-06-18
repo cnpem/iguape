@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Iguape.GUI package &mdash; Iguape - Paineira Graphical User Interface 1.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/theme_overrides.css" />
 
@@ -61,7 +61,6 @@
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.FolderMonitor"><code class="docutils literal notranslate"><span class="pre">FolderMonitor</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.counter"><code class="docutils literal notranslate"><span class="pre">counter()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.data_read"><code class="docutils literal notranslate"><span class="pre">data_read()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.normalize_array"><code class="docutils literal notranslate"><span class="pre">normalize_array()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.peak_fit"><code class="docutils literal notranslate"><span class="pre">peak_fit()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.peak_fit_split_gaussian"><code class="docutils literal notranslate"><span class="pre">peak_fit_split_gaussian()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.Monitor.pseudo_voigt"><code class="docutils literal notranslate"><span class="pre">pseudo_voigt()</span></code></a></li>
@@ -69,11 +68,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="Iguape.html#module-Iguape.iguape">Iguape.iguape module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.CustomListViewModel"><code class="docutils literal notranslate"><span class="pre">CustomListViewModel</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.ExportWindow"><code class="docutils literal notranslate"><span class="pre">ExportWindow</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.FilterWindow"><code class="docutils literal notranslate"><span class="pre">FilterWindow</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.FitWindow"><code class="docutils literal notranslate"><span class="pre">FitWindow</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.GarbageCollector"><code class="docutils literal notranslate"><span class="pre">GarbageCollector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.Window"><code class="docutils literal notranslate"><span class="pre">Window</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="Iguape.html#Iguape.iguape.Worker"><code class="docutils literal notranslate"><span class="pre">Worker</span></code></a></li>
 </ul>
@@ -124,7 +119,7 @@
 <span id="iguape-gui-iguape-gui-module"></span><h2>Iguape.GUI.iguape_GUI module<a class="headerlink" href="#module-Iguape.GUI.iguape_GUI" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="Iguape.GUI.iguape_GUI.Ui_MainWindow">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Iguape.GUI.iguape_GUI.</span></span><span class="sig-name descname"><span class="pre">Ui_MainWindow</span></span><a class="reference internal" href="_modules/Iguape/GUI/iguape_GUI.html#Ui_MainWindow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Iguape.GUI.iguape_GUI.Ui_MainWindow" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Iguape.GUI.iguape_GUI.</span></span><span class="sig-name descname"><span class="pre">Ui_MainWindow</span></span><a class="reference internal" href="_modules/Iguape/GUI/iguape_GUI.html#Ui_MainWindow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Iguape.GUI.iguape_GUI.Ui_MainWindow" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Iguape.GUI.iguape_GUI.Ui_MainWindow.retranslateUi">
@@ -141,9 +136,10 @@
 </section>
 <section id="module-Iguape.GUI.pk_window">
 <span id="iguape-gui-pk-window-module"></span><h2>Iguape.GUI.pk_window module<a class="headerlink" href="#module-Iguape.GUI.pk_window" title="Link to this heading"></a></h2>
+<p>Main GUI python script. This GUI was built with PyQt5. The .ui file can be found inside the GUI folder.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="Iguape.GUI.pk_window.Ui_pk_window">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Iguape.GUI.pk_window.</span></span><span class="sig-name descname"><span class="pre">Ui_pk_window</span></span><a class="reference internal" href="_modules/Iguape/GUI/pk_window.html#Ui_pk_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Iguape.GUI.pk_window.Ui_pk_window" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Iguape.GUI.pk_window.</span></span><span class="sig-name descname"><span class="pre">Ui_pk_window</span></span><a class="reference internal" href="_modules/Iguape/GUI/pk_window.html#Ui_pk_window"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Iguape.GUI.pk_window.Ui_pk_window" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Iguape.GUI.pk_window.Ui_pk_window.retranslateUi">

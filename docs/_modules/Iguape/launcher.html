@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Iguape.launcher &mdash; Iguape - Paineira Graphical User Interface 1.1.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/theme_overrides.css" />
 
@@ -59,7 +59,6 @@
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.Monitor.FolderMonitor"><code class="docutils literal notranslate"><span class="pre">FolderMonitor</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.Monitor.counter"><code class="docutils literal notranslate"><span class="pre">counter()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.Monitor.data_read"><code class="docutils literal notranslate"><span class="pre">data_read()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.Monitor.normalize_array"><code class="docutils literal notranslate"><span class="pre">normalize_array()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.Monitor.peak_fit"><code class="docutils literal notranslate"><span class="pre">peak_fit()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.Monitor.peak_fit_split_gaussian"><code class="docutils literal notranslate"><span class="pre">peak_fit_split_gaussian()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.Monitor.pseudo_voigt"><code class="docutils literal notranslate"><span class="pre">pseudo_voigt()</span></code></a></li>
@@ -67,11 +66,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../Iguape.html#module-Iguape.iguape">Iguape.iguape module</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.iguape.CustomListViewModel"><code class="docutils literal notranslate"><span class="pre">CustomListViewModel</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.iguape.ExportWindow"><code class="docutils literal notranslate"><span class="pre">ExportWindow</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.iguape.FilterWindow"><code class="docutils literal notranslate"><span class="pre">FilterWindow</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.iguape.FitWindow"><code class="docutils literal notranslate"><span class="pre">FitWindow</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.iguape.GarbageCollector"><code class="docutils literal notranslate"><span class="pre">GarbageCollector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.iguape.Window"><code class="docutils literal notranslate"><span class="pre">Window</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../Iguape.html#Iguape.iguape.Worker"><code class="docutils literal notranslate"><span class="pre">Worker</span></code></a></li>
 </ul>
@@ -119,15 +114,13 @@
 <span class="sd">Execution script. It goes to the directory where Iguape is installed and it executes the program (iguape.py)</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">subprocess</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../Iguape.html#Iguape.launcher.main">[docs]</a>
-<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
     <span class="n">iguape_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;iguape.py&quot;</span><span class="p">)</span>
     <span class="n">iguape_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">iguape_dir</span><span class="p">)</span>
