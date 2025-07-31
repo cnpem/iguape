@@ -600,16 +600,22 @@ class Window(QMainWindow, Ui_MainWindow):
             return pd.DataFrame({
             temp_label: self.monitor.fit_data['temp'],
             'Peak position (degree)': self.monitor.fit_data['dois_theta_0'],
+            'Peak position std (degree)': self.monitor.fit_data['dois_theta_0_std'],
             'Peak Integrated Area': self.monitor.fit_data['area'],
+            'Peak Integrated Area std': self.monitor.fit_data['area_std'],
             'FWHM (degree)': self.monitor.fit_data['fwhm'],
+            'FWHM std (degree)': self.monitor.fit_data['fwhm_std'],
             'R-squared (R²)': self.monitor.fit_data['R-squared']
         })
         else:
             return pd.DataFrame({
             'Measure': self.monitor.fit_data['file_index'],
             'Peak position (degree)': self.monitor.fit_data['dois_theta_0'],
+            'Peak position std (degree)': self.monitor.fit_data['dois_theta_0_std'],
             'Peak Integrated Area': self.monitor.fit_data['area'],
+            'Peak Integrated Area std': self.monitor.fit_data['area_std'],
             'FWHM (degree)': self.monitor.fit_data['fwhm'],
+            'FWHM std (degree)': self.monitor.fit_data['fwhm_std'],
             'R-squared (R²)': self.monitor.fit_data['R-squared']
         })
 
@@ -624,22 +630,34 @@ class Window(QMainWindow, Ui_MainWindow):
             return pd.DataFrame({
             temp_label: self.monitor.fit_data['temp'],
             'Peak position #1 (degree)': self.monitor.fit_data['dois_theta_0'],
+            'Peak position #1 std (degree)': self.monitor.fit_data['dois_theta_0_std'],
             'Peak Integrated Area #1': self.monitor.fit_data['area'],
+            'Peak Integrated Area #1 std': self.monitor.fit_data['area_std'],
             'FWHM (degree) #1': self.monitor.fit_data['fwhm'],
+            'FWHM (degree) #1 std': self.monitor.fit_data['fwhm_std'],
             'Peak Position #2 (degree)': self.monitor.fit_data['dois_theta_0_#2'],
+            'Peak Position #2 (degree) std': self.monitor.fit_data['dois_theta_0_#2_std'],
             'Peak Integrated Area #2': self.monitor.fit_data['area_#2'],
+            'Peak Integrated Area #2 std': self.monitor.fit_data['area_#2_std'],
             'FWHM #2 (degree)': self.monitor.fit_data['fwhm_#2'],
+            'FWHM #2 (degree) std': self.monitor.fit_data['fwhm_#2_std'],
             'R-squared (R²)': self.monitor.fit_data['R-squared']
         })
         else:
             return pd.DataFrame({
             'Measure': self.monitor.fit_data['file_index'],
             'Peak position #1 (degree)': self.monitor.fit_data['dois_theta_0'],
+            'Peak position #1 std (degree)': self.monitor.fit_data['dois_theta_0_std'],
             'Peak Integrated Area #1': self.monitor.fit_data['area'],
+            'Peak Integrated Area #1 std': self.monitor.fit_data['area_std'],
             'FWHM (degree) #1': self.monitor.fit_data['fwhm'],
+            'FWHM (degree) #1 std': self.monitor.fit_data['fwhm_std'],
             'Peak Position #2 (degree)': self.monitor.fit_data['dois_theta_0_#2'],
+            'Peak Position #2 std (degree)': self.monitor.fit_data['dois_theta_0_#2_std'],
             'Peak Integrated Area #2': self.monitor.fit_data['area_#2'],
+            'Peak Integrated Area #2 std': self.monitor.fit_data['area_#2_std'],
             'FWHM #2 (degree)': self.monitor.fit_data['fwhm_#2'],
+            'FWHM #2 (degree) std': self.monitor.fit_data['fwhm_#2_std'],
             'R-squared (R²)': self.monitor.fit_data['R-squared']
         })
 
@@ -914,7 +932,12 @@ class Worker(QThread):
                 if win.fit_interval_window.fit_model == 'PseudoVoigt':
                     theta, intensity = win.read_data(win.plot_data['file_name'][i])
                     fit = peak_fit(theta, intensity, self.fit_interval, pars)
-                    new_fit_data = pd.DataFrame({'dois_theta_0': [fit[0]], 'fwhm': [fit[1]], 'area': [fit[2]], 'temp': [win.plot_data['temp'][i]], 'file_index': [win.plot_data['file_index'][i]], 'R-squared': [fit[3]]})
+                    try:
+                        dois_theta_std, fwhm_std, area_std = fit[7]['center'].stderr*1, fit[7]['fwhm'].stderr*1, fit[7]['amplitude'].stderr*1
+                    except Exception as e:
+                        print(f"Excepetion {e}")
+                        dois_theta_std, fwhm_std, area_std = float("nan"), float("nan"), float("nan")
+                    new_fit_data = pd.DataFrame({'dois_theta_0': [fit[0]], 'dois_theta_0_std': [dois_theta_std], 'fwhm': [fit[1]],'fwhm_std': [fwhm_std], 'area': [fit[2]], 'area_std': [area_std], 'temp': [win.plot_data['temp'][i]], 'file_index': [win.plot_data['file_index'][i]], 'R-squared': [fit[3]]})
                     win.monitor.fit_data = pd.concat([win.monitor.fit_data, new_fit_data], ignore_index=True)
                     #pars = fit[7]
                     progress_value = int((i + 1) / len(win.plot_data['file_name']) * 100)
@@ -922,7 +945,12 @@ class Worker(QThread):
                 else:
                     theta, intensity = win.read_data(win.plot_data['file_name'][i])
                     fit = peak_fit_split_gaussian(theta, intensity, self.fit_interval, height = win.fit_interval_window.height, distance=win.fit_interval_window.distance, pars=pars)
-                    new_fit_data = pd.DataFrame({'dois_theta_0': [fit[0][0]], 'dois_theta_0_#2': [fit[0][1]], 'fwhm': [fit[1][0]], 'fwhm_#2': [fit[1][1]], 'area': [fit[2][0]], 'area_#2': [fit[2][1]], 'temp': [win.plot_data['temp'][i]], 'file_index': [win.plot_data['file_index'][i]], 'R-squared': [fit[3]]})
+                    try:
+                        dois_theta_std, fwhm_std, area_std, dois_theta_2_std, fwhm_2_std, area_2_std = fit[7]['cen1'].stderr*1, fit[7]['sigma1'].stderr*2, fit[7]['amp1'].stderr*1, fit[7]['cen2'].stderr*1, fit[7]['sigma2'].stderr*2, fit[7]['amp2'].stderr*1
+                    except Exception as e:
+                        print(f"Exception {e}")
+                        dois_theta_std, fwhm_std, area_std, dois_theta_2_std, fwhm_2_std, area_2_std = float("nan"), float("nan"), float("nan"), float("nan"), float("nan"), float("nan")
+                    new_fit_data = pd.DataFrame({'dois_theta_0': [fit[0][0]], 'dois_theta_0_std': [dois_theta_std], 'dois_theta_0_#2': [fit[0][1]], 'dois_theta_0_#2_std': [dois_theta_2_std],'fwhm': [fit[1][0]], 'fwhm_std': [fwhm_std], 'fwhm_#2': [fit[1][1]], 'fwhm_#2_std': [fwhm_2_std],'area': [fit[2][0]], 'area_std': [area_std],'area_#2': [fit[2][1]], 'area_#2_std': [area_2_std],'temp': [win.plot_data['temp'][i]], 'file_index': [win.plot_data['file_index'][i]], 'R-squared': [fit[3]]})
                     win.monitor.fit_data =pd.concat([win.monitor.fit_data, new_fit_data], ignore_index=True)
                     pars = fit[7]
                     progress_value = int((i + 1) / len(win.plot_data['file_name']) * 100)
@@ -1118,9 +1146,9 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         self.edit_fig.set_layout_engine('constrained')
         self.axes = self.edit_fig.axes
         if len(self.edit_fig.axes) > 2:
-            self.xlabel_lineEdit.setEnabled(False)
+            #self.xlabel_lineEdit.setEnabled(False)
             self.ylabel_lineEdit.setEnabled(False)
-            self.cmap_label_lineEdit.setEnabled(False)
+            #self.cmap_label_lineEdit.setEnabled(False)
         self.cmap_ax = self.axes[-1]
         self.axes.pop()
 
@@ -1233,11 +1261,18 @@ class ExportWindow(QDialog, Ui_Export_Figure):
                                                           style=self.tick_font['style'],
                                                           weight=self.tick_font['weight'],
                                                           size=self.tick_font['size'])
-        for ax in self.axes:
-            ax.set_xlabel(self.xlabel_lineEdit.text(), fontdict = self.label_font)
-            ax.set_ylabel(self.ylabel_lineEdit.text(), fontdict = self.label_font)
-            for label in ax.get_xticklabels() + ax.get_yticklabels():
-                label.set_fontproperties(tickfont)
+        if len(self.edit_fig.axes) > 2:
+            for ax in self.axes:
+                ax.set_xlabel(self.xlabel_lineEdit.text(), fontdict = self.label_font)
+                ax.set_ylabel(ax.get_ylabel(), fontdict = self.label_font)
+                for label in ax.get_xticklabels() + ax.get_yticklabels():
+                    label.set_fontproperties(tickfont)
+        else:
+            for ax in self.axes:
+                ax.set_xlabel(self.xlabel_lineEdit.text(), fontdict = self.label_font)
+                ax.set_ylabel(self.ylabel_lineEdit.text(), fontdict = self.label_font)
+                for label in ax.get_xticklabels() + ax.get_yticklabels():
+                    label.set_fontproperties(tickfont)
         
             
 
