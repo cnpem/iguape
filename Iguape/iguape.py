@@ -73,7 +73,7 @@ class Window(QMainWindow, Ui_MainWindow):
             logo.installEventFilter(self)
         #self.XRD_data_layout = QVBoxLayout()
         # Creating the main Figure and Layout #
-        self.fig_main = Figure(figsize=(8, 6), dpi=100)
+        self.fig_main = Figure(dpi=100)
         self.gs_main = self.fig_main.add_gridspec(1, 1)
         self.ax_main = self.fig_main.add_subplot(self.gs_main[0, 0])
         self.fig_main.set_layout_engine('constrained')
@@ -81,7 +81,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.ax_main.set_xlabel('2θ (°)', fontsize = 15)
         self.ax_main.set_ylabel('Intensity (a.u.)', fontsize = 15)
         self.ax_main.text(0.5, 0.5, "Biondo Neto, J. L., Cintra Mauricio, J. & Rodella, C. B. (2025). \n J. Appl. Cryst. 58, 1061-1067.", 
-                          fontsize=40, color="grey", alpha=0.8, ha="center", va="center", rotation=10)
+                          fontsize=20, color="grey", alpha=0.8, ha="center", va="center", rotation=10)
         self.XRD_data_layout.addWidget(self.canvas_main)
         #self.XRD_data_tab.setLayout(self.XRD_data_layout)
     
@@ -95,8 +95,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.fig_sub.set_layout_engine('constrained')
         self.canvas_sub = FigureCanvas(self.fig_sub)
         self.peak_fit_layout.addWidget(self.canvas_sub)
-        #self.peak_fit_tab.setLayout(self.peak_fit_layout)
-        self.cursor = None #Cursor(self.ax_main, useblit=True, color='red', linewidth=1, horizOn=False)
+        
+        self.cursor = None 
         
         
         self.fig_contour = Figure(figsize=(8, 6), dpi = 100)
@@ -238,6 +238,10 @@ class Window(QMainWindow, Ui_MainWindow):
             self.cax_2.update_normal(self.sm)
 
         except KeyError as e:
+            print(f'Please, initialize the monitor! Error: {e}')
+            QMessageBox.warning(self, '','Please initialize the monitor!') 
+            pass
+        except AttributeError as e:
             print(f'Please, initialize the monitor! Error: {e}')
             QMessageBox.warning(self, '','Please initialize the monitor!') 
             pass
@@ -475,9 +479,10 @@ class Window(QMainWindow, Ui_MainWindow):
         Args:
             xmin (_type_): _description_
             xmax (_type_): _description_
-        """        
+        """
+        if not self.monitor:
+            return
         self.selected_interval = (xmin, xmax)
-        #print(f'Selected Interval: {self.selected_interval}')
         self.update_graphs()
     # Reset button function #     
     def reset_interval(self):
@@ -780,6 +785,8 @@ class Window(QMainWindow, Ui_MainWindow):
     def contour(self):
         """_summary_
         """        
+        if not self.monitor:
+            return
         try:
             self.ax_contour.clear()
             theta, intensity = self.read_data(self.plot_data['file_name'][0])
@@ -803,6 +810,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.cax_3.update_normal(colormesh)
             self.cax_3.set_label("Intensity (a.u.)", fontsize = 15)
             self.ax_contour.set_xlabel("2θ (°)", fontsize = 15)
+            colormesh.set_rasterized(True)
             self.canvas_contour.draw()
             del X, Y, mask, z
             gc.collect()
@@ -817,13 +825,17 @@ class Window(QMainWindow, Ui_MainWindow):
         Args:
             index (_type_): _description_
         """        
+        if not self.monitor:
+            return
         self.color_pallete_comboBox.setCurrentIndex(index)
         self.color_pallete_comboBox_2.setCurrentIndex(index)
         self.update_graphs()
 
     def apply_filter(self):
         """_summary_
-        """        
+        """
+        if not self.monitor:
+            return       
         try:
             self.filter_window = FilterWindow(self.monitor.data_frame.iloc[:, 0:3], self.monitor.kelvin_sginal)
             self.filter_window.mask.connect(self.apply_temp_mask)
@@ -1254,7 +1266,11 @@ class ExportWindow(QDialog, Ui_Export_Figure):
             return
         print(path)
         #self.canvas.resize(int(width*self.edit_fig.dpi), int(height*self.edit_fig.dpi))
-        self.edit_fig.set_size_inches(self.width, self.height)
+        try: # try-except to handle save when height and width are None
+            self.edit_fig.set_size_inches(self.width, self.height)
+        except Exception as e:
+            pass
+        self.canvas.draw()
         self.edit_fig.savefig(path+f".{self.format_comboBox.currentText()}", dpi = self.dpi_spinBox.value(),
                          format = self.format_comboBox.currentText(),
                          bbox_inches = 'tight')
@@ -1499,6 +1515,8 @@ class FitWindow(QDialog, Ui_pk_window):
     def fit(self):
         """_summary_
         """        
+        if not self.fit_interval:
+            return
         win.monitor.set_fit_interval(self.fit_interval)
         win.monitor.set_distance(self.distance)
         win.monitor.set_height(self.height)
