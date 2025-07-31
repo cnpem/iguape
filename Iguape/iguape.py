@@ -13,6 +13,7 @@ from PyQt5.QtGui import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 import matplotlib.colorbar
+import matplotlib.backends.backend_svg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
@@ -899,7 +900,7 @@ class GarbageCollector(QThread):
         """        
         while True:
             gc.collect()
-            time.sleep(10)
+            time.sleep(3)
 
 class Worker(QThread):
     """_summary_
