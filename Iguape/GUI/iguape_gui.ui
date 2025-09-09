@@ -20,6 +20,9 @@
   <property name="styleSheet">
    <string notr="true"/>
   </property>
+  <property name="locale">
+   <locale language="English" country="UnitedKingdom"/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0">
@@ -810,7 +813,7 @@
      <x>0</x>
      <y>0</y>
      <width>1160</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFolder">
@@ -823,7 +826,15 @@
     <addaction name="actionAbout"/>
     <addaction name="actionHelp"/>
    </widget>
+   <widget class="QMenu" name="menuVisualization">
+    <property name="title">
+     <string>Visualization</string>
+    </property>
+    <addaction name="actionQ_Vector"/>
+    <addaction name="action2theta"/>
+   </widget>
    <addaction name="menuFolder"/>
+   <addaction name="menuVisualization"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionOpen_New_Folder">
@@ -844,6 +855,28 @@
   <action name="actionExport_Figure">
    <property name="text">
     <string>Export Figure</string>
+   </property>
+  </action>
+  <action name="actionQ_Vector">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Q-Vector</string>
+   </property>
+  </action>
+  <action name="action2theta">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2theta</string>
    </property>
   </action>
  </widget>
