@@ -393,6 +393,9 @@ def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1
 def normalize_array(array: np.array):
     return array/np.max(array)
 
+def calculate_q_vector(wavelength: float, two_theta: np.ndarray):
+	return (4 * np.pi / wavelength) * np.sin(np.deg2rad(two_theta / 2))
+
 # --- A counter function to index the created curves --- #
 def counter():
 	"""

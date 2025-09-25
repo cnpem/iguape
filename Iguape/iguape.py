@@ -6,7 +6,7 @@ This is the main script for the excution of the Paineira Graphical User Interfac
 In this script, both GUIs used by the program are called and all of the backend functions and processes are defined. 
 """
 
-import sys, time, gc, copy, matplotlib
+import sys, time, gc, copy, matplotlib, re
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -58,7 +58,12 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         geometry = QGuiApplication.screens()[-1].availableGeometry()
         #print(geometry)
-        
+        self.props_dict = {"Main Axis": {"X_Label": "2θ (°)", "Y_Label": "Intensity (a.u.)", "Cmap_Label": "XRD acquisition order"},
+                           "Peak Fit Axis": {"Peak Position Axis": {"X_Label":  "XRD acquisition order", "Y_Label": "Peak Position (°)", "Cmap_Label": "XRD acquisition order"},
+                                             "FWHM Axis": {"X_Label":  "XRD acquisition order", "Y_Label": "FWHM (°)", "Cmap_Label": "XRD acquisition order"},
+                                             "Integrated Area Axis": {"X_Label":  "XRD acquisition order", "Y_Label": "Peak Integrated Area (a.u.)", "Cmap_Label": "XRD acquisition order"}},
+                           "Contour Axis": {"X_Label": "2θ (°)", "Y_Label": "XRD acquisition order", "Cmap_Label": "Intensity (a.u.)"},
+                           "Normalization Axis": {"X_Label": "2θ (°)", "Y_Label": "Normalized Intensity (a.u.)", "Cmap_Label": "XRD acquisition order"}}
         self.setGeometry(geometry)
         self.create_graphs_layout()
         self.gc_collector = GarbageCollector()
@@ -146,6 +151,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.fit_interval = None
         self.monitor = None
         self.normalize_state = False
+        self.Q_vector_state = False
         self.norms = {'LogNorm': LogNorm(), "PowerNorm": PowerNorm(gamma=0.5), 'CenteredNorm': CenteredNorm()}
         
         self.folder_selected = False
@@ -174,6 +180,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.actionOpen_New_Folder.triggered.connect(self.select_folder)
         self.actionExport_Figure.triggered.connect(self.export_figure)
         self.actionAbout.triggered.connect(self.about)
+        self.actionQ_Vector.triggered.connect(self.on_toggle_Q_vector_action)
+        self.action2theta.triggered.connect(self.on_toggle_2theta_action)
         
         
 
@@ -260,8 +268,7 @@ class Window(QMainWindow, Ui_MainWindow):
         :rtype: slice
         """        
         if self.selected_interval:
-            dois_theta = self.read_data(self.plot_data['file_name'][i])[0]
-            print(len(dois_theta))
+            dois_theta = self.read_data(self.plot_data['file_name'][i], Q=self.Q_vector_state)[0]
             return (dois_theta >= self.selected_interval[0]) & (dois_theta <= self.selected_interval[1])
         return slice(None)
 
@@ -295,14 +302,14 @@ class Window(QMainWindow, Ui_MainWindow):
 
         if self.plot_with_temp:
             norm_col = 'temp'
-            self.update_colormap('temp', 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)')
+            self.update_colormap('temp', self.props_dict["Main Axis"]["Cmap_Label"])
             self.min_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['temp']), max(self.monitor.data_frame['temp']))
             self.max_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['temp']), max(self.monitor.data_frame['temp']))
             self.min_temp_doubleSpinBox.setValue(min(self.plot_data['temp']))
             self.max_temp_doubleSpinBox.setValue(max(self.plot_data['temp']))
         else:
             norm_col = 'file_index'
-            self.update_colormap('file_index', 'XRD acquisition time')
+            self.update_colormap('file_index', self.props_dict["Main Axis"]["Cmap_Label"])
             self.min_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['file_index']), max(self.monitor.data_frame['file_index']))
             self.max_temp_doubleSpinBox.setRange(min(self.monitor.data_frame['file_index']), max(self.monitor.data_frame['file_index']))
             self.min_temp_doubleSpinBox.setValue(min(self.plot_data['file_index']))
@@ -314,15 +321,14 @@ class Window(QMainWindow, Ui_MainWindow):
         mask = self._get_mask(0)
         for i in range(len(self.plot_data['file_name'])):
             color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
-            dois_theta, intensity = self.read_data(self.plot_data['file_name'][i], normalize=False)
-            self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K' 
-                                                                                                                        if self.monitor.kelvin_sginal else f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} °C' 
+            dois_theta, intensity = self.read_data(self.plot_data['file_name'][i], normalize=False, Q=self.Q_vector_state)
+            self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} {re.search(r"Temperature\s*\(([^)]+)\)", self.props_dict["Main Axis"]["Cmap_Label"]).group(1)}' 
                                                                                                                                     if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
             offset += self.spacing
             del dois_theta, intensity
 
-            self.ax_main.set_xlabel('2θ (°)', fontsize = 15)
-            self.ax_main.set_ylabel('Intensity (a.u.)', fontsize = 15)
+            self.ax_main.set_xlabel(self.props_dict["Main Axis"]["X_Label"], fontsize = 15)
+            self.ax_main.set_ylabel(self.props_dict["Main Axis"]["Y_Label"], fontsize = 15)
         QApplication.restoreOverrideCursor()
         gc.collect()
 
@@ -358,18 +364,18 @@ class Window(QMainWindow, Ui_MainWindow):
         
         mask = self.temp_mask if self.temp_mask_signal else slice(None)
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
-        x_label = 'XRD measure' if not self.plot_with_temp else 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
+        x_label = self.props_dict["Peak Fit Axis"]["FWHM Axis"]["X_Label"]
         try:
             
-            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0'].values[mask], 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
-            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area'].values[mask], 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
-            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm'].values[mask], 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0'].values[mask], self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"], x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area'].values[mask], self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"], x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm'].values[mask], self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"], x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
         
         except IndexError:
             
-            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
-            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
-            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"], x_label)#, yerr=self.monitor.fit_data['dois_theta_0_stderr'].values)
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"], x_label)#, yerr=self.monitor.fit_data['area_stderr'].values)
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"], x_label)#, yerr=self.monitor.fit_data['fwhm_stderr'].values)
 
         
     def _plot_double_peak(self):
@@ -378,29 +384,29 @@ class Window(QMainWindow, Ui_MainWindow):
         
         mask = self.temp_mask if self.temp_mask_signal else slice(None)
         x_data_type = 'temp' if self.plot_with_temp else 'file_index'
-        x_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)' if self.plot_with_temp else 'XRD measure'
+        x_label = self.props_dict["Peak Fit Axis"]["FWHM Axis"]["X_Label"]
         
         try:
             
-            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0'].values[mask], 'Peak position (°)', x_label, label=True, color='red')
-            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0_#2'].values[mask], 'Peak position (°)', x_label, label=True, color='red', marker='x')
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0'].values[mask], self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"], x_label, label=True, color='red')
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['dois_theta_0_#2'].values[mask], self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"], x_label, label=True, color='red', marker='x')
 
-            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area'].values[mask], 'Peak integrated area', x_label, label=True, color='green')
-            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area_#2'].values[mask], 'Peak integrated area', x_label, label=True, color='green', marker='x')
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area'].values[mask], self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"], x_label, label=True, color='green')
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['area_#2'].values[mask], self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"], x_label, label=True, color='green', marker='x')
 
-            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm'].values[mask], 'FWHM (°)', x_label, label = True, color='blue')
-            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm_#2'].values[mask], 'FWHM (°)', x_label, label = True, color='blue', marker='x')
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm'].values[mask], self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"], x_label, label = True, color='blue')
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values[mask], self.monitor.fit_data['fwhm_#2'].values[mask], self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"], x_label, label = True, color='blue', marker='x')
        
         except IndexError:
             
-            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, 'Peak position (°)', x_label, label=True, color='red')
-            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0_#2'].values, 'Peak position (°)', x_label, label=True, color='red', marker='x')
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0'].values, self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"], x_label, label=True, color='red')
+            self._plot_parameter(self.ax_2theta, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['dois_theta_0_#2'].values, self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"], x_label, label=True, color='red', marker='x')
 
-            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, 'Peak integrated area', x_label, label=True, color='green')
-            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area_#2'].values, 'Peak integrated area', x_label, label=True, color='green', marker='x')
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area'].values, self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"], x_label, label=True, color='green')
+            self._plot_parameter(self.ax_area, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['area_#2'].values, self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"], x_label, label=True, color='green', marker='x')
 
-            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, 'FWHM (°)', x_label, label = True, color='blue')
-            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm_#2'].values, 'FWHM (°)', x_label, label = True, color='blue', marker='x')
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm'].values, self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"], x_label, label = True, color='blue')
+            self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm_#2'].values, self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"], x_label, label = True, color='blue', marker='x')
 
     def _plot_parameter(self, ax, x, y, ylabel, xlabel, label=None, color=None, marker='o', yerr = None):
         """_summary_
@@ -451,6 +457,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.temp_mask_signal = False
         #folder_path = QFileDialog.getExistingDirectory(self, 'Select the data folder to monitor', '', options=QFileDialog.Options()) # Selection of monitoring folder
         if folder_path:
+            if not (os.path.exists(os.path.join(folder_path, "iguape_filelist.txt"))):
+                QMessageBox.warning(self, '','This folder does not contain the iguape_filelist.txt file! Please select a valid folder!')
+                return
             self.folder_selected = True
             self.ax_main.clear()
             self.ax_contour.clear()
@@ -560,7 +569,7 @@ class Window(QMainWindow, Ui_MainWindow):
                             
         #print(label)
         if label is not None and x is not None and y is not None:
-            s = f"Label: {label} | 2theta={x:.2f}, Intensity={y:.2e}"
+            s = fr"Label: {label} | {self.props_dict["Main Axis"]["X_Label"]}={x:.2f}, {self.props_dict["Main Axis"]["Y_Label"]}={y:.2e}"
             self.toolbar.set_message(s)
         else:
             try:
@@ -601,23 +610,23 @@ class Window(QMainWindow, Ui_MainWindow):
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
             return pd.DataFrame({
             temp_label: self.monitor.fit_data['temp'],
-            'Peak position (degree)': self.monitor.fit_data['dois_theta_0'],
-            'Peak position std (degree)': self.monitor.fit_data['dois_theta_0_std'],
-            'Peak Integrated Area': self.monitor.fit_data['area'],
-            'Peak Integrated Area std': self.monitor.fit_data['area_std'],
-            'FWHM (degree)': self.monitor.fit_data['fwhm'],
-            'FWHM std (degree)': self.monitor.fit_data['fwhm_std'],
+            self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]: self.monitor.fit_data['dois_theta_0'],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} std': self.monitor.fit_data['dois_theta_0_std'],
+            self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]: self.monitor.fit_data['area'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} std': self.monitor.fit_data['area_std'],
+            self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]: self.monitor.fit_data['fwhm'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} std': self.monitor.fit_data['fwhm_std'],
             'R-squared (R²)': self.monitor.fit_data['R-squared']
         })
         else:
             return pd.DataFrame({
             'Measure': self.monitor.fit_data['file_index'],
-            'Peak position (degree)': self.monitor.fit_data['dois_theta_0'],
-            'Peak position std (degree)': self.monitor.fit_data['dois_theta_0_std'],
-            'Peak Integrated Area': self.monitor.fit_data['area'],
-            'Peak Integrated Area std': self.monitor.fit_data['area_std'],
-            'FWHM (degree)': self.monitor.fit_data['fwhm'],
-            'FWHM std (degree)': self.monitor.fit_data['fwhm_std'],
+            self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]: self.monitor.fit_data['dois_theta_0'],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} std': self.monitor.fit_data['dois_theta_0_std'],
+            self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]: self.monitor.fit_data['area'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} std': self.monitor.fit_data['area_std'],
+            self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]: self.monitor.fit_data['fwhm'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} std': self.monitor.fit_data['fwhm_std'],
             'R-squared (R²)': self.monitor.fit_data['R-squared']
         })
 
@@ -631,35 +640,35 @@ class Window(QMainWindow, Ui_MainWindow):
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
             return pd.DataFrame({
             temp_label: self.monitor.fit_data['temp'],
-            'Peak position #1 (degree)': self.monitor.fit_data['dois_theta_0'],
-            'Peak position #1 std (degree)': self.monitor.fit_data['dois_theta_0_std'],
-            'Peak Integrated Area #1': self.monitor.fit_data['area'],
-            'Peak Integrated Area #1 std': self.monitor.fit_data['area_std'],
-            'FWHM (degree) #1': self.monitor.fit_data['fwhm'],
-            'FWHM (degree) #1 std': self.monitor.fit_data['fwhm_std'],
-            'Peak Position #2 (degree)': self.monitor.fit_data['dois_theta_0_#2'],
-            'Peak Position #2 (degree) std': self.monitor.fit_data['dois_theta_0_#2_std'],
-            'Peak Integrated Area #2': self.monitor.fit_data['area_#2'],
-            'Peak Integrated Area #2 std': self.monitor.fit_data['area_#2_std'],
-            'FWHM #2 (degree)': self.monitor.fit_data['fwhm_#2'],
-            'FWHM #2 (degree) std': self.monitor.fit_data['fwhm_#2_std'],
+            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1": self.monitor.fit_data['dois_theta_0'],
+            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['dois_theta_0_std'],
+            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1": self.monitor.fit_data['area'],
+            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['area_std'],
+            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1": self.monitor.fit_data['fwhm'],
+            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['fwhm_std'],
+            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2": self.monitor.fit_data['dois_theta_0_#2'],
+            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['dois_theta_0_#2_std'],
+            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2": self.monitor.fit_data['area_#2'],
+            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['area_#2_std'],
+            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2": self.monitor.fit_data['fwhm_#2'],
+            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['fwhm_#2_std'],
             'R-squared (R²)': self.monitor.fit_data['R-squared']
         })
         else:
             return pd.DataFrame({
-            'Measure': self.monitor.fit_data['file_index'],
-            'Peak position #1 (degree)': self.monitor.fit_data['dois_theta_0'],
-            'Peak position #1 std (degree)': self.monitor.fit_data['dois_theta_0_std'],
-            'Peak Integrated Area #1': self.monitor.fit_data['area'],
-            'Peak Integrated Area #1 std': self.monitor.fit_data['area_std'],
-            'FWHM (degree) #1': self.monitor.fit_data['fwhm'],
-            'FWHM (degree) #1 std': self.monitor.fit_data['fwhm_std'],
-            'Peak Position #2 (degree)': self.monitor.fit_data['dois_theta_0_#2'],
-            'Peak Position #2 std (degree)': self.monitor.fit_data['dois_theta_0_#2_std'],
-            'Peak Integrated Area #2': self.monitor.fit_data['area_#2'],
-            'Peak Integrated Area #2 std': self.monitor.fit_data['area_#2_std'],
-            'FWHM #2 (degree)': self.monitor.fit_data['fwhm_#2'],
-            'FWHM #2 (degree) std': self.monitor.fit_data['fwhm_#2_std'],
+            'XRD Acquisition Number': self.monitor.fit_data['file_index'],
+            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1": self.monitor.fit_data['dois_theta_0'],
+            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['dois_theta_0_std'],
+            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1": self.monitor.fit_data['area'],
+            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['area_std'],
+            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1": self.monitor.fit_data['fwhm'],
+            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['fwhm_std'],
+            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2": self.monitor.fit_data['dois_theta_0_#2'],
+            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['dois_theta_0_#2_std'],
+            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2": self.monitor.fit_data['area_#2'],
+            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['area_#2_std'],
+            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2": self.monitor.fit_data['fwhm_#2'],
+            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['fwhm_#2_std'],
             'R-squared (R²)': self.monitor.fit_data['R-squared']
         })
 
@@ -723,6 +732,15 @@ class Window(QMainWindow, Ui_MainWindow):
             self.plot_with_temp = False
             self.min_filter_label.setText('<u>Minimum:</u>')
             self.max_filter_label.setText('<u>Maximum:</u>')
+            label = "XRD acquisition order"
+            self.props_dict["Main Axis"]["Cmap_Label"] = label
+            self.props_dict["Normalization Axis"]["Cmap_Label"] = label
+            self.props_dict["Contour Axis"]["Y_Label"] = label
+            for key in self.props_dict["Peak Fit Axis"].keys():
+                self.props_dict["Peak Fit Axis"][key]["X_Label"] = label
+                self.props_dict["Peak Fit Axis"][key]["Cmap_Label"] = label
+
+
             self.update_graphs()
         else:
             self.temperature_checkbox.setCheckable(True)
@@ -741,6 +759,16 @@ class Window(QMainWindow, Ui_MainWindow):
                     self.plot_with_temp = True
                     self.min_filter_label.setText('<u>Minimum Temperature:</u>')
                     self.max_filter_label.setText('<u>Maximum Temperature:</u>')
+                    if self.monitor.kelvin_sginal:
+                        label = "Temperature (K)"
+                    else:
+                        label = "Temperature (°C)"
+                    self.props_dict["Main Axis"]["Cmap_Label"] = label
+                    self.props_dict["Normalization Axis"]["Cmap_Label"] = label
+                    self.props_dict["Contour Axis"]["Y_Label"] = label
+                    for key in self.props_dict["Peak Fit Axis"].keys():
+                        self.props_dict["Peak Fit Axis"][key]["X_Label"] = label
+                        self.props_dict["Peak Fit Axis"][key]["Cmap_Label"] = label
                     self.update_graphs()
                 else:
                     print("This experiment doesn't make use of temperature!")
@@ -753,7 +781,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f'Please initizalie the Monitor! Error {e}')
             QMessageBox.warning(self, '','Please initialize the monitor!')     
     
-    def read_data(self, path, normalize = False):
+    def read_data(self, path, normalize = False, Q = False):
         """_summary_
 
         Args:
@@ -767,7 +795,9 @@ class Window(QMainWindow, Ui_MainWindow):
         theta = np.array(data.iloc[:, 0], dtype="float64")
         intensity = np.array(data.iloc[:, 1], dtype="float64")
         if normalize:
-            return theta, normalize_array(intensity)
+            intensity = normalize_array(intensity)
+        if Q:
+            theta = calculate_q_vector(win.wavelength, theta)
         return theta, intensity
     
     def normalize(self):
@@ -781,20 +811,19 @@ class Window(QMainWindow, Ui_MainWindow):
             for i in range(len(self.plot_data['file_name'])):
                 norm_col = 'temp' if self.plot_with_temp else 'file_index' #Flag for chosing the XRD pattern index
                 color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
-                dois_theta, intensity = self.read_data(self.plot_data['file_name'][i], normalize=True)
+                dois_theta, intensity = self.read_data(self.plot_data['file_name'][i], normalize=True, Q=self.Q_vector_state)
                 self.ax_norm.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} K'                                                                                                                  if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
                 offset += spacing
                 del dois_theta, intensity
             
             if self.plot_with_temp:
-                self.update_colormap('temp', 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)')
-                self.cax_4.set_label("Temperature (K)" if self.monitor.kelvin_sginal else "Temperature (°C)", fontsize = 15)
+                self.update_colormap('temp', self.props_dict["Normalization Axis"]["Cmap_Label"])
             else:
                 self.update_colormap('file_index', 'XRD acquisition time')
-                self.cax_4.set_label("XRD Acquistion time", fontsize=15)
             
-            self.ax_norm.set_xlabel('2θ (°)', fontsize = 15)
-            self.ax_norm.set_ylabel('Normalized Intensity (a.u.)', fontsize = 15)
+            self.cax_4.set_label(self.props_dict["Normalization Axis"]["Cmap_Label"], fontsize = 15)
+            self.ax_norm.set_xlabel(self.props_dict["Normalization Axis"]["X_Label"], fontsize = 15)
+            self.ax_norm.set_ylabel(self.props_dict["Normalization Axis"]["Y_Label"], fontsize = 15)
             self.canvas_norm.draw()
             gc.collect()
             return
@@ -809,27 +838,27 @@ class Window(QMainWindow, Ui_MainWindow):
             return
         try:
             self.ax_contour.clear()
-            theta, intensity = self.read_data(self.plot_data['file_name'][0])
+            theta, intensity = self.read_data(self.plot_data['file_name'][0], Q=self.Q_vector_state)
             if self.plot_with_temp:
                 y = np.array(self.plot_data['temp'], dtype="float64")
-                self.ax_contour.set_ylabel("Temperature (°C)", fontsize = 15)
+                
             else:
                 y = np.array(self.plot_data['file_index'], dtype="float64")
-                self.ax_contour.set_ylabel("Acquisition time", fontsize = 15)
+            self.ax_contour.set_ylabel(self.props_dict["Contour Axis"]["Y_Label"], fontsize = 15)
             mask = self._get_mask(0)
             X, Y = np.meshgrid(theta[mask], y)
             z = []
             for item in self.plot_data['file_name']:
                 intensity = np.array(self.read_data(item)[1][mask]) 
                 z.append(intensity)
-            z = np.array(z)
+            z = np.array(z, dtype="float64")
 
             #print(f'Shape X and Y: {np.shape(X)}, {np.shape(Y)}. Z shape: {np.shape(z)}')
             norm = self.norms[self.norm_comboBox.currentText()]
             colormesh = self.ax_contour.pcolormesh(X, Y, z, cmap = self.color_pallete_comboBox.currentText(), norm = norm, shading='auto')
             self.cax_3.update_normal(colormesh)
-            self.cax_3.set_label("Intensity (a.u.)", fontsize = 15)
-            self.ax_contour.set_xlabel("2θ (°)", fontsize = 15)
+            self.cax_3.set_label(self.props_dict["Contour Axis"]["Cmap_Label"], fontsize = 15)
+            self.ax_contour.set_xlabel(self.props_dict["Contour Axis"]["X_Label"], fontsize = 15)
             colormesh.set_rasterized(True)
             self.canvas_contour.draw()
             del X, Y, mask, z
@@ -862,6 +891,44 @@ class Window(QMainWindow, Ui_MainWindow):
             self.filter_window.show()
         except AttributeError or Exception:
             QMessageBox.warning(self, "No folder was selected", "Select a folder to monitor!")
+
+    def on_toggle_Q_vector_action(self):
+        dialog = QInputDialog()
+        dialog.setInputMode(QInputDialog.DoubleInput)
+        dialog.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        dialog.setLabelText("Input Wavelength of XRD experiment (Å)")
+        dialog.setDoubleMinimum(0)
+        dialog.setDoubleMaximum(100)
+        dialog.setDoubleStep(1e-5)
+        dialog.setDoubleDecimals(5)
+        dialog.setDoubleValue(0)
+        dialog.setWindowTitle("Wavelenght")
+        ok = dialog.exec_()
+        if (not ok) or (dialog.doubleValue() == 0):
+            self.actionQ_Vector.setChecked(False)
+            QMessageBox.warning(self, "Invlid Wavelenght", "Please insert a valid wavelength for Q vector computation")
+            return
+        else:
+            self.action2theta.setChecked(False)
+            self.wavelength = dialog.doubleValue()    
+            self.props_dict["Main Axis"]["X_Label"] = r"Q ($Å^{-1}$)"
+            self.props_dict["Normalization Axis"]["X_Label"] = r"Q ($Å^{-1}$)"
+            self.props_dict["Contour Axis"]["X_Label"] = r"Q ($Å^{-1}$)"
+            self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"] = r"Peak position ($Å^{-1}$)"
+            self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"] = r"$\delta$Q ($Å^{-1}$)"
+            self.Q_vector_state = True
+            self.selected_interval = None
+        #self.update_graphs()
+
+    def on_toggle_2theta_action(self):
+        self.actionQ_Vector.setChecked(False)
+        self.action2theta.setChecked(True)
+        self.props_dict["Main Axis"]["X_Label"] = "2θ (°)"
+        self.props_dict["Normalization Axis"]["X_Label"] = "2θ (°)"
+        self.props_dict["Contour Axis"]["X_Label"] = "2θ (°)"
+        self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"] = "Peak position (°)"
+        self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"] = "FWHM (°)"
+        self.Q_vector_state = False
 
     def on_change_vline_checkbox(self):
         """_summary_
@@ -932,7 +999,7 @@ class Worker(QThread):
             pars = None
             for i in range(len(win.plot_data['file_name'])):
                 if win.fit_interval_window.fit_model == 'PseudoVoigt':
-                    theta, intensity = win.read_data(win.plot_data['file_name'][i])
+                    theta, intensity = win.read_data(win.plot_data['file_name'][i], Q=win.Q_vector_state)
                     fit = peak_fit(theta, intensity, self.fit_interval, pars)
                     try:
                         dois_theta_std, fwhm_std, area_std = fit[7]['center'].stderr*1, fit[7]['fwhm'].stderr*1, fit[7]['amplitude'].stderr*1
@@ -945,7 +1012,7 @@ class Worker(QThread):
                     progress_value = int((i + 1) / len(win.plot_data['file_name']) * 100)
                     self.progress.emit(progress_value)  # Emit progress signal with percentage
                 else:
-                    theta, intensity = win.read_data(win.plot_data['file_name'][i])
+                    theta, intensity = win.read_data(win.plot_data['file_name'][i], Q=win.Q_vector_state)
                     fit = peak_fit_split_gaussian(theta, intensity, self.fit_interval, height = win.fit_interval_window.height, distance=win.fit_interval_window.distance, pars=pars)
                     try:
                         dois_theta_std, fwhm_std, area_std, dois_theta_2_std, fwhm_2_std, area_2_std = fit[7]['cen1'].stderr*1, fit[7]['sigma1'].stderr*2, fit[7]['amp1'].stderr*1, fit[7]['cen2'].stderr*1, fit[7]['sigma2'].stderr*2, fit[7]['amp2'].stderr*1
@@ -1132,7 +1199,7 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         QDialog (_type_): _description_
         Ui_Export_Figure (_type_): _description_
     """    
-    def __init__(self, figure, parent=None):
+    def __init__(self, figure: Figure, parent=None):
         """_summary_
 
         Args:
@@ -1151,13 +1218,14 @@ class ExportWindow(QDialog, Ui_Export_Figure):
             #self.xlabel_lineEdit.setEnabled(False)
             self.ylabel_lineEdit.setEnabled(False)
             #self.cmap_label_lineEdit.setEnabled(False)
+        self.xlabel_lineEdit.setText(self.axes[0].get_xlabel())
+        self.ylabel_lineEdit.setText(self.axes[0].get_ylabel())
         self.cmap_ax = self.axes[-1]
         self.axes.pop()
 
         self.canvas = FigureCanvas(self.edit_fig)
         
-        self.xlabel_lineEdit.setText('2θ (°)')
-        self.ylabel_lineEdit.setText("Intensity (a.u.)")
+        
         self.cmap_label_lineEdit.setText(self.cmap_ax.get_ylabel())
         self.dpi_spinBox.setValue(self.edit_fig.dpi)
         self.font_comboBox.addItems(fonts_list)
@@ -1348,7 +1416,7 @@ class FitWindow(QDialog, Ui_pk_window):
         self.pk_layout = QVBoxLayout()
         self.fig = Figure(figsize=(20,10), dpi=100)
         self.ax = self.fig.add_subplot(1,1,1)
-        theta, intensity = win.read_data(win.plot_data['file_name'][0])
+        theta, intensity = win.read_data(win.plot_data['file_name'][0], Q=win.Q_vector_state)
         if win.plot_with_temp:
             #theta, intensity = win.read_data(win.plot_data['file_name'][0])
             self.ax.plot(theta, intensity,'o', markersize=3, label = 'XRD pattern ' + str(win.plot_data['temp'][0]) + '°C')
@@ -1357,8 +1425,8 @@ class FitWindow(QDialog, Ui_pk_window):
         else:
             self.ax.plot(theta, intensity, 'o', markersize=3, label = 'XRD pattern #' + str(win.plot_data['file_index'][0]))
             #self.ax.plot(win.plot_data['theta'][0], win.plot_data['intensity'][0], 'o', markersize=3, label = 'XRD pattern #' + str(win.plot_data['file_index'][0]))
-        self.ax.set_xlabel("2θ (°)", fontsize = 15)
-        self.ax.set_ylabel("Intensity (u.a.)", fontsize = 15)
+        self.ax.set_xlabel(win.props_dict["Main Axis"]["X_Label"], fontsize=15)
+        self.ax.set_ylabel(win.props_dict["Main Axis"]["Y_Label"], fontsize=15)
         self.ax.legend(fontsize='small')
         self.canvas = FigureCanvas(self.fig)
         self.pk_layout.addWidget(self.canvas)
@@ -1404,7 +1472,7 @@ class FitWindow(QDialog, Ui_pk_window):
         else:
             i = self.xrd_combo_box.currentIndex()
             self.indexes.append(i)
-            theta, intensity = win.read_data(win.plot_data['file_name'][i])
+            theta, intensity = win.read_data(win.plot_data['file_name'][i], Q=win.Q_vector_state)
             if win.plot_with_temp:
                 self.ax.plot(theta, intensity, 'o', markersize=3, label = ('XRD pattern ' + text))
 
@@ -1511,7 +1579,7 @@ class FitWindow(QDialog, Ui_pk_window):
                 self.ax.lines[len(self.ax.lines)-1].remove()
         if self.fit_model == "PseudoVoigt":
             for i in range(len(self.indexes)):
-                theta, intensity = win.read_data(win.plot_data['file_name'][self.indexes[i]])
+                theta, intensity = win.read_data(win.plot_data['file_name'][self.indexes[i]], Q=win.Q_vector_state)
                 #data = peak_fit(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval)
                 data = peak_fit(theta, intensity, self.fit_interval)
                 best_fit = data[4].best_fit
@@ -1529,7 +1597,7 @@ class FitWindow(QDialog, Ui_pk_window):
         else:
             for i in range(len(self.indexes)):
                 try:
-                    theta, intensity = win.read_data(win.plot_data['file_name'][self.indexes[i]])
+                    theta, intensity = win.read_data(win.plot_data['file_name'][self.indexes[i]], Q=win.Q_vector_state)
                     #data = peak_fit_split_gaussian(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval, height = self.height, distance=self.distance)
                     data = peak_fit_split_gaussian(theta, intensity, self.fit_interval, height = self.height, distance=self.distance)
                     best_fit = data[4].best_fit
