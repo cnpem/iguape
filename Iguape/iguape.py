@@ -261,6 +261,7 @@ class Window(QMainWindow, Ui_MainWindow):
         """        
         if self.selected_interval:
             dois_theta = self.read_data(self.plot_data['file_name'][i])[0]
+            print(len(dois_theta))
             return (dois_theta >= self.selected_interval[0]) & (dois_theta <= self.selected_interval[1])
         return slice(None)
 
@@ -763,8 +764,8 @@ class Window(QMainWindow, Ui_MainWindow):
             _type_: _description_
         """        
         data = pd.read_csv(path, sep = ',', header=0, comment="#")
-        theta = np.array(data.iloc[:, 0])
-        intensity = np.array(data.iloc[:, 1])
+        theta = np.array(data.iloc[:, 0], dtype="float64")
+        intensity = np.array(data.iloc[:, 1], dtype="float64")
         if normalize:
             return theta, normalize_array(intensity)
         return theta, intensity
