@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'GUI\iguape_gui.ui'
+# Form implementation generated from reading ui file 'GUI/iguape_gui.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -16,7 +16,7 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1160, 749)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("GUI\\../../../.designer/backup/Icons/Logo_IGUAPE.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Logo_IGUAPE.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setStyleSheet("")
         MainWindow.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
@@ -32,7 +32,7 @@ class Ui_MainWindow(object):
         self.CNPEM_logo.setMaximumSize(QtCore.QSize(100, 50))
         self.CNPEM_logo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.CNPEM_logo.setText("")
-        self.CNPEM_logo.setPixmap(QtGui.QPixmap("GUI\\../Icons/CNPEM-logo-colorido-2023_resize.png"))
+        self.CNPEM_logo.setPixmap(QtGui.QPixmap("GUI/../Icons/CNPEM-logo-colorido-2023_resize.png"))
         self.CNPEM_logo.setOpenExternalLinks(True)
         self.CNPEM_logo.setObjectName("CNPEM_logo")
         self.horizontalLayout.addWidget(self.CNPEM_logo)
@@ -42,7 +42,7 @@ class Ui_MainWindow(object):
         self.iguape_logo.setMaximumSize(QtCore.QSize(100, 70))
         self.iguape_logo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.iguape_logo.setText("")
-        self.iguape_logo.setPixmap(QtGui.QPixmap("GUI\\../Icons/Logo_IGUAPE_resized.png"))
+        self.iguape_logo.setPixmap(QtGui.QPixmap("GUI/../Icons/Logo_IGUAPE_resized.png"))
         self.iguape_logo.setOpenExternalLinks(True)
         self.iguape_logo.setObjectName("iguape_logo")
         self.horizontalLayout.addWidget(self.iguape_logo)
@@ -66,7 +66,7 @@ class Ui_MainWindow(object):
         self.LNLS_logo.setMaximumSize(QtCore.QSize(16777215, 50))
         self.LNLS_logo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.LNLS_logo.setText("")
-        self.LNLS_logo.setPixmap(QtGui.QPixmap("GUI\\../Icons/LNLS_logo_resize.png"))
+        self.LNLS_logo.setPixmap(QtGui.QPixmap("GUI/../Icons/LNLS_logo_resize.png"))
         self.LNLS_logo.setAlignment(QtCore.Qt.AlignCenter)
         self.LNLS_logo.setObjectName("LNLS_logo")
         self.horizontalLayout.addWidget(self.LNLS_logo)
@@ -75,7 +75,7 @@ class Ui_MainWindow(object):
         self.paineira_logo = QtWidgets.QLabel(self.centralwidget)
         self.paineira_logo.setMaximumSize(QtCore.QSize(70, 100))
         self.paineira_logo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.paineira_logo.setPixmap(QtGui.QPixmap("GUI\\../Icons/Paineira_resize.png"))
+        self.paineira_logo.setPixmap(QtGui.QPixmap("GUI/../Icons/Paineira_resize.png"))
         self.paineira_logo.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.paineira_logo.setObjectName("paineira_logo")
         self.horizontalLayout.addWidget(self.paineira_logo)
@@ -145,7 +145,7 @@ class Ui_MainWindow(object):
         font.setPointSize(14)
         self.refresh_button.setFont(font)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("GUI\\../../../.designer/backup/Icons/Refresh_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Refresh_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.refresh_button.setIcon(icon1)
         self.refresh_button.setObjectName("refresh_button")
         self.horizontalLayout_6.addWidget(self.refresh_button)
@@ -248,7 +248,7 @@ class Ui_MainWindow(object):
         font.setPointSize(14)
         self.filter_button.setFont(font)
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("GUI\\../../../.designer/backup/Icons/Filter_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Filter_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.filter_button.setIcon(icon2)
         self.filter_button.setObjectName("filter_button")
         self.horizontalLayout_8.addWidget(self.filter_button)
@@ -278,7 +278,7 @@ class Ui_MainWindow(object):
         self.save_peak_fit_data_button.setMinimumSize(QtCore.QSize(0, 0))
         self.save_peak_fit_data_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("GUI\\../../../.designer/backup/Icons/Save_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Save_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.save_peak_fit_data_button.setIcon(icon3)
         self.save_peak_fit_data_button.setObjectName("save_peak_fit_data_button")
         self.gridLayout_8.addWidget(self.save_peak_fit_data_button, 0, 2, 1, 1)
@@ -288,7 +288,7 @@ class Ui_MainWindow(object):
         self.peak_fit_button = QtWidgets.QPushButton(self.groupBox_3)
         self.peak_fit_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("GUI\\../../../.designer/backup/Icons/peak_fit_icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/peak_fit_icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.peak_fit_button.setIcon(icon4)
         self.peak_fit_button.setObjectName("peak_fit_button")
         self.gridLayout_8.addWidget(self.peak_fit_button, 0, 1, 1, 1)

@@ -322,8 +322,12 @@ class Window(QMainWindow, Ui_MainWindow):
         for i in range(len(self.plot_data['file_name'])):
             color = self.cmap(self.norm(self.plot_data[norm_col][i])) #Selecting the pattern's color based on the colormap
             dois_theta, intensity = self.read_data(self.plot_data['file_name'][i], normalize=False, Q=self.Q_vector_state)
-            self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} {re.search(r"Temperature\s*\(([^)]+)\)", self.props_dict["Main Axis"]["Cmap_Label"]).group(1)}' 
-                                                                                                                                    if self.plot_with_temp else f'XRD pattern #{self.plot_data["file_index"][i]}')
+            if self.plot_with_temp:
+                temp = re.search(r"Temperature\s*\(([^)]+)\)", self.props_dict["Main Axis"]["Cmap_Label"]).group(1)
+                label = f'XRD pattern #{self.plot_data["file_index"][i]} - Temperature {self.plot_data["temp"][i]} {temp}'
+            else: 
+                label = f'XRD pattern #{self.plot_data["file_index"][i]}'
+            self.ax_main.plot(dois_theta[mask], intensity[mask] + offset, color=color, label=label)
             offset += self.spacing
             del dois_theta, intensity
 
@@ -569,7 +573,7 @@ class Window(QMainWindow, Ui_MainWindow):
                             
         #print(label)
         if label is not None and x is not None and y is not None:
-            s = fr"Label: {label} | {self.props_dict["Main Axis"]["X_Label"]}={x:.2f}, {self.props_dict["Main Axis"]["Y_Label"]}={y:.2e}"
+            s = fr'Label: {label} | {self.props_dict["Main Axis"]["X_Label"]}={x:.2f}, {self.props_dict["Main Axis"]["Y_Label"]}={y:.2e}'
             self.toolbar.set_message(s)
         else:
             try:
@@ -640,36 +644,36 @@ class Window(QMainWindow, Ui_MainWindow):
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
             return pd.DataFrame({
             temp_label: self.monitor.fit_data['temp'],
-            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1": self.monitor.fit_data['dois_theta_0'],
-            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['dois_theta_0_std'],
-            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1": self.monitor.fit_data['area'],
-            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['area_std'],
-            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1": self.monitor.fit_data['fwhm'],
-            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['fwhm_std'],
-            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2": self.monitor.fit_data['dois_theta_0_#2'],
-            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['dois_theta_0_#2_std'],
-            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2": self.monitor.fit_data['area_#2'],
-            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['area_#2_std'],
-            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2": self.monitor.fit_data['fwhm_#2'],
-            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['fwhm_#2_std'],
-            'R-squared (R²)': self.monitor.fit_data['R-squared']
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1': self.monitor.fit_data['dois_theta_0'],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1 std': self.monitor.fit_data['dois_theta_0_std'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1': self.monitor.fit_data['area'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1 std': self.monitor.fit_data['area_std'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1': self.monitor.fit_data['fwhm'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1 std': self.monitor.fit_data['fwhm_std'],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2': self.monitor.fit_data['dois_theta_0_#2'],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2 std': self.monitor.fit_data['dois_theta_0_#2_std'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2': self.monitor.fit_data['area_#2'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2 std': self.monitor.fit_data['area_#2_std'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2': self.monitor.fit_data['fwhm_#2'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2 std': self.monitor.fit_data['fwhm_#2_std'],
+            'R-squared (R²)': self.monitor.fit_data["R-squared"]
         })
         else:
             return pd.DataFrame({
-            'XRD Acquisition Number': self.monitor.fit_data['file_index'],
-            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1": self.monitor.fit_data['dois_theta_0'],
-            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['dois_theta_0_std'],
-            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1": self.monitor.fit_data['area'],
-            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['area_std'],
-            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1": self.monitor.fit_data['fwhm'],
-            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1 std": self.monitor.fit_data['fwhm_std'],
-            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2": self.monitor.fit_data['dois_theta_0_#2'],
-            f"{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['dois_theta_0_#2_std'],
-            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2": self.monitor.fit_data['area_#2'],
-            f"{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['area_#2_std'],
-            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2": self.monitor.fit_data['fwhm_#2'],
-            f"{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2 std": self.monitor.fit_data['fwhm_#2_std'],
-            'R-squared (R²)': self.monitor.fit_data['R-squared']
+            'XRD Acquisition Number': self.monitor.fit_data["file_index"],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1': self.monitor.fit_data['dois_theta_0'],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #1 std': self.monitor.fit_data['dois_theta_0_std'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1': self.monitor.fit_data['area'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #1 std': self.monitor.fit_data['area_std'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1': self.monitor.fit_data['fwhm'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #1 std': self.monitor.fit_data['fwhm_std'],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2': self.monitor.fit_data['dois_theta_0_#2'],
+            f'{self.props_dict["Peak Fit Axis"]["Peak Position Axis"]["Y_Label"]} #2 std': self.monitor.fit_data['dois_theta_0_#2_std'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2': self.monitor.fit_data['area_#2'],
+            f'{self.props_dict["Peak Fit Axis"]["Integrated Area Axis"]["Y_Label"]} #2 std': self.monitor.fit_data['area_#2_std'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2': self.monitor.fit_data['fwhm_#2'],
+            f'{self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"]} #2 std': self.monitor.fit_data['fwhm_#2_std'],
+            'R-squared (R²)': self.monitor.fit_data["R-squared"]
         })
 
     def validate_temp(self, min_value, max_value):
