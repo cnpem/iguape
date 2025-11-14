@@ -20,7 +20,7 @@ from matplotlib.lines import Line2D
 from matplotlib.widgets import SpanSelector, Cursor
 from matplotlib.cm import ScalarMappable
 import matplotlib.font_manager
-from matplotlib.colors import LogNorm, PowerNorm, CenteredNorm
+from matplotlib.colors import LogNorm, PowerNorm, CenteredNorm, Normalize
 import numpy as np
 import pandas as pd
 from Monitor import FolderMonitor
@@ -152,8 +152,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.monitor = None
         self.normalize_state = False
         self.Q_vector_state = False
-        self.norms = {'LogNorm': LogNorm(), "PowerNorm": PowerNorm(gamma=0.5), 'CenteredNorm': CenteredNorm()}
-        
+        self.norms = {'LogNorm': LogNorm(), "PowerNorm": PowerNorm(gamma=0.5), 'CenteredNorm': CenteredNorm(), "LinearNorm": None}
         self.folder_selected = False
         self.temp_mask_signal = False
         self.temp_mask = slice(None)
@@ -593,11 +592,15 @@ class Window(QMainWindow, Ui_MainWindow):
                 df = self._create_single_peak_dataframe()
             else:
                 df = self._create_double_peak_dataframe()
-
             if df is not None:
                 file_path, _ = QFileDialog.getSaveFileName(self, "Save fitting Data", "", "CSV (*.csv);;All Files (*)", options=options)
                 if file_path:
-                    df.to_csv(file_path, index=False)
+                    with open(file_path, "w+") as f:
+                        f.write("# For more information on each peak fit, please, refer to IGUAPE's terminal window, where you will find a complete report on each fit.\n")
+                        f.write("# If uncertainties were not generated for one or multiple fits, it probably beacause one or more parameters reached a boundary value. For more information refer to lmfit's documentation: https://lmfit.github.io/lmfit-py/faq.html\n")
+                        df.to_csv(f, index=False)
+                        f.close()
+                    
         except AttributeError as e:
             print(f"No data available! Please, initialize the monitor! Error: {e}")
             QMessageBox.warning(self, '','Please initialize the monitor!')
@@ -1243,7 +1246,6 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         self.save_fig_button.clicked.connect(self.save_fig)
         self.color_pallete.clicked.connect(self.get_color)
         self.color_pallete.setFixedSize(QSize(22,22))
-        #self.setGeometry(QRect(0, 0, 500,  500))
         self.height = None
         self.width = None
         self.label_font = {'family': self.font_comboBox.currentText(),
