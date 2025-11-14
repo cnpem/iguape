@@ -1005,9 +1005,10 @@ class Worker(QThread):
             start = time.time()
             pars = None
             for i in range(len(win.plot_data['file_name'])):
+                theta, intensity = win.read_data(win.plot_data['file_name'][i], Q=win.Q_vector_state)
+                id = [win.plot_data['file_index'][i], win.plot_data['temp'][i]]
                 if win.fit_interval_window.fit_model == 'PseudoVoigt':
-                    theta, intensity = win.read_data(win.plot_data['file_name'][i], Q=win.Q_vector_state)
-                    fit = peak_fit(theta, intensity, self.fit_interval, pars)
+                    fit = peak_fit(theta, intensity, self.fit_interval, id=id, pars=pars)
                     try:
                         dois_theta_std, fwhm_std, area_std = fit[7]['center'].stderr*1, fit[7]['fwhm'].stderr*1, fit[7]['amplitude'].stderr*1
                     except Exception as e:
@@ -1015,12 +1016,11 @@ class Worker(QThread):
                         dois_theta_std, fwhm_std, area_std = float("nan"), float("nan"), float("nan")
                     new_fit_data = pd.DataFrame({'dois_theta_0': [fit[0]], 'dois_theta_0_std': [dois_theta_std], 'fwhm': [fit[1]],'fwhm_std': [fwhm_std], 'area': [fit[2]], 'area_std': [area_std], 'temp': [win.plot_data['temp'][i]], 'file_index': [win.plot_data['file_index'][i]], 'R-squared': [fit[3]]})
                     win.monitor.fit_data = pd.concat([win.monitor.fit_data, new_fit_data], ignore_index=True)
-                    #pars = fit[7]
+                    pars = fit[7]
                     progress_value = int((i + 1) / len(win.plot_data['file_name']) * 100)
                     self.progress.emit(progress_value)  # Emit progress signal with percentage
                 else:
-                    theta, intensity = win.read_data(win.plot_data['file_name'][i], Q=win.Q_vector_state)
-                    fit = peak_fit_split_gaussian(theta, intensity, self.fit_interval, height = win.fit_interval_window.height, distance=win.fit_interval_window.distance, pars=pars)
+                    fit = peak_fit_split_gaussian(theta, intensity, self.fit_interval, id=id,height = win.fit_interval_window.height, distance=win.fit_interval_window.distance, prominence=win.fit_interval_window.prominence, pars=pars)
                     try:
                         dois_theta_std, fwhm_std, area_std, dois_theta_2_std, fwhm_2_std, area_2_std = fit[7]['cen1'].stderr*1, fit[7]['sigma1'].stderr*2, fit[7]['amp1'].stderr*1, fit[7]['cen2'].stderr*1, fit[7]['sigma2'].stderr*2, fit[7]['amp2'].stderr*1
                     except Exception as e:
@@ -1461,7 +1461,8 @@ class FitWindow(QDialog, Ui_pk_window):
         self.distance_spinBox.setReadOnly(True)
         self.distance_spinBox.valueChanged[int].connect(self.onChanged_distance_spinbox)
         self.height_spinBox.setReadOnly(True)
-        self.height_spinBox.valueChanged[int].connect(self.onChanged_height_spinbox)
+        self.height_spinBox.valueChanged[float].connect(self.onChanged_height_spinbox)
+        self.prominence_spinBox.setReadOnly(True)
         self.prominence_spinBox.valueChanged[int].connect(self.onChanged_prominence_spinbox)
 
     def onChanged_xrd_combo_box(self, text):
@@ -1510,16 +1511,14 @@ class FitWindow(QDialog, Ui_pk_window):
             win.monitor.set_fit_model = 'PseudoVoigt'
             self.distance_spinBox.setReadOnly(True)
             self.height_spinBox.setReadOnly(True)
+            self.prominence_spinBox.setReadOnly(True)
         elif text == 'Split PseudoVoigt Model - 2x PseudoVoigt':
             self.fit_model = '2x PseudoVoigt(SPV)'
             win.monitor.set_fit_model = '2x PseudoVoigt(SPV)'
             self.distance_spinBox.setReadOnly(False)
             self.height_spinBox.setReadOnly(False)
-        else:
-            self.fit_model = '2x Gaussian'
-            win.monitor.set_fit_model = '2x PseudoVoigt(SPV)'
-            self.distance_spinBox.setReadOnly(False)
-            self.height_spinBox.setReadOnly(False)
+            self.prominence_spinBox.setReadOnly(False)
+
     def onChanged_bkg_combo_box(self, text):
         """_summary_
 
@@ -1579,15 +1578,17 @@ class FitWindow(QDialog, Ui_pk_window):
 
     def preview(self):
         """_summary_
-        """        
+        """
+        if self.fit_interval == None:
+            return  
         if len(self.ax.lines) > 2:
             while len(self.ax.lines) > 2:
                 self.ax.lines[len(self.ax.lines)-1].remove()
         if self.fit_model == "PseudoVoigt":
             for i in range(len(self.indexes)):
                 theta, intensity = win.read_data(win.plot_data['file_name'][self.indexes[i]], Q=win.Q_vector_state)
-                #data = peak_fit(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval)
-                data = peak_fit(theta, intensity, self.fit_interval)
+                id = [win.plot_data['file_index'][self.indexes[i]], win.plot_data['temp'][self.indexes[i]]]
+                data = peak_fit(theta, intensity, self.fit_interval, id=id)
                 best_fit = data[4].best_fit
                 #dely = data[4].eval_uncertainty(sigma = 3)
                 if win.plot_with_temp:
@@ -1604,8 +1605,8 @@ class FitWindow(QDialog, Ui_pk_window):
             for i in range(len(self.indexes)):
                 try:
                     theta, intensity = win.read_data(win.plot_data['file_name'][self.indexes[i]], Q=win.Q_vector_state)
-                    #data = peak_fit_split_gaussian(win.plot_data['theta'][self.indexes[i]], win.plot_data['intensity'][self.indexes[i]], self.fit_interval, height = self.height, distance=self.distance)
-                    data = peak_fit_split_gaussian(theta, intensity, self.fit_interval, height = self.height, distance=self.distance)
+                    id = [win.plot_data['file_index'][self.indexes[i]], win.plot_data['temp'][self.indexes[i]]]
+                    data = peak_fit_split_gaussian(theta, intensity, self.fit_interval, id=id, height = self.height, distance=self.distance, prominence=self.prominence)
                     best_fit = data[4].best_fit
                     #dely = data[4].eval_uncertainty(sigma = 3)
                     if win.plot_with_temp:
@@ -1620,8 +1621,8 @@ class FitWindow(QDialog, Ui_pk_window):
                     self.canvas.draw()
                 except UnboundLocalError as e:
                     QMessageBox.warning(self, '', 'The value given for distance and/or height for peak search are out of bounds, i.e., it was not possible to find two peaks mtaching the given parameters! Please, try again with different values for distance and height!')
-                except UnboundLocalError as e:
-                    QMessageBox.warning(self, '', 'The value given for distance and/or height for peak search are out of bounds, i.e., it was not possible to find two peaks mtaching the given parameters! Please, try again with different values for distance and height!')
+                except TypeError as e:
+                    QMessageBox.warning(self, '', 'One or more peak parameters have reached a boundary value! Please check IGUAPE terimnal window for a fit report!')
 
     def fit(self):
         """_summary_
@@ -1664,7 +1665,7 @@ class FitWindow(QDialog, Ui_pk_window):
         """        
 
         self.progress_dialog.setValue(100)
-        QMessageBox.information(self, "Peak Fitting", f"Peak fitting completed successfully! Elapsed time: {int(time)}s")
+        QMessageBox.information(self, "Peak Fitting", f"Peak fitting completed successfully! For more information on each fit, check the terminal for the fit report! Elapsed time: {int(time)}s")
         win.update_graphs()
         
         self.close()

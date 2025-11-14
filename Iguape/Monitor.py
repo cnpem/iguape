@@ -178,7 +178,7 @@ def data_read(path):
 # --- Defining the storaging lists --- #		
 
 
-def peak_fit(theta, intensity, interval, bkg = 'Linear', pars = None):
+def peak_fit(theta, intensity, interval, id, bkg = 'Linear', pars = None):
 	"""
 	Peak fitting function for the PseudoVoigt model.
 	Given a set of 2theta and Intensity arrays, it fits the data to the
@@ -220,12 +220,16 @@ def peak_fit(theta, intensity, interval, bkg = 'Linear', pars = None):
 			mod = PseudoVoigtModel(nan_policy='omit')
 			if pars == None:
 				pars = mod.guess(data= intensity_fit, x = theta_fit)
+			else:
+				pars['fraction'].value=0.5
 			background = LinearModel(prefix='bkg_')
 			pars.update(background.guess(data=intensity_fit, x = theta_fit))
 			mod += background
 			
 			out = mod.fit(intensity_fit, pars, x=theta_fit) # Fitting the data to the Voigt model #
 			comps = out.eval_components(x=theta_fit)
+
+			print(f"Fit report for XRD #{id[0]} - {id[1]}°C", out.fit_report(), sep='\n')
 		# Getting the parameters from the optimal fit #, bkg= self.bkg_model
 			
 			dois_theta_0 = out.params['center'].value
@@ -305,7 +309,7 @@ def split_pseudo_voigt(x, amp1, cen1, sigma1, eta1, amp2, cen2, sigma2, eta2):
 	return (pseudo_voigt(x, amplitude=amp1, center=cen1, sigma=sigma1, eta=eta1) +
 			pseudo_voigt(x, amplitude=amp2, center=cen2, sigma=sigma2, eta=eta2))
 
-def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1e+09, distance = 35, pars = None):
+def peak_fit_split_gaussian(theta, intensity, interval, id, bkg = 'Linear', height=1e+09, distance = 35, prominence=50, pars = None):
 	"""
 	Peak fitting function for the Split PseudoVoigt model.
 	Given a set of 2theta and Intensity arrays, it fits the data to the
@@ -345,39 +349,42 @@ def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1
 			theta_fit=np.array(theta_fit)
 			intensity_fit=np.array(intensity_fit)
   # Building the Voigt model with lmfit #
-			
-			peaks, properties = find_peaks(intensity_fit, height=height, distance=distance)
-			if len(peaks) >= 2:
-	# Sort peaks by prominence and pick the top two
-				sorted_indices = np.argsort(properties['peak_heights'])[-2:]
-				peak_positions = theta_fit[peaks][sorted_indices]
-				peak_heights = properties['peak_heights'][sorted_indices]
-				if peak_positions[0] > peak_positions[1]:
-					amp2, cen2 = peak_heights[0], peak_positions[0]
-					amp1, cen1 = peak_heights[1], peak_positions[1]
-				else:
-					amp1, cen1 = peak_heights[0], peak_positions[0]
-					amp2, cen2 = peak_heights[1], peak_positions[1]
-
-	# Estimate sigma using the width of the peaks at half height
-				sigma1 = 0.1/2.355
-				sigma2 = 0.1/2.355
-				
-				
-
 			model = lm.Model(split_pseudo_voigt)
 			if pars == None:
-				pars = model.make_params(amp1=amp1, cen1=cen1, sigma1=sigma1, eta1=0.5, amp2=amp2, cen2=cen2, sigma2=sigma2, eta2=0.5)
-			pars['eta1'].min, pars['eta1'].max = 0, 1
-			pars['eta2'].min, pars['eta2'].max = 0, 1
+				peaks, properties = find_peaks(intensity_fit, height=height, distance=distance, prominence=prominence)
+				if len(peaks) >= 2:
+					# Sort peaks by height and pick the top two
+					sorted_indices = np.argsort(properties['peak_heights'])[-2:]
+					peak_positions = theta_fit[peaks][sorted_indices]
+					peak_heights = properties['peak_heights'][sorted_indices]
+					if peak_positions[0] > peak_positions[1]:
+						amp2, cen2 = peak_heights[0], peak_positions[0]
+						amp1, cen1 = peak_heights[1], peak_positions[1]
+					else:
+						amp1, cen1 = peak_heights[0], peak_positions[0]
+						amp2, cen2 = peak_heights[1], peak_positions[1]
+					# Estimate sigma using the width of the peaks at half height
+					sigma1 = 0.1/2.355
+					sigma2 = 0.1/2.355
+					pars = model.make_params(amp1=amp1, cen1=cen1, sigma1=sigma1, eta1=0.5, amp2=amp2, cen2=cen2, sigma2=sigma2, eta2=0.5)
+			else:
+				pars['eta1'].value = 0.5
+				pars['eta2'].value = 0.5
+
+			pars['cen1'].min, pars['cen1'].max = interval[0], interval[1]
+			pars['cen2'].min, pars['cen2'].max = interval[0], interval[1]
+
+			pars['eta1'].min, pars['eta1'].max = 0.0, 1.0
+			pars['eta2'].min, pars['eta2'].max = 0.0, 1.0
+   
 			background = LinearModel(prefix='bkg_')
 			pars.update(background.guess(data=intensity_fit, x = theta_fit))
 			model += background		
 
-			out = model.fit(intensity_fit, pars, x=theta_fit) # Fitting the data to the Voigt model #
+			out = model.fit(intensity_fit, pars, x=theta_fit) 
 			comps = out.eval_components(x=theta_fit)
-			
-  # Getting the parameters from the optimal fit #, bkg= self.bkg_model
+			print(f"Fit report for XRD #{id[0]} - {id[1]}°C", out.fit_report(), sep='\n')
+  
 			
 			dois_theta_0 = [out.params['cen1']*1, out.params['cen2']*1]
 			fwhm = [2.0*out.params['sigma1'], 2.0*out.params['sigma2']]
@@ -385,7 +392,11 @@ def peak_fit_split_gaussian(theta, intensity, interval, bkg = 'Linear', height=1
 			r_squared = out.rsquared
 			done = True
 			return dois_theta_0, fwhm, area, r_squared, out, comps, theta_fit, out.params
-		except ValueError or TypeError as e:
+		except ValueError as e:
+			print(f'Fitting error, please wait: {e}! Please select a new fitting interval')
+			done = True
+			pass
+		except TypeError as e:
 			print(f'Fitting error, please wait: {e}! Please select a new fitting interval')
 			done = True
 			pass
