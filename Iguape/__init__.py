@@ -6,5 +6,5 @@ This is the main script for the excution of the Paineira Graphical User Interfac
 In this script, both GUIs used by the program are called and all of the backend functions and processes are defined. 
 """
 
-__version__ = '1.2.5'
+__version__ = '1.2.6'
 license  = 'GNU GPL-3.0 License'

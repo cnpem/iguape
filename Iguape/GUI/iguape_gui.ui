@@ -706,6 +706,11 @@
                  <string>CenteredNorm</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>LinearNorm</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item row="0" column="2">
@@ -813,7 +818,7 @@
      <x>0</x>
      <y>0</y>
      <width>1160</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFolder">
