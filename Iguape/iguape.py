@@ -290,7 +290,8 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def _update_main_figure(self):
-        """_summary_
+        """
+        Routine to update XRD Data Tab graph. This calls other methods such as update_colormap and plots the selected XRD measures in the main figure.  
         """        
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
@@ -336,7 +337,8 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def _plot_fitting_parameters(self):
-        """_summary_
+        """
+        This method calls :py:meth:`Window._plot_single_peak` or :py:meth:`Window._plot_double_peak`, according to the profile model selected.
         """
         if not self.fit_interval:
             return
@@ -412,18 +414,18 @@ class Window(QMainWindow, Ui_MainWindow):
             self._plot_parameter(self.ax_FWHM, self.monitor.fit_data[x_data_type].values, self.monitor.fit_data['fwhm_#2'].values, self.props_dict["Peak Fit Axis"]["FWHM Axis"]["Y_Label"], x_label, label = True, color='blue', marker='x')
 
     def _plot_parameter(self, ax, x, y, ylabel, xlabel, label=None, color=None, marker='o', yerr = None):
-        """_summary_
-
+        """
+        Generic routine to plot xy data in a given axes.
         Args:
-            ax (_type_): _description_
-            x (_type_): _description_
-            y (_type_): _description_
-            ylabel (_type_): _description_
-            xlabel (_type_): _description_
-            label (_type_, optional): _description_. Defaults to None.
-            color (_type_, optional): _description_. Defaults to None.
-            marker (str, optional): _description_. Defaults to 'o'.
-            yerr (_type_, optional): _description_. Defaults to None.
+            ax (matplotlib.axes.Axes): A matplotlib Axes object
+            x (list): x-axis data
+            y (list): y-axis data
+            ylabel (str): y-axis label
+            xlabel (str): x-axis label
+            label (bool, optional): Displays label. Accepts True or False. Defaults to None.
+            color (str, optional): matplotlib color. Defaults to None.
+            marker (str, optional): matplotlib marker. Defaults to 'o'.
+            yerr (list, optional): y-axis error. Defaults to None.
         """
         
         for i in range(len(x)):
@@ -439,7 +441,8 @@ class Window(QMainWindow, Ui_MainWindow):
             ax.legend(handles = [peak1, peak2])
 
     def select_folder(self):
-        """_summary_
+        """
+        Method for selecting a folder conatining the XRD data. In order for IGUAPE to read and monitor the folder, the file iguape_filelist.txt must be present.
         """        
         folder_path = QFileDialog.getExistingDirectory(self, 'Select the data folder to monitor', '', options=QFileDialog.Options()) # Selection of monitoring folder
         if folder_path == "":
@@ -483,7 +486,7 @@ class Window(QMainWindow, Ui_MainWindow):
         """_summary_
 
         Args:
-            new_data (_type_): _description_
+            new_data (pd.DataFrame): pandas DataFrame to be concatenated with the existing one
         """        
         self.plot_data = pd.concat([self.plot_data, new_data], ignore_index=True)
         
@@ -491,8 +494,8 @@ class Window(QMainWindow, Ui_MainWindow):
         """_summary_
 
         Args:
-            xmin (_type_): _description_
-            xmax (_type_): _description_
+            xmin (float): minimum 2theta value of the interval selected in the XRD Data graph 
+            xmax (float): maximum 2theta value of the interval selected in the XRD Data graph
         """
         if not self.monitor:
             return
@@ -500,13 +503,13 @@ class Window(QMainWindow, Ui_MainWindow):
         self.update_graphs()
     # Reset button function #     
     def reset_interval(self):
-        """_summary_
+        """Method for resetting the 2theta interval in the XRD Data graph to None 
         """        
         self.selected_interval = None
         self.update_graphs()
     # Peak fit interval selection routine # 
     def select_fit_interval(self):
-        """_summary_
+        """Method for initializing the FitWindow class. This Window has the elements that control the fitting parameters.
         """        
         if not self.folder_selected:
             QMessageBox.warning(self, '','Please initialize the monitor!')
@@ -531,7 +534,7 @@ class Window(QMainWindow, Ui_MainWindow):
     
 
     def export_figure(self):
-        """_summary_
+        """Method for initializing the ExportWindow class. This Window has the elements that control the fitting parameters.
         """        
         tab_dict = {0: self.fig_main, 1: self.fig_sub, 2: self.fig_contour, 3: self.fig_norm}
         cur_index = self.tabWidget.currentIndex()
@@ -543,7 +546,7 @@ class Window(QMainWindow, Ui_MainWindow):
         """_summary_
 
         Args:
-            event (_type_): _description_
+            event (str): matplotlib FigureCanvas event.
         """        
         self.canvas_main.mouse_event = event
         x, y = event.xdata, event.ydata
@@ -582,7 +585,7 @@ class Window(QMainWindow, Ui_MainWindow):
                 self.toolbar.set_message("")
         
     def save_data_frame(self):
-        """_summary_
+        """This method calls two hidden method that generates the DataFrame to be saved. It also writes comments ("#") on the top of the csv file.
         """        
         try:
             options = QFileDialog.Options()
@@ -608,10 +611,9 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f'Exception {e} encountered')
 
     def _create_single_peak_dataframe(self):
-        """_summary_
-
+        """Method for creating a DataFrame with the results of a PseudoVoigt peak fitting.
         Returns:
-            _type_: _description_
+            pd.DataFrame: pandas DataFrame with fitting parameters from a PseudoVoigt single peak fit.
         """        
         if self.plot_with_temp:
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
@@ -638,10 +640,9 @@ class Window(QMainWindow, Ui_MainWindow):
         })
 
     def _create_double_peak_dataframe(self):
-        """_summary_
-
+        """Method for creating a DataFrame with the results of a Split-PseudoVoigt peak fitting.
         Returns:
-            _type_: _description_
+            pd.DataFrame: pandas DataFrame with fitting parameters from a Split-PseudoVoigt peak fit.
         """        
         if self.plot_with_temp:
             temp_label = 'Cryojet Temperature (K)' if self.monitor.kelvin_sginal else 'Temperature (°C)'
@@ -680,52 +681,31 @@ class Window(QMainWindow, Ui_MainWindow):
         })
 
     def validate_temp(self, min_value, max_value):
-        """_summary_
+        """Method for validating the temperature value entered in the temperature QDoubleSpinBox. It returns the closest available temperature from the Monitor's DataFrame
 
         Args:
-            min_value (_type_): _description_
-            max_value (_type_): _description_
+            min_value (float): Minimum temperature 
+            max_value (float): Maximum temperature
 
         Returns:
-            _type_: _description_
+            tuple: (min_temp, max_temp) tuple with the closest min/max available temperature  
         """        
         min_temp = min(self.monitor.data_frame['temp'], key=lambda x: abs(x-min_value))
         max_temp = min(self.monitor.data_frame['temp'], key=lambda x: abs(x-max_value))
         return min_temp, max_temp
     
     def apply_temp_mask(self, mask):
-        """_summary_
+        """Method for applying a temperature mask in the XRD measures.
 
         Args:
             mask (_type_): _description_
         """        
-        def a():
-            try:
-                if self.plot_with_temp:
-                    min_temp, max_temp = self.validate_temp(self.min_temp_doubleSpinBox.value(), self.max_temp_doubleSpinBox.value())
-                    self.temp_mask = (self.monitor.data_frame['temp'] >= min_temp) & (self.monitor.data_frame['temp'] <= max_temp)
-                else:
-                    self.temp_mask = (self.monitor.data_frame['file_index'] >= self.min_temp_doubleSpinBox.value()) & (self.monitor.data_frame['file_index'] <= self.max_temp_doubleSpinBox.value())
-                self.temp_mask_signal = True
-                QApplication.setOverrideCursor(Qt.WaitCursor)
-                self.ax_main.clear()
-                self._update_main_figure()
-                QApplication.restoreOverrideCursor()
-                self.canvas_main.draw()
-                
-            except AttributeError as e:
-                print(f"No data available! Please, initialize the monitor! Error: {e}")
-                QMessageBox.warning(self, '','Please initialize the monitor!')
-            except Exception as e:
-                print(f'Exception {e} encountered')
         self.temp_mask = np.array(mask)
         
         
         self.temp_mask_signal = True
-        #QApplication.setOverrideCursor(Qt.WaitCursor)
         self.ax_main.clear()
         self.update_graphs()
-        #QApplication.restoreOverrideCursor()
         self.canvas_main.draw()
 
     def measure_order_index(self, checked):
