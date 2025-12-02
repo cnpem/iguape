@@ -364,7 +364,7 @@ class Window(QMainWindow, Ui_MainWindow):
        # self.cax_2.update_normal(self.sm)
         
     def _plot_single_peak(self):
-        """_summary_
+        """Hidden method to call :py:meth:`Window._plot_parameter` in order to plot fitting parameters of a single peak.
         """        
         
         mask = self.temp_mask if self.temp_mask_signal else slice(None)
@@ -384,7 +384,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         
     def _plot_double_peak(self):
-        """_summary_
+        """Hidden method to call :py:meth:`Window._plot_parameter` in order to plot fitting parameters of a double peak.
         """        
         
         mask = self.temp_mask if self.temp_mask_signal else slice(None)
@@ -483,7 +483,7 @@ class Window(QMainWindow, Ui_MainWindow):
             
 
     def handle_new_data(self, new_data):
-        """_summary_
+        """This method is connected to the signal emited by :py:class:`Iguape.Monitor.FolderMonitor`, which delivers a pd.DataFrame containing the XDR data.
 
         Args:
             new_data (pd.DataFrame): pandas DataFrame to be concatenated with the existing one
@@ -491,7 +491,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.plot_data = pd.concat([self.plot_data, new_data], ignore_index=True)
         
     def onselect(self, xmin, xmax):
-        """_summary_
+        """This method is passed as argument for the SpanSelector in the XRD Data Tab Graph.
+        It sets the selected interval for visualization based on the min/max value received for 2theta.
 
         Args:
             xmin (float): minimum 2theta value of the interval selected in the XRD Data graph 
@@ -543,7 +544,7 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def on_mouse_move(self, event):
-        """_summary_
+        """This method is connected to the canvas in the XRD Data Tab graph. It shows the temperature/index of the closest XRD difractogram.
 
         Args:
             event (str): matplotlib FigureCanvas event.
@@ -696,9 +697,9 @@ class Window(QMainWindow, Ui_MainWindow):
     
     def apply_temp_mask(self, mask):
         """Method for applying a temperature mask in the XRD measures.
-
+        Recieves an array of booleans. The array has a length equal to the number of XRD data read by the :py:class:`Iguape.Monitor.FolderMonitor`.
         Args:
-            mask (_type_): _description_
+            mask (np.array): numpy array with booleans as entries
         """        
         self.temp_mask = np.array(mask)
         
@@ -709,10 +710,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.canvas_main.draw()
 
     def measure_order_index(self, checked):
-        """_summary_
+        """Method connected to the measure order QCheckBox. This method will change the colormaps that identify the XRD data.
+        All of the Figures are updated accordingly.
 
         Args:
-            checked (_type_): _description_
+            checked (bool): True or False
         """        
         if checked:
             self.temperature_checkbox.setCheckState(False)
@@ -733,10 +735,11 @@ class Window(QMainWindow, Ui_MainWindow):
             self.temperature_checkbox.setCheckable(True)
 
     def temp_index(self, checked):
-        """_summary_
+        """Method connected to the measure order QCheckBox. This method will change the colormaps that identify the XRD data.
+        All of the Figures are updated accordingly.
 
         Args:
-            checked (_type_): _description_
+            checked (bool): True or False
         """        
         try:
             if checked:
@@ -769,14 +772,15 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(self, '','Please initialize the monitor!')     
     
     def read_data(self, path, normalize = False, Q = False):
-        """_summary_
+        """Reads the XRD data using pandas *read_csv* function. 
+        Comments are identified by "#" and the header is identified by the first line.
 
         Args:
-            path (_type_): _description_
-            normalize (bool, optional): _description_. Defaults to False.
-
+            path (str): 
+            normalize (bool, optional): If True the XRD intensities will be normalized. Defaults to False.
+            Q (bool, optional): If True the XRD x-axis will be converted from 2theta to the scattering vector Q. Defaults to False.
         Returns:
-            _type_: _description_
+            (theta, intensity): 2theta and Intensity numpy arrays read from the XRD data.
         """        
         data = pd.read_csv(path, sep = ',', header=0, comment="#")
         theta = np.array(data.iloc[:, 0], dtype="float64")
@@ -788,7 +792,7 @@ class Window(QMainWindow, Ui_MainWindow):
         return theta, intensity
     
     def normalize(self):
-        """_summary_
+        """Draws an intensities normalized plot at the Normalization Plot Tab graph.
         """        
         try:
             self.ax_norm.clear()
@@ -819,7 +823,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f"Error: {e}")
     
     def contour(self):
-        """_summary_
+        """Draws a contour plot at the Contour Plot Tab graph.
         """        
         if not self.monitor:
             return
@@ -856,10 +860,10 @@ class Window(QMainWindow, Ui_MainWindow):
             print(f"Error: {e}")
     
     def on_change_color_pallete(self, index):
-        """_summary_
+        """Sets the current item in the QComboBox.
 
         Args:
-            index (_type_): _description_
+            index (int): Integer representing the index of item in the Color pallete QComboBox.
         """        
         if not self.monitor:
             return
@@ -868,7 +872,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.update_graphs()
 
     def apply_filter(self):
-        """_summary_
+        """Initializes the :py:class:`FilterWindow` class.
         """
         if not self.monitor:
             return       
@@ -880,6 +884,10 @@ class Window(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(self, "No folder was selected", "Select a folder to monitor!")
 
     def on_toggle_Q_vector_action(self):
+        """
+        This is triggred when the Q vector visualization option is selected by the user.
+        This renders a QDialog for user input of the wavelength and than updates the graphs to plot as function of Q.
+        """        
         dialog = QInputDialog()
         dialog.setInputMode(QInputDialog.DoubleInput)
         dialog.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
@@ -908,6 +916,10 @@ class Window(QMainWindow, Ui_MainWindow):
         #self.update_graphs()
 
     def on_toggle_2theta_action(self):
+        """
+        This is triggred when the 2theta visualization option is selected by the user.
+        This is the default visualization mode. The method updates the graphs to plot as function of 2theta.
+        """        
         self.actionQ_Vector.setChecked(False)
         self.action2theta.setChecked(True)
         self.props_dict["Main Axis"]["X_Label"] = "2θ (°)"
@@ -918,7 +930,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Q_vector_state = False
 
     def on_change_vline_checkbox(self):
-        """_summary_
+        """This method enables a Vertical Line cursor in the XRD Data Tab Figure. 
         """        
         
         if self.cursor == None:
@@ -927,7 +939,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.cursor = None
     
     def about(self):
-        """_summary_
+        """Initializes a QMessageBox with some info on IGUAPE.
         """        
         QMessageBox.about(
             self,
@@ -940,45 +952,46 @@ class Window(QMainWindow, Ui_MainWindow):
         )
 
 class GarbageCollector(QThread):
-    """_summary_
+    """Garbage Collector class. Inherits a QThread and calls, every 3 seconds, the collect method of python's garbage collector.
+    The matpltolib Figures are updated using **for loops**. This consumes a lot of RAM memory. This method frees up some memory space.
 
     Args:
-        QThread (_type_): _description_
+        QThread (QThread): QThread class from PyQt5
     """    
     def __init__(self):
-        """_summary_
+        """Constructor
         """        
         super().__init__()
         
     def run(self):
-        """_summary_
+        """Calls the collect method from python's Garbage Collector every 3 seconds.
         """        
         while True:
             gc.collect()
             time.sleep(3)
 
 class Worker(QThread):
-    """_summary_
-
+    """QThread that performs peak fitting in the selected XRD data.
     Args:
-        QThread (_type_): _description_
+        QThread (QThread): QThread class from PyQt5
     """    
     progress = pyqtSignal(int)
     finished = pyqtSignal(float) 
     error = pyqtSignal(str) # Changed to emit multiple arrays
 
     def __init__(self, interval):
-        """_summary_
+        r"""Constructor for the peak fitting thread.
 
         Args:
-            interval (_type_): _description_
+            interval (list): List in the form [:math:`2\theta_{i}`, :math:`2\theta_{f}`] where :math:`2\theta_{i}` and :math:`2\theta_{f}` are, respectively,
+            the initial and final values of the 2theta interval selected to perfor peak fitting.
         """    
         super().__init__()
         self.fit_interval = interval
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
     def run(self):
-        """_summary_
+        r"""Performs peak fitting in the selected XRD data in the selected 2theta interval [:math:`2\theta_{i}`, :math:`2\theta_{f}`]
         """        
         
         try:
@@ -1023,16 +1036,17 @@ class FilterWindow(QDialog, Ui_Filter_Dialog):
     """_summary_
 
     Args:
-        QDialog (_type_): _description_
-        Ui_Filter_Dialog (_type_): _description_
+        QDialog (QDialog): QDialog class from PyQt5
+        Ui_Filter_Dialog (QDialog): Custom QDialog class made from QtDesigner
     """    
     mask = pyqtSignal(list)
     def __init__(self, data = None, kelvin_signal = None, parent = None):
-        """_summary_
+        """Constructor
+        This method will initialize the QDialog and render a QListView() in the QDialog Window.
 
         Args:
-            data (_type_, optional): _description_. Defaults to None.
-            kelvin_signal (_type_, optional): _description_. Defaults to None.
+            data (pd.DataFrame, optional): *pandas DataFrame* containing the names of the XRD data files. Defaults to None.
+            kelvin_signal (Bool, optional): Defines if the temperature unit is K or °C. Defaults to None.
             parent (_type_, optional): _description_. Defaults to None.
         """        
         super().__init__(parent)
@@ -1057,28 +1071,28 @@ class FilterWindow(QDialog, Ui_Filter_Dialog):
         
         
     def setup_df(self):
-        """_summary_
+        """Initializes the data as unchecked
         """        
         checked = np.full_like(np.array(self.data.iloc[:, 0]), False)
         self.data['checked'] = checked
         return
     
     def set_state_checked(self):
-        """_summary_
+        """Sets the state of a given item as checked
         """        
         for row in range(self.model.rowCount()):
             index = self.model.index(row)
             self.model.setData(index, Qt.Checked, role=Qt.CheckStateRole)
     
     def set_state_unchecked(self):
-        """_summary_
+        """Sets the state of a given item as unchecked
         """        
         for row in range(self.model.rowCount()):
             index = self.model.index(row)
             self.model.setData(index, Qt.Unchecked, role=Qt.CheckStateRole)
     
     def set_state_selected(self):
-        """_summary_
+        """Sets the state of a given item as selected
         """        
         selected = self.list.selectedIndexes()
         for index in selected:
@@ -1086,7 +1100,7 @@ class FilterWindow(QDialog, Ui_Filter_Dialog):
 
 
     def apply(self):
-        """_summary_
+        """Send the maks to IGUAPE's main Window
         """        
         if True in list(self.model._data.iloc[:, -1]):
             self.mask.emit(list(self.model._data.iloc[:, -1]))
@@ -1097,24 +1111,24 @@ class FilterWindow(QDialog, Ui_Filter_Dialog):
 
 
 class CustomListViewModel(QAbstractListModel):
-    """_summary_
+    """Custom QListView made to display the data correctly.
 
     Args:
-        QAbstractListModel (_type_): _description_
+        QAbstractListModel (QAbstractListModel): QAbstractListModel from PyQt5
     """    
     def __init__(self, data = None, unit = None):
-        """_summary_
+        """Constructor
 
         Args:
-            data (_type_, optional): _description_. Defaults to None.
-            unit (_type_, optional): _description_. Defaults to None.
+            data (pd.DataFrame, optional): *pandas DataFrame* containing the names of the XRD data files. Defaults to None.. Defaults to None.
+            unit (str, optional): Temperature unit. Defaults to None.
         """        
         super().__init__()
         self._data = data.copy()
         self.unit = unit
 
     def rowCount(self, parent=QModelIndex()):
-        """_summary_
+        """Return the length of the *pandas DataFrame*, i.e. the number of columns.
 
         Args:
             parent (_type_, optional): _description_. Defaults to QModelIndex().
@@ -1125,14 +1139,14 @@ class CustomListViewModel(QAbstractListModel):
         return len(self._data)
 
     def data(self, index, role=Qt.DisplayRole):
-        """_summary_
+        """
 
         Args:
-            index (_type_): _description_
-            role (_type_, optional): _description_. Defaults to Qt.DisplayRole.
+            index (QModelIndex): PyQt5 index for each item
+            role (Qt.DisplayRolde, optional): PyQt5 Display Role for each item
 
         Returns:
-            _type_: _description_
+            QVariant:
         """        
         if not index.isValid():
             return QVariant()
@@ -1146,15 +1160,15 @@ class CustomListViewModel(QAbstractListModel):
         return QVariant()
 
     def setData(self, index, value, role=Qt.EditRole):
-        """_summary_
+        """Changes the status of an item
 
         Args:
-            index (_type_): _description_
-            value (_type_): _description_
-            role (_type_, optional): _description_. Defaults to Qt.EditRole.
+            index (QIndexModel): PyQt5 index for each item
+            value (Qt.CheckState): PyQt5 CheckState of the item
+            role (Qt.EditRole, optional): Defaults to Qt.EditRole.
 
         Returns:
-            _type_: _description_
+            Bool: 
         """        
         if not index.isValid():
             return False
@@ -1167,10 +1181,10 @@ class CustomListViewModel(QAbstractListModel):
         return False
 
     def flags(self, index):
-        """_summary_
+        """Defines the properties of each item
 
         Args:
-            index (_type_): _description_
+            index (QIndexModel): PyQt5 index for each item
 
         Returns:
             _type_: _description_
@@ -1180,18 +1194,18 @@ class CustomListViewModel(QAbstractListModel):
 
 
 class ExportWindow(QDialog, Ui_Export_Figure):
-    """_summary_
+    """Custom QDialog for managing Figure export.
 
     Args:
-        QDialog (_type_): _description_
-        Ui_Export_Figure (_type_): _description_
+        QDialog (QDialog): QDialog class from PyQt5
+        Ui_Export_Figure (_type_): Custom QDialog mode with QDesigner
     """    
     def __init__(self, figure: Figure, parent=None):
-        """_summary_
+        """Constructor
 
         Args:
-            figure (_type_): _description_
-            parent (_type_, optional): _description_. Defaults to None.
+            figure (matplotlib.figure.Figure): *matplotlib* Figure class
+            parent (_type_, optional): Defaults to None.
         """        
         super().__init__(parent)
         self.setupUi(self)
@@ -1241,7 +1255,7 @@ class ExportWindow(QDialog, Ui_Export_Figure):
                      'style': 'normal',
                     }
     def get_color(self):
-        """_summary_
+        """Gets the color selected with QColorDialog and sets the button color to it.
         """        
         color = QColorDialog().getColor()
         if color.isValid():
@@ -1251,38 +1265,38 @@ class ExportWindow(QDialog, Ui_Export_Figure):
     
     
     def on_change_font_comboBox(self, font):
-        """_summary_
-
+        """Changes the label and tick font.
+        
         Args:
-            font (_type_): _description_
+            font (str): Font for label and ticks
         """        
         self.label_font['family'] = font
         self.tick_font['family'] = font
         return
     
     def on_change_label_size_spinBox(self, value):
-        """_summary_
+        """Changes the label font size
 
         Args:
-            value (_type_): _description_
+            value (int): Font size
         """        
         self.label_font['size'] = value
         return
 
     def on_change_tick_size_spinBox(self, value):
-        """_summary_
+        """Changes the tick font size
 
         Args:
-            value (_type_): _description_
+            value (int): Font size
         """        
         self.tick_font['size'] = value
         return
 
     def on_change_label_style_comboBox(self, style):
-        """_summary_
-
+        """Changes the label style
+        
         Args:
-            style (_type_): _description_
+            style (str): Label style (italic/bold/normal)
         """        
         if style == 'bold':
             self.label_font['weight'] = style
@@ -1291,10 +1305,10 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         return
 
     def on_change_tick_style_comboBox(self, style):
-        """_summary_
+        """Changes the tick style
 
         Args:
-            style (_type_): _description_
+            style (str): Tick style (italic/bold/normal)
         """        
         if style == 'bold':
             self.tick_font['weight'] = style
@@ -1304,7 +1318,7 @@ class ExportWindow(QDialog, Ui_Export_Figure):
     
 
     def redraw_fig(self):
-        """_summary_
+        """Redraws the Figure according to the changes made by the user.
         """        
         
         try:
@@ -1349,7 +1363,7 @@ class ExportWindow(QDialog, Ui_Export_Figure):
         return
     
     def save_fig(self):
-        """_summary_
+        """Saves the Figure according to the chosen format.
         """        
         path = QFileDialog.getSaveFileName(self, "Select Save Path", os.path.expanduser('~'), options=QFileDialog.Options())[0]
         if path == "":
@@ -1371,17 +1385,17 @@ class ExportWindow(QDialog, Ui_Export_Figure):
             
 
 class FitWindow(QDialog, Ui_pk_window):
-    """_summary_
+    """QDialog Window to manage the Peak Fitting options.
 
     Args:
-        QDialog (_type_): _description_
-        Ui_pk_window (_type_): _description_
+        QDialog (QDialog): QDialog from PyQt5
+        Ui_pk_window (QDialog): Custom QDialog made with QDesigner
     """    
     def __init__(self, parent=None):
-        """_summary_
+        """Constructor
 
         Args:
-            parent (_type_, optional): _description_. Defaults to None.
+            parent (optional): Defaults to None.
         """        
         
         super().__init__(parent)
@@ -1396,7 +1410,7 @@ class FitWindow(QDialog, Ui_pk_window):
         self.setup_layout()
 
     def setup_layout(self):
-        """_summary_
+        """Setup the figures layout and connects the widgets to its functions.
         """        
         self.setWindowTitle('Peak Fit')
         self.pk_layout = QVBoxLayout()
@@ -1446,10 +1460,10 @@ class FitWindow(QDialog, Ui_pk_window):
         self.prominence_spinBox.valueChanged[int].connect(self.onChanged_prominence_spinbox)
 
     def onChanged_xrd_combo_box(self, text):
-        """_summary_
+        """Adds a new XRD difractogram to the Figure. If there's already two plotted, it will ask to user to clear the canvas.
 
         Args:
-            text (_type_): _description_
+            text (str): Text from the QComboBox. It identifies the XRD data.
         """        
 
         self.text = text
@@ -1474,11 +1488,7 @@ class FitWindow(QDialog, Ui_pk_window):
             self.canvas.draw()
     
     def onChanged_pk_combo_box(self, text):
-        """_summary_
-
-        Args:
-            text (_type_): _description_
-        """        """
+        """
         Routine for selecting the Peak Fitting Model via the ComboBox.
         
         Parameters 
@@ -1500,7 +1510,7 @@ class FitWindow(QDialog, Ui_pk_window):
             self.prominence_spinBox.setReadOnly(False)
 
     def onChanged_bkg_combo_box(self, text):
-        """_summary_
+        """Changes the Background model. Currently only Linear model is applied.
 
         Args:
             text (_type_): _description_
@@ -1512,11 +1522,11 @@ class FitWindow(QDialog, Ui_pk_window):
             self.bkg_model = 'Spline'
 
     def onselect(self, xmin, xmax):
-        """_summary_
+        """Sets the selected fit interval as [xmin, xmax]. It also draws a rectangle spaning the interval (axvspan)
 
         Args:
-            xmin (_type_): _description_
-            xmax (_type_): _description_
+            xmin (float): Lower bound of the interval
+            xmax (flat): Upper bound of the interval
         """        
         if self.shade:
             self.shade.remove()
@@ -1526,38 +1536,38 @@ class FitWindow(QDialog, Ui_pk_window):
         self.canvas.draw()
         
     def onChanged_distance_spinbox(self, value):
-        """_summary_
+        """Sets the distance to value. Only valid for Spli PseudoVoigt model
 
         Args:
-            value (_type_): _description_
+            value (int): Minimum distance (in experimental points) between peaks.
         """        
         self.distance = value
 
     def onChanged_height_spinbox(self, value):
-        """_summary_
+        """Sets the height to value (x1e09). Only valid for Spli PseudoVoigt model
 
         Args:
-            value (_type_): _description_
+            value (float): Minimum height of peaks. This float is multiplied by 1e09.
         """        
         self.height = value*(1e+09)
     
     def onChanged_prominence_spinbox(self, value):
-        """_summary_
+        """Sets the prominence to value. Only valid for Spli PseudoVoigt model
 
         Args:
-            value (_type_): _description_
+            value (int): Prominence of peaks. Prominence is the difference between the maximum value of the peak and the background of the measure.
         """        
         self.prominence = value
 
     def clear_plot(self):
-        """_summary_
+        """Clears the Figure
         """
         self.ax.clear()
         self.canvas.draw()
         self.indexes.clear()
 
     def preview(self):
-        """_summary_
+        """Displays a preview of the Peak Fit in the Figure.
         """
         if self.fit_interval == None:
             return  
@@ -1605,7 +1615,7 @@ class FitWindow(QDialog, Ui_pk_window):
                     QMessageBox.warning(self, '', 'One or more peak parameters have reached a boundary value! Please check IGUAPE terimnal window for a fit report!')
 
     def fit(self):
-        """_summary_
+        """Performs the fit, with the model, interval and data selected in the XRD Data Tab.
         """        
         if not self.fit_interval:
             return
@@ -1629,19 +1639,19 @@ class FitWindow(QDialog, Ui_pk_window):
         self.worker.start()
 
     def update_progress(self, value):
-        """_summary_
+        """Updates the QProgressDialog with a percentage progress
 
         Args:
-            value (_type_): _description_
+            value (int): Progress percentage
         """        
 
         self.progress_dialog.setValue(value)
 
     def peak_fitting_finished(self, time):
-        """_summary_
+        """Shows QMessageBox when Peak Fitting is done.
 
         Args:
-            time (_type_): _description_
+            time (float): Time spent during Peak Fit 
         """        
 
         self.progress_dialog.setValue(100)
@@ -1651,10 +1661,10 @@ class FitWindow(QDialog, Ui_pk_window):
         self.close()
 
     def peak_fitting_error(self, error_message):
-        """_summary_
+        """Shows QMessageBox if there's been an error during peak fitting.
 
         Args:
-            error_message (_type_): _description_
+            error_message (str): Error message
         """        
         self.progress_dialog.cancel()
         QMessageBox.warning(self, "Peak Fitting Error", error_message)
