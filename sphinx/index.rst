@@ -3,10 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Iguape - Paineira Graphical User Interface documentation
+IGUAPE - Paineira Graphical User Interface for Kinetic Experiments
 ========================================================
-This page is serves as a a documentation and tutorial for Iguape. This program was desinged to read data acquired at Paineira, and does not support data from other sources. 
-However, it is possible to change the Monitor class, found in the soruce code, to support other data sources. 
+This is the documentation web page for IGUAPE, the Paineira Graphical User Interface for Kinetic Experiments. 
+The software was developed to provide a friendly and easy way for PAINEIRA (PNR) users to visualize and make qualitative data treatment
+of Powder X-ray Diffraction (PXRD) data acquired during *in situ* experiments.\n
+During this type of experiments, hundreds of PXRD data are generated. Visualization and data treatment are not straight forward with such a volume of data.
+IGUAPE provides a Graphical User Interface (GUI), associated with a python backend, that can read the large volume of data produced at PNR.
+The software was developed to read data acquired at Paineira, and does not support data from other sources. However, it is possible to change the Monitor class, found in the soruce code, to support other data sources.
+
+In this web page you'll find the documentation for IGUAPE's source code and a brief tutorial showcasing the software's capabilities.
+
 Beware that this program is under the GNU General Public License v3.0, and any changes made to the source code must be shared with the community. 
 
 You can find the source code for Iguape at the CNPEM GitHub Page: `Iguape Source Code <https://github.com/cnpem/iguape>`_
@@ -36,7 +43,7 @@ Biondo Neto, J. L., Cintra Mauricio, J. & Rodella, C. B. (2025). \n J. Appl. Cry
       keywords = {open-source software, <it>IGUAPE</it>, X-ray diffraction, XRD, PAINEIRA beamline, <it>in situ</it> experiments},
    }
 
-
+The software is currently maintained by one person, so please be patient with bug fixes and implementation requests. If you find yourself in need of help, reach out at joao.neto@lnls.br.
 
 .. toctree::
    :maxdepth: 2

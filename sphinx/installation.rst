@@ -29,7 +29,7 @@ To verify the installation, you can run:
 
    iguape
 
-It's always better to setup a python environment before installing any package. I you are familiar with Anaconda, you can create a conda environment (with python 3.10 or higher)
+It's always better to setup a python environment before installing any package. If you are familiar with Anaconda, you can create a conda environment (with python 3.10 or higher)
 and then install iguape via pip.
 
 .. code-block:: bash
@@ -66,7 +66,7 @@ To install Iguape on Windows, ensure you have **Python 3.10** or higher:
 
 Once Python 3.10 is set up, download the installer for Iguape from the following link:
 
-- `Windows Installer <https://github.com/cnpem/iguape/releases/download/v1.2.2/IGUAPE_installer_v122.exe>`_
+- `Windows Installer <https://github.com/cnpem/iguape/releases/>`_
 
 After downloading, double-click the installer and follow the on-screen instructions.
 

@@ -1,14 +1,6 @@
 Iguape package
 ==============
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   Iguape.GUI
-
 Submodules
 ----------
 
