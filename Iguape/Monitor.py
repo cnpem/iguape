@@ -267,11 +267,12 @@ def pseudo_voigt(x, amplitude, center, sigma, eta):
 	Notes
 	-----
 	The PseudoVoigt function is defined as:
-	.. math::
+		.. math::
 			PV(x; A, \mu, \sigma, \eta) = \eta L(x; A, \mu, \sigma) + (1 - \eta) G(x; A, \mu, \sigma)
-			where:
-			- L(x; A, \mu, \sigma) is the Lorentzian function
-			- G(x; A, \mu, \sigma) is the Gaussian function
+		.. math::
+			L(x; A, \mu, \sigma) = \frac{A}{\pi} \left[ \frac{\sigma}{(x-\mu)^2 + \sigma^{2}} \right]
+		.. math::
+			G(x; A, \mu, \sigma) = \frac{A}{\sigma\sqrt{2\pi}}e^{\left[ \frac{-(x - \mu)^{2}}{2\sigma^{2}} \right]}
 	"""
 	sigma_g = sigma/math.sqrt(2*math.log(2))
 	gaussian = (amplitude/(sigma_g*math.sqrt(2*math.pi)))*np.exp(-(x-center)**2/(2*sigma_g** 2))
@@ -282,29 +283,32 @@ def split_pseudo_voigt(x, amp1, cen1, sigma1, eta1, amp2, cen2, sigma2, eta2):
 	r"""
 	Split PseudoVoigt function, a linear combination of two PseudoVoigt functions.
 
-	Parameters
-	----------
-		x (np.array): 2theta array.
-		amp1 (float): Peak amplitude for the first peak.
-		cen1 (float): Peak center for the first peak.
-		sigma1 (float): Sigma value or standard deviation for the first peak.
-		eta1 (float): Eta value for the first peak (mixing parameter).
-		amp2 (float): Peak amplitude for the second peak.
-		cen2 (float): Peak center for the second peak.
-		sigma2 (float): Sigma value or standard deviation for the second peak.
-		eta2 (float): Eta value for the second peak (mixing parameter).
-	
-	Returns
-	-------
-		np.array: Split PseudoVoigt function.
+	:param x: 2theta array
+	:type x: np.array
+	:param amp1: Peak amplitude for the first peak
+	:type amp1: np.array
+	:param cen1: Peak center for the first peak.
+	:type cen1: float
+	:param sigma1: Sigma value or standard deviation for the first peak.
+	:type sigma1: float
+	:param eta1: Eta value for the first peak (mixing parameter).
+	:type eta1: float
+	:param amp2: Peak amplitude for the second peak.
+	:type amp2: float
+	:param cen2: Peak center for the second peak.
+	:type cen2: float
+	:param sigma2: Sigma value or standard deviation for the second peak.
+	:type sigma2: float
+	:param eta2: Eta value for the second peak (mixing parameter).
+	:type eta2: float
+	:return: Split PseudoVoigt function
+	:rtype: np.array
 
 	Notes
-	-----
-	The Split PseudoVoigt function is defined as:
-		.. math::
-			SPV(x; A1, \mu1, \sigma1, \eta1, A2, \mu2, \sigma2, \eta2) = PV1(x; A1, \mu1, \sigma1, \eta1) + PV2(x; A2, \mu2, \sigma2, \eta2)
-	
-
+		-----
+		The Split PseudoVoigt function is defined as:
+			.. math::
+				SPV(x; A1, \mu1, \sigma1, \eta1, A2, \mu2, \sigma2, \eta2) = PV1(x; A1, \mu1, \sigma1, \eta1) + PV2(x; A2, \mu2, \sigma2, \eta2)
 	"""
 	return (pseudo_voigt(x, amplitude=amp1, center=cen1, sigma=sigma1, eta=eta1) +
 			pseudo_voigt(x, amplitude=amp2, center=cen2, sigma=sigma2, eta=eta2))
@@ -315,25 +319,28 @@ def peak_fit_split_gaussian(theta, intensity, interval, id, bkg = 'Linear', heig
 	Given a set of 2theta and Intensity arrays, it fits the data to the
 	Split PseudoVoigt model and 2theta interval selected. It returns the fitting parameters.
 
-	Parameters
-	----------
-		theta (np.array): 2theta array.
-		intensity (np.array): Intensity array.
-		interval (list): 2theta interval for the peak fitting.
-		bkg (str, optional): Background model. Default is 'Linear'.
-		height (float, optional): Minimum height for the peaks. Default is 1e+09.
-		distance (float, optional): Minimum distance between the peaks. Default is 35.
-	
-	Returns
-	-------
-		dois_theta_0 (list): Peak centers.
-		fwhm (list): Full Width at Half Maximum.
-		area (list): Area under the peaks.
-		r_squared (float): R-squared value of the fit.
-		out (lmfit.ModelResult): ModelResult. Inherited from the lmfit package.
-		comps (dict): Fitting components such as the backgroud and model function. Inherited from the lmfit package.
-		theta_fit (np.array): 2theta array for the fitting interval.
-	"""
+	:param theta: 2theta array.
+	:type theta: np.array
+	:param intensity: Intensity array.
+	:type intensity: np.array
+	:param interval: 2theta interval for the peak fitting
+	:type interval: list
+	:param id: String with the index and temperature of the XRD data.
+	:type id: str
+	:param bkg: Background Model, defaults to 'Linear'
+	:type bkg: str, optional
+	:param height: Minimum height of the peaks, defaults to 1e+09
+	:type height: float, optional
+	:param distance: Minimum distance bewtween the peaks, defaults to 35
+	:type distance: int, optional
+	:param prominence: Minimum prominence of the peaks, defaults to 50
+	:type prominence: int, optional
+	:param pars: Parameters dictionary (as described by lmfit), defaults to None
+	:type pars: dict, optional
+	:return: tuple with fit results
+	:rtype: tuple
+	"""    
+
 	done = False
 	while not done:
 		#time.sleep(0.5)
@@ -402,9 +409,29 @@ def peak_fit_split_gaussian(theta, intensity, interval, id, bkg = 'Linear', heig
 			pass
 
 def normalize_array(array: np.array):
-    return array/np.max(array)
+	"""
+	Normalizes (by the maximum) and array
+
+	:param array: Array to be normalized
+	:type array: np.array
+	:return: Normalized (by maximum) array
+	:rtype: np.array
+	"""
+	return array/np.max(array)
 
 def calculate_q_vector(wavelength: float, two_theta: np.ndarray):
+	r"""
+	Converts 2theta values into Q vector (Scattering vector).
+		.. math::
+			Q = \frac{4\pi}{\lambda} \sin{\theta}
+
+	:param wavelength: wavelength in Angstroms
+	:type wavelength: float
+	:param two_theta: 2theta values array
+	:type two_theta: np.ndarray
+	:return: Q-vector
+	:rtype: Q-vector values array
+	"""
 	return (4 * np.pi / wavelength) * np.sin(np.deg2rad(two_theta / 2))
 
 # --- A counter function to index the created curves --- #
@@ -412,11 +439,9 @@ def counter():
 	"""
 	Counter function. It counts the number of XRD data and returns its index.
 
-	Returns
-	-------
-		int: Index of the XRD data.
+	:return: _Index of the XRD data
+	:rtype: int
 	"""
-
 	counter.count += 1
 	return counter.count
 	

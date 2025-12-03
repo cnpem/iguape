@@ -8,12 +8,14 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../Iguape'))
+sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../Iguape/'))
+#sys.path.insert(0, os.path.abspath('../Iguape/iguape'))
 
-project = 'Iguape - Paineira Graphical User Interface'
-copyright = u'2024, João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella'
+project = 'IGUAPE - Paineira Graphical User Interface'
+#copyright = u'2024, João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella'
 author = 'João Luis Biondo Neto; Junior Cintra Mauricio; Cristiane Barbieri Rodella'
-release = '1.1.0'
+#release = '1.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -50,7 +52,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'sphinx_book_theme'
 html_logo = '_static/Logo_IGUAPE.png'
 pygments_style = 'sphinx'
 html_css_files=['theme_overrides.css',]
