@@ -24,7 +24,9 @@ class Ui_Export_Figure(object):
         self.gridLayout_4 = QtWidgets.QGridLayout(self.frame)
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.groupBox = QtWidgets.QGroupBox(self.frame)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
@@ -78,7 +80,9 @@ class Ui_Export_Figure(object):
         self.label_3.setObjectName("label_3")
         self.gridLayout_2.addWidget(self.label_3, 0, 1, 1, 1)
         self.height_doubleSpinBox = QtWidgets.QDoubleSpinBox(self.groupBox)
-        self.height_doubleSpinBox.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
+        self.height_doubleSpinBox.setLocale(
+            QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom)
+        )
         self.height_doubleSpinBox.setDecimals(1)
         self.height_doubleSpinBox.setMinimum(1.0)
         self.height_doubleSpinBox.setMaximum(100.0)
@@ -87,7 +91,9 @@ class Ui_Export_Figure(object):
         self.height_doubleSpinBox.setObjectName("height_doubleSpinBox")
         self.gridLayout_2.addWidget(self.height_doubleSpinBox, 0, 2, 1, 1)
         self.width_doubleSpinBox = QtWidgets.QDoubleSpinBox(self.groupBox)
-        self.width_doubleSpinBox.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
+        self.width_doubleSpinBox.setLocale(
+            QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom)
+        )
         self.width_doubleSpinBox.setDecimals(1)
         self.width_doubleSpinBox.setMinimum(1.0)
         self.width_doubleSpinBox.setSingleStep(0.1)
@@ -104,7 +110,9 @@ class Ui_Export_Figure(object):
         self.gridLayout_5.addWidget(self.label_13, 3, 1, 1, 1)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout_2.addItem(spacerItem)
         self.label_2 = QtWidgets.QLabel(self.groupBox)
         self.label_2.setObjectName("label_2")
@@ -114,7 +122,9 @@ class Ui_Export_Figure(object):
         self.label_size_spinBox.setProperty("value", 15)
         self.label_size_spinBox.setObjectName("label_size_spinBox")
         self.horizontalLayout_2.addWidget(self.label_size_spinBox)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout_2.addItem(spacerItem1)
         self.gridLayout_5.addLayout(self.horizontalLayout_2, 0, 4, 2, 1)
         self.xlabel_lineEdit = QtWidgets.QLineEdit(self.groupBox)
@@ -122,7 +132,9 @@ class Ui_Export_Figure(object):
         self.gridLayout_5.addWidget(self.xlabel_lineEdit, 0, 2, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem2)
         self.label_11 = QtWidgets.QLabel(self.groupBox)
         self.label_11.setObjectName("label_11")
@@ -133,7 +145,9 @@ class Ui_Export_Figure(object):
         self.ticks_size_spinBox.setProperty("value", 15)
         self.ticks_size_spinBox.setObjectName("ticks_size_spinBox")
         self.horizontalLayout.addWidget(self.ticks_size_spinBox)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem3)
         self.gridLayout_5.addLayout(self.horizontalLayout, 2, 4, 2, 1)
         self.label_7 = QtWidgets.QLabel(self.groupBox)
@@ -144,9 +158,9 @@ class Ui_Export_Figure(object):
         self.gridLayout_5.addWidget(self.ylabel_lineEdit, 1, 2, 1, 1)
         self.color_pallete = QtWidgets.QPushButton(self.groupBox)
         self.color_pallete.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.color_pallete.setStyleSheet("QPushButton{\n"
-"            background-color: rgb(0, 0, 0);\n"
-"            }")
+        self.color_pallete.setStyleSheet(
+            "QPushButton{\n            background-color: rgb(0, 0, 0);\n            }"
+        )
         self.color_pallete.setText("")
         self.color_pallete.setObjectName("color_pallete")
         self.gridLayout_5.addWidget(self.color_pallete, 3, 2, 1, 1)
@@ -160,7 +174,9 @@ class Ui_Export_Figure(object):
         self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.label_8)
         self.font_comboBox = QtWidgets.QComboBox(self.groupBox)
         self.font_comboBox.setObjectName("font_comboBox")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.font_comboBox)
+        self.formLayout.setWidget(
+            0, QtWidgets.QFormLayout.FieldRole, self.font_comboBox
+        )
         self.label_9 = QtWidgets.QLabel(self.groupBox)
         self.label_9.setObjectName("label_9")
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_9)
@@ -170,7 +186,9 @@ class Ui_Export_Figure(object):
         self.label_style_comboBox.addItem("")
         self.label_style_comboBox.addItem("")
         self.label_style_comboBox.addItem("")
-        self.formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.label_style_comboBox)
+        self.formLayout.setWidget(
+            1, QtWidgets.QFormLayout.FieldRole, self.label_style_comboBox
+        )
         self.label_10 = QtWidgets.QLabel(self.groupBox)
         self.label_10.setObjectName("label_10")
         self.formLayout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.label_10)
@@ -180,13 +198,17 @@ class Ui_Export_Figure(object):
         self.ticks_style_comboBox.addItem("")
         self.ticks_style_comboBox.addItem("")
         self.ticks_style_comboBox.addItem("")
-        self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.ticks_style_comboBox)
+        self.formLayout.setWidget(
+            2, QtWidgets.QFormLayout.FieldRole, self.ticks_style_comboBox
+        )
         self.gridLayout_5.addLayout(self.formLayout, 0, 0, 4, 1)
         self.gridLayout_4.addWidget(self.groupBox, 2, 0, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
         self.gridLayout_4.addLayout(self.verticalLayout, 0, 0, 1, 1)
-        spacerItem4 = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        spacerItem4 = QtWidgets.QSpacerItem(
+            20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed
+        )
         self.gridLayout_4.addItem(spacerItem4, 1, 0, 1, 1)
         self.gridLayout.addWidget(self.frame, 0, 0, 1, 1)
 

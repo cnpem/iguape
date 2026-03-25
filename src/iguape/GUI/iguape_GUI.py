@@ -16,10 +16,16 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1160, 749)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Logo_IGUAPE.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(
+            QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Logo_IGUAPE.png"),
+            QtGui.QIcon.Normal,
+            QtGui.QIcon.Off,
+        )
         MainWindow.setWindowIcon(icon)
         MainWindow.setStyleSheet("")
-        MainWindow.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
+        MainWindow.setLocale(
+            QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom)
+        )
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.centralwidget)
@@ -32,21 +38,29 @@ class Ui_MainWindow(object):
         self.CNPEM_logo.setMaximumSize(QtCore.QSize(100, 50))
         self.CNPEM_logo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.CNPEM_logo.setText("")
-        self.CNPEM_logo.setPixmap(QtGui.QPixmap("GUI/../Icons/CNPEM-logo-colorido-2023_resize.png"))
+        self.CNPEM_logo.setPixmap(
+            QtGui.QPixmap("GUI/../Icons/CNPEM-logo-colorido-2023_resize.png")
+        )
         self.CNPEM_logo.setOpenExternalLinks(True)
         self.CNPEM_logo.setObjectName("CNPEM_logo")
         self.horizontalLayout.addWidget(self.CNPEM_logo)
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem)
         self.iguape_logo = QtWidgets.QLabel(self.centralwidget)
         self.iguape_logo.setMaximumSize(QtCore.QSize(100, 70))
         self.iguape_logo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.iguape_logo.setText("")
-        self.iguape_logo.setPixmap(QtGui.QPixmap("GUI/../Icons/Logo_IGUAPE_resized.png"))
+        self.iguape_logo.setPixmap(
+            QtGui.QPixmap("GUI/../Icons/Logo_IGUAPE_resized.png")
+        )
         self.iguape_logo.setOpenExternalLinks(True)
         self.iguape_logo.setObjectName("iguape_logo")
         self.horizontalLayout.addWidget(self.iguape_logo)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem1)
         self.title_label = QtWidgets.QLabel(self.centralwidget)
         self.title_label.setMinimumSize(QtCore.QSize(0, 0))
@@ -60,7 +74,9 @@ class Ui_MainWindow(object):
         self.title_label.setAlignment(QtCore.Qt.AlignCenter)
         self.title_label.setObjectName("title_label")
         self.horizontalLayout.addWidget(self.title_label)
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem2)
         self.LNLS_logo = QtWidgets.QLabel(self.centralwidget)
         self.LNLS_logo.setMaximumSize(QtCore.QSize(16777215, 50))
@@ -70,13 +86,17 @@ class Ui_MainWindow(object):
         self.LNLS_logo.setAlignment(QtCore.Qt.AlignCenter)
         self.LNLS_logo.setObjectName("LNLS_logo")
         self.horizontalLayout.addWidget(self.LNLS_logo)
-        spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem3)
         self.paineira_logo = QtWidgets.QLabel(self.centralwidget)
         self.paineira_logo.setMaximumSize(QtCore.QSize(70, 100))
         self.paineira_logo.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.paineira_logo.setPixmap(QtGui.QPixmap("GUI/../Icons/Paineira_resize.png"))
-        self.paineira_logo.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.paineira_logo.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.paineira_logo.setObjectName("paineira_logo")
         self.horizontalLayout.addWidget(self.paineira_logo)
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -94,7 +114,9 @@ class Ui_MainWindow(object):
         self.XRD_data_layout.setObjectName("XRD_data_layout")
         self.gridLayout_4.addLayout(self.XRD_data_layout, 0, 0, 1, 1)
         self.groupBox = QtWidgets.QGroupBox(self.XRD_data_tab)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox.sizePolicy().hasHeightForWidth())
@@ -108,7 +130,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
         self.offset_label = QtWidgets.QLabel(self.groupBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.offset_label.sizePolicy().hasHeightForWidth())
@@ -145,7 +169,11 @@ class Ui_MainWindow(object):
         font.setPointSize(14)
         self.refresh_button.setFont(font)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Refresh_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(
+            QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Refresh_Icon.png"),
+            QtGui.QIcon.Normal,
+            QtGui.QIcon.Off,
+        )
         self.refresh_button.setIcon(icon1)
         self.refresh_button.setObjectName("refresh_button")
         self.horizontalLayout_6.addWidget(self.refresh_button)
@@ -161,7 +189,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.index_label = QtWidgets.QLabel(self.groupBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.index_label.sizePolicy().hasHeightForWidth())
@@ -202,10 +232,14 @@ class Ui_MainWindow(object):
         self.min_filter_label.setObjectName("min_filter_label")
         self.horizontalLayout_8.addWidget(self.min_filter_label)
         self.min_temp_doubleSpinBox = QtWidgets.QDoubleSpinBox(self.groupBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.min_temp_doubleSpinBox.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.min_temp_doubleSpinBox.sizePolicy().hasHeightForWidth()
+        )
         self.min_temp_doubleSpinBox.setSizePolicy(sizePolicy)
         self.min_temp_doubleSpinBox.setMaximumSize(QtCore.QSize(16777215, 16777215))
         font = QtGui.QFont()
@@ -223,10 +257,14 @@ class Ui_MainWindow(object):
         self.max_filter_label.setObjectName("max_filter_label")
         self.horizontalLayout_8.addWidget(self.max_filter_label)
         self.max_temp_doubleSpinBox = QtWidgets.QDoubleSpinBox(self.groupBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.max_temp_doubleSpinBox.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.max_temp_doubleSpinBox.sizePolicy().hasHeightForWidth()
+        )
         self.max_temp_doubleSpinBox.setSizePolicy(sizePolicy)
         self.max_temp_doubleSpinBox.setMaximumSize(QtCore.QSize(16777215, 16777215))
         font = QtGui.QFont()
@@ -238,17 +276,25 @@ class Ui_MainWindow(object):
         self.max_temp_doubleSpinBox.setObjectName("max_temp_doubleSpinBox")
         self.horizontalLayout_8.addWidget(self.max_temp_doubleSpinBox)
         self.filter_button = QtWidgets.QPushButton(self.groupBox)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.filter_button.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            self.filter_button.sizePolicy().hasHeightForWidth()
+        )
         self.filter_button.setSizePolicy(sizePolicy)
         self.filter_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.filter_button.setFont(font)
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Filter_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(
+            QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Filter_Icon.png"),
+            QtGui.QIcon.Normal,
+            QtGui.QIcon.Off,
+        )
         self.filter_button.setIcon(icon2)
         self.filter_button.setObjectName("filter_button")
         self.horizontalLayout_8.addWidget(self.filter_button)
@@ -263,7 +309,9 @@ class Ui_MainWindow(object):
         self.peak_fit_layout.setObjectName("peak_fit_layout")
         self.gridLayout_5.addLayout(self.peak_fit_layout, 0, 0, 1, 1)
         self.groupBox_3 = QtWidgets.QGroupBox(self.peak_fit_tab)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox_3.sizePolicy().hasHeightForWidth())
@@ -278,7 +326,11 @@ class Ui_MainWindow(object):
         self.save_peak_fit_data_button.setMinimumSize(QtCore.QSize(0, 0))
         self.save_peak_fit_data_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Save_Icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3.addPixmap(
+            QtGui.QPixmap("GUI/../../../.designer/backup/Icons/Save_Icon.png"),
+            QtGui.QIcon.Normal,
+            QtGui.QIcon.Off,
+        )
         self.save_peak_fit_data_button.setIcon(icon3)
         self.save_peak_fit_data_button.setObjectName("save_peak_fit_data_button")
         self.gridLayout_8.addWidget(self.save_peak_fit_data_button, 0, 2, 1, 1)
@@ -288,7 +340,11 @@ class Ui_MainWindow(object):
         self.peak_fit_button = QtWidgets.QPushButton(self.groupBox_3)
         self.peak_fit_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("GUI/../../../.designer/backup/Icons/peak_fit_icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(
+            QtGui.QPixmap("GUI/../../../.designer/backup/Icons/peak_fit_icon.png"),
+            QtGui.QIcon.Normal,
+            QtGui.QIcon.Off,
+        )
         self.peak_fit_button.setIcon(icon4)
         self.peak_fit_button.setObjectName("peak_fit_button")
         self.gridLayout_8.addWidget(self.peak_fit_button, 0, 1, 1, 1)
@@ -302,7 +358,9 @@ class Ui_MainWindow(object):
         self.contour_layout.setObjectName("contour_layout")
         self.gridLayout_2.addLayout(self.contour_layout, 0, 0, 1, 1)
         self.groupBox_2 = QtWidgets.QGroupBox(self.contour_tab)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
@@ -323,7 +381,9 @@ class Ui_MainWindow(object):
         self.gridLayout_6.addWidget(self.norm_comboBox, 0, 1, 1, 1)
         self.label_4 = QtWidgets.QLabel(self.groupBox_2)
         self.label_4.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.label_4.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_4.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.label_4.setObjectName("label_4")
         self.gridLayout_6.addWidget(self.label_4, 0, 2, 1, 1)
         self.color_pallete_comboBox = QtWidgets.QComboBox(self.groupBox_2)
@@ -342,7 +402,9 @@ class Ui_MainWindow(object):
         self.normalization_layout.setObjectName("normalization_layout")
         self.gridLayout_7.addLayout(self.normalization_layout, 0, 0, 1, 1)
         self.groupBox_4 = QtWidgets.QGroupBox(self.normalization_tab)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.groupBox_4.sizePolicy().hasHeightForWidth())
@@ -417,31 +479,64 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Iguape"))
-        self.title_label.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">IGUAPE</span></p><p align=\"center\"><span style=\" font-size:7pt; font-weight:600;\">(PAINEIRA GRAPHICAL USER INTERFACE)</span></p></body></html>"))
+        self.title_label.setText(
+            _translate(
+                "MainWindow",
+                '<html><head/><body><p align="center"><span style=" font-weight:600;">IGUAPE</span></p><p align="center"><span style=" font-size:7pt; font-weight:600;">(PAINEIRA GRAPHICAL USER INTERFACE)</span></p></body></html>',
+            )
+        )
         self.groupBox.setTitle(_translate("MainWindow", "Tools"))
         self.offset_label.setText(_translate("MainWindow", "XRD patterns offset:"))
-        self.offset_slider.setToolTip(_translate("MainWindow", "Select the XRD patterns offset"))
+        self.offset_slider.setToolTip(
+            _translate("MainWindow", "Select the XRD patterns offset")
+        )
         self.label_5.setText(_translate("MainWindow", "Color Palette"))
-        self.refresh_button.setToolTip(_translate("MainWindow", "Press to refresh the graph with the new XRD patterns"))
+        self.refresh_button.setToolTip(
+            _translate(
+                "MainWindow", "Press to refresh the graph with the new XRD patterns"
+            )
+        )
         self.refresh_button.setText(_translate("MainWindow", "Refresh"))
-        self.reset_button.setToolTip(_translate("MainWindow", "Press to reset the 2θ interval to the deafult range"))
+        self.reset_button.setToolTip(
+            _translate(
+                "MainWindow", "Press to reset the 2θ interval to the deafult range"
+            )
+        )
         self.reset_button.setText(_translate("MainWindow", "Reset 2θ"))
         self.index_label.setText(_translate("MainWindow", "XDR patterns indexing:"))
-        self.XRD_measure_order_checkbox.setText(_translate("MainWindow", "XRD acquisition time"))
+        self.XRD_measure_order_checkbox.setText(
+            _translate("MainWindow", "XRD acquisition time")
+        )
         self.temperature_checkbox.setText(_translate("MainWindow", "Temperature"))
         self.checkBox.setText(_translate("MainWindow", "VLine"))
         self.min_filter_label.setText(_translate("MainWindow", "Minimum"))
         self.max_filter_label.setText(_translate("MainWindow", "Maximum"))
-        self.filter_button.setToolTip(_translate("MainWindow", "Press to apply the temperature/measure order range"))
+        self.filter_button.setToolTip(
+            _translate(
+                "MainWindow", "Press to apply the temperature/measure order range"
+            )
+        )
         self.filter_button.setText(_translate("MainWindow", "Apply Filter "))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.XRD_data_tab), _translate("MainWindow", "XRD Data"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.XRD_data_tab),
+            _translate("MainWindow", "XRD Data"),
+        )
         self.groupBox_3.setTitle(_translate("MainWindow", "Tools"))
-        self.save_peak_fit_data_button.setToolTip(_translate("MainWindow", "Press to save the data as a CSV file"))
-        self.save_peak_fit_data_button.setText(_translate("MainWindow", "Save Peak Fit Data"))
+        self.save_peak_fit_data_button.setToolTip(
+            _translate("MainWindow", "Press to save the data as a CSV file")
+        )
+        self.save_peak_fit_data_button.setText(
+            _translate("MainWindow", "Save Peak Fit Data")
+        )
         self.refresh_button_peak_fit.setText(_translate("MainWindow", "Refresh"))
-        self.peak_fit_button.setToolTip(_translate("MainWindow", "Press to open the Peak Fit Window"))
+        self.peak_fit_button.setToolTip(
+            _translate("MainWindow", "Press to open the Peak Fit Window")
+        )
         self.peak_fit_button.setText(_translate("MainWindow", "Peak Fit"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.peak_fit_tab), _translate("MainWindow", "Peak Fitting"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.peak_fit_tab),
+            _translate("MainWindow", "Peak Fitting"),
+        )
         self.groupBox_2.setTitle(_translate("MainWindow", "Tools"))
         self.label_3.setText(_translate("MainWindow", "Contour Norm"))
         self.norm_comboBox.setItemText(0, _translate("MainWindow", "LogNorm"))
@@ -450,11 +545,19 @@ class Ui_MainWindow(object):
         self.norm_comboBox.setItemText(3, _translate("MainWindow", "LinearNorm"))
         self.label_4.setText(_translate("MainWindow", "Color Palette"))
         self.contour_button.setText(_translate("MainWindow", "Generate Contour"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.contour_tab), _translate("MainWindow", "Contour Plot"))
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.contour_tab),
+            _translate("MainWindow", "Contour Plot"),
+        )
         self.groupBox_4.setTitle(_translate("MainWindow", "Tools"))
         self.label.setText(_translate("MainWindow", "XRD patterns offset:"))
-        self.normalize_button.setText(_translate("MainWindow", "Generate Normalization Plot"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.normalization_tab), _translate("MainWindow", "Normalization"))
+        self.normalize_button.setText(
+            _translate("MainWindow", "Generate Normalization Plot")
+        )
+        self.tabWidget.setTabText(
+            self.tabWidget.indexOf(self.normalization_tab),
+            _translate("MainWindow", "Normalization"),
+        )
         self.menuFolder.setTitle(_translate("MainWindow", "Folder"))
         self.menuVisualization.setTitle(_translate("MainWindow", "Visualization"))
         self.actionOpen_New_Folder.setText(_translate("MainWindow", "Open New Folder"))

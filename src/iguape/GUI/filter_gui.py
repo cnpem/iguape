@@ -19,7 +19,9 @@ class Ui_Filter_Dialog(object):
         self.gridLayout.setObjectName("gridLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem)
         self.label = QtWidgets.QLabel(Filter_Dialog)
         font = QtGui.QFont()
@@ -27,7 +29,9 @@ class Ui_Filter_Dialog(object):
         self.label.setFont(font)
         self.label.setObjectName("label")
         self.horizontalLayout.addWidget(self.label)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.horizontalLayout.addItem(spacerItem1)
         self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -55,8 +59,12 @@ class Ui_Filter_Dialog(object):
     def retranslateUi(self, Filter_Dialog):
         _translate = QtCore.QCoreApplication.translate
         Filter_Dialog.setWindowTitle(_translate("Filter_Dialog", "Dialog"))
-        self.label.setText(_translate("Filter_Dialog", "Select the XRD diffractograms to be plotted"))
-        self.toggle_selected_button.setText(_translate("Filter_Dialog", "Toggle Selected"))
+        self.label.setText(
+            _translate("Filter_Dialog", "Select the XRD diffractograms to be plotted")
+        )
+        self.toggle_selected_button.setText(
+            _translate("Filter_Dialog", "Toggle Selected")
+        )
         self.select_all_button.setText(_translate("Filter_Dialog", "Select All"))
         self.deselect_all_button.setText(_translate("Filter_Dialog", "Deselect All"))
         self.apply_button.setText(_translate("Filter_Dialog", "Apply Filter"))
