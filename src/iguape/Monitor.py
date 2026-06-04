@@ -287,9 +287,6 @@ def peak_fit(theta, intensity, interval, id, bkg="Linear", pars=None):
             )  # Fitting the data to the Voigt model #
             comps = out.eval_components(x=theta_fit)
 
-            print(
-                f"Fit report for XRD #{id[0]} - {id[1]}°C", out.fit_report(), sep="\n"
-            )
             # Getting the parameters from the optimal fit #, bkg= self.bkg_model
 
             dois_theta_0 = out.params["center"].value
