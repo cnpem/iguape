@@ -52,12 +52,12 @@ import matplotlib.font_manager
 from matplotlib.colors import LogNorm, PowerNorm, CenteredNorm
 import numpy as np
 import pandas as pd
-from Monitor import FolderMonitor
-from GUI.iguape_GUI import Ui_MainWindow
-from GUI.pk_window import Ui_pk_window
-from GUI.export_figure import Ui_Export_Figure
-from GUI.filter_gui import Ui_Filter_Dialog
-from Monitor import (
+from .ui.iguape_GUI import Ui_MainWindow
+from .ui.pk_window import Ui_pk_window
+from .ui.export_figure import Ui_Export_Figure
+from .ui.filter_gui import Ui_Filter_Dialog
+from .monitor import (
+    FolderMonitor,
     counter,
     normalize_array,
     calculate_q_vector,
