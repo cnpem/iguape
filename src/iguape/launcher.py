@@ -5,18 +5,17 @@
 Execution script. It goes to the directory where Iguape is installed and it executes the program (iguape.py)
 """
 
-import subprocess
-import os
+from qtpy.QtWidgets import QApplication
+from .iguape import Window
+import sys
 
 
 def main():
     """_summary_"""
-    iguape_dir = os.path.dirname(__file__)
-    os.chdir(iguape_dir)
-    try:
-        subprocess.run(["python", "iguape.py"])
-    except Exception:
-        subprocess.run(["python3", "iguape.py"])
+    app = QApplication(sys.argv)
+    win = Window()
+    win.show()
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
