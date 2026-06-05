@@ -26,7 +26,7 @@ from qtpy.QtWidgets import (
     QColorDialog,
     QFileDialog,
 )
-from qtpy.QtGui import QGuiApplication, QDesktopServices
+from qtpy.QtGui import QGuiApplication, QDesktopServices, QIcon, QPixmap
 from qtpy.QtCore import (
     QUrl,
     QEvent,
@@ -52,6 +52,7 @@ import matplotlib.font_manager
 from matplotlib.colors import LogNorm, PowerNorm, CenteredNorm
 import numpy as np
 import pandas as pd
+from .ui import ICONS_MAP
 from .ui.iguape_GUI import Ui_MainWindow
 from .ui.pk_window import Ui_pk_window
 from .ui.export_figure import Ui_Export_Figure
@@ -64,6 +65,7 @@ from .monitor import (
     peak_fit,
     peak_fit_split_gaussian,
 )
+from .utils.image import get_assets
 
 
 if getattr(sys, "frozen", False):
@@ -131,10 +133,21 @@ class Window(QMainWindow, Ui_MainWindow):
         }
         self.setGeometry(geometry)
         self.create_graphs_layout()
+        self.load_icons()
         self.gc_collector = GarbageCollector()
         self.gc_collector.start()
         if getattr(sys, "frozen", False):
             pyi_splash.close()  # After the GUI initialization, close the Splash Screen
+
+    def load_icons(self):
+        for attr, image in ICONS_MAP["Labels"].items():
+            attr = getattr(self, attr)
+            attr.setPixmap(QPixmap(get_assets(image)))
+
+        for attr, image in ICONS_MAP["Buttons"].items():
+            attr = getattr(self, attr)
+            attr.setIcon(QIcon(QPixmap(get_assets(image))))
+        self.setWindowIcon(QIcon(QPixmap(get_assets("Logo_IGUAPE.ico"))))
 
     def create_graphs_layout(self):
         """Routine to initialize and connect UI elements. All parameters and flags are initiated and UI element's signals are connected to its functions."""
