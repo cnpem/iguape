@@ -777,9 +777,17 @@ class Window(QMainWindow, Ui_MainWindow):
             self.ax_area.clear()
             self.ax_FWHM.clear()
             self.canvas_main.draw()
+            self.thread = QThread()
             self.monitor = FolderMonitor(folder_path=folder_path)
+            self.monitor.moveToThread(self.thread)
+            self.thread.started.connect(self.monitor.run)
             self.monitor.new_data_signal.connect(self.handle_new_data)
-            self.monitor.start()
+
+            self.monitor.finished.connect(self.thread.quit)
+            self.monitor.finished.connect(self.monitor.deleteLater)
+            self.monitor.finished.connect(self.thread.deleteLater)
+
+            self.thread.start()
             gc.collect()
 
         else:

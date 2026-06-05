@@ -14,12 +14,12 @@ import lmfit as lm
 from lmfit.models import PseudoVoigtModel, LinearModel
 import pandas as pd
 from scipy.signal import find_peaks
-from qtpy.QtCore import QThread, Signal
+from qtpy.QtCore import Signal, QObject, Slot
 from qtpy.QtWidgets import QApplication, QFileDialog
 
 
 # --- Monitor - Reading a '.txt' file for new data --- #
-class FolderMonitor(QThread):
+class FolderMonitor(QObject):
     """
     The Folder Monitor operates by tracking new or exiting data in a specified folder.
 
@@ -34,6 +34,7 @@ class FolderMonitor(QThread):
     """
 
     new_data_signal = Signal(pd.DataFrame)
+    finished = Signal()
 
     def __init__(self, folder_path, fit_interval=None):
         """
@@ -58,6 +59,7 @@ class FolderMonitor(QThread):
             columns=["dois_theta_0", "fwhm", "area", "temp", "file_index", "R-squared"]
         )
 
+    @Slot()
     def run(self):
         """
         The run method is the main method of the FolderMonitor class. It reads the 'iguape_filelist.txt' file
@@ -142,6 +144,7 @@ class FolderMonitor(QThread):
                     pass
 
             i += 2
+        self.finished.emit()
 
     def set_fit_interval(self, interval):
         """
