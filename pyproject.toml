@@ -39,6 +39,7 @@ dependencies = [
 	"scipy>=1.7",
 	"matplotlib>=3.5",
 	"lmfit>=1.0",
+  "pyndantic",
 ]
 dynamic = ["version"]
 
