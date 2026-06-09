@@ -25,7 +25,7 @@ class PNRTemperatureUnitValidationError(ValueError):
 
 
 class XRDMetadataBaseClass(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="allow")
     file_path: Annotated[
         str,
         Field(
@@ -38,6 +38,19 @@ class XRDMetadataBaseClass(BaseModel):
             description="The index of the XRD file. This can be used to sorted the plotting and to identify each XRD pattern."
         ),
     ]
+
+    extra_md: Annotated[
+        dict[str, Any] | None,
+        Field(
+            default=None,
+            description="Optional metadata in the form of a python `dictionary`.",
+        ),
+    ]
+
+
+class XRDMetadataPNR(XRDMetadataBaseClass):
+    source: Annotated[str, Field(default="PNR", frozen=True)]
+
     temperature: Annotated[
         float | None,
         Field(
