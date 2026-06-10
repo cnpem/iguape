@@ -785,7 +785,8 @@ class Window(QMainWindow, Ui_MainWindow):
 
             self.monitor.finished.connect(self.thread.quit)
             self.monitor.finished.connect(self.monitor.deleteLater)
-            self.monitor.finished.connect(self.thread.deleteLater)
+            self.thread.finished.connect(self.monitor.deleteLater)
+            self.thread.finished.connect(self.thread.deleteLater)
 
             self.thread.start()
             gc.collect()
