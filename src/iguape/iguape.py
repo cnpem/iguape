@@ -1,12 +1,4 @@
-# This is part of the source code for the Paineira Graphical User Interface - Iguape
-# The code is distributed under the GNU GPL-3.0 License. Please refer to the main page (https://github.com/cnpem/iguape) for more information
-
-"""
-This is the main script for the excution of the Paineira Graphical User Interface, a GUI for visualization and data processing during in situ experiments at Paineira.
-In this script, both GUIs used by the program are called and all of the backend functions and processes are defined.
-"""
-
-import sys
+import sys  # numpydoc ignore=GL08
 import time
 import gc
 import copy
@@ -59,13 +51,14 @@ from .ui.export_figure import Ui_Export_Figure
 from .ui.filter_gui import Ui_Filter_Dialog
 from .monitor import (
     FolderMonitor,
-    counter,
     normalize_array,
     calculate_q_vector,
     peak_fit,
     peak_fit_split_gaussian,
 )
 from .utils.image import get_assets
+from .protocols.readers import PNRXRDReader
+import polars as pl
 
 
 if getattr(sys, "frozen", False):
@@ -73,30 +66,24 @@ if getattr(sys, "frozen", False):
 
 license = "GNU GPL-3.0 License"
 
-counter.count = 0
 fonts_list = [font.name for font in matplotlib.font_manager.fontManager.ttflist]
 cmaps = [cmap for cmap in plt.colormaps()]
 
 
 class Window(QMainWindow, Ui_MainWindow):
-    """Class for IGUAPE main window. It inherits QMainWindow from PyQt5 and Ui_MainWindow from GUI.iguape_GUI
+    """Class for IGUAPE main window. It inherits QMainWindow from PyQt5 and Ui_MainWindow from GUI.iguape_GUI.
 
     :param QMainWindow: QMainWindow from PyQt5
     :type QMainWindow: QMainWindow
     :param Ui_MainWindow: Ui_MainWindow from GUI.iguape_GUI
     :type Ui_MainWindow: QMainWindow
+
     """
 
-    def __init__(self, parent=None):
-        """Constructor for Window class
-
-        Args:
-            parent (optional): Defaults to None.
-        """
+    def __init__(self, parent=None):  # numpydoc ignore=GL08
         super().__init__(parent)
         self.setupUi(self)
         geometry = QGuiApplication.screens()[-1].availableGeometry()
-        # print(geometry)
         self.props_dict = {
             "Main Axis": {
                 "X_Label": "2θ (°)",
@@ -134,12 +121,13 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setGeometry(geometry)
         self.create_graphs_layout()
         self.load_icons()
+        self.test_frame = pl.DataFrame()
         self.gc_collector = GarbageCollector()
         self.gc_collector.start()
         if getattr(sys, "frozen", False):
             pyi_splash.close()  # After the GUI initialization, close the Splash Screen
 
-    def load_icons(self):
+    def load_icons(self):  # numpydoc ignore=GL08
         for attr, image in ICONS_MAP["Labels"].items():
             attr = getattr(self, attr)
             attr.setPixmap(QPixmap(get_assets(image)))
@@ -309,7 +297,7 @@ class Window(QMainWindow, Ui_MainWindow):
             pass
 
     def eventFilter(self, source: QLabel, event: QEvent):
-        """eventFilter method for logo QLabel. It tracks a mouse press event and calls the :func:`Window._open_url`
+        """eventFilter method for logo QLabel. It tracks a mouse press event and calls the :func:`Window._open_url`.
 
         :param source: Object name of logo in IGUAPE UI (QLabel)
         :type source: QLabel
@@ -356,8 +344,7 @@ class Window(QMainWindow, Ui_MainWindow):
         QApplication.restoreOverrideCursor()
 
     def _get_mask(self, i: int):
-        """
-        Method for getting the :math:`2\\theta` mask, given the selection of interval by `SpanSelector` in the XRD Data tab.
+        """Method for getting the :math:`2\\theta` mask, given the selection of interval by `SpanSelector` in the XRD Data tab.
 
         :param i: index of the XRD pattern
         :type i: int
@@ -374,8 +361,7 @@ class Window(QMainWindow, Ui_MainWindow):
         return slice(None)
 
     def update_colormap(self, color_map_type: str, label: str):
-        """
-        Routine for updating the colormaps and norm used in the XRD Data and PeakFit tabs.
+        """Routine for updating the colormaps and norm used in the XRD Data and PeakFit tabs.
 
         :param color_map_type: Column label of XRD patterns DataFrame. It can be `temp` or `file_index`
         :type color_map_type: str
@@ -395,9 +381,7 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def _update_main_figure(self):
-        """
-        Routine to update XRD Data Tab graph. This calls other methods such as update_colormap and plots the selected XRD measures in the main figure.
-        """
+        """Routine to update XRD Data Tab graph. This calls other methods such as update_colormap and plots the selected XRD measures in the main figure."""
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
             self.plot_data = (
@@ -473,9 +457,7 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def _plot_fitting_parameters(self):
-        """
-        This method calls :py:meth:`Window._plot_single_peak` or :py:meth:`Window._plot_double_peak`, according to the profile model selected.
-        """
+        """This method calls :py:meth:`Window._plot_single_peak` or :py:meth:`Window._plot_double_peak`, according to the profile model selected."""
         if not self.fit_interval:
             return
 
@@ -754,7 +736,6 @@ class Window(QMainWindow, Ui_MainWindow):
             self.plot_data = None
             print(self.monitor.data_frame, self.monitor.fit_data, self.plot_data)
             gc.collect()
-        counter.count = 0
         self.plot_with_temp = False
         self.selected_interval = None
         self.fit_interval = None
@@ -781,7 +762,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.monitor = FolderMonitor(folder_path=folder_path)
             self.monitor.moveToThread(self.thread)
             self.thread.started.connect(self.monitor.run)
-            self.monitor.new_data_signal.connect(self.handle_new_data)
+            self.monitor.data.connect(self.handle_data)
 
             self.monitor.finished.connect(self.thread.quit)
             self.monitor.finished.connect(self.monitor.deleteLater)
@@ -794,13 +775,12 @@ class Window(QMainWindow, Ui_MainWindow):
         else:
             print("No folder selected. Exiting")
 
-    def handle_new_data(self, new_data):
-        """This method is connected to the signal emited by :py:class:`Iguape.Monitor.FolderMonitor`, which delivers a pd.DataFrame containing the XDR data.
-
-        Args:
-            new_data (pd.DataFrame): pandas DataFrame to be concatenated with the existing one
-        """
-        self.plot_data = pd.concat([self.plot_data, new_data], ignore_index=True)
+    def handle_data(self, signal: PNRXRDReader):
+        self.test_frame = pl.concat(
+            [self.test_frame, pl.DataFrame({f"{signal.file_index}": signal})],
+            strict=True,
+            how="horizontal",
+        )
 
     def onselect(self, xmin, xmax):
         """This method is passed as argument for the SpanSelector in the XRD Data Tab Graph.
