@@ -1,5 +1,5 @@
 import os  # numpydoc ignore=GL08
-from qtpy.QtCore import Signal, QObject, Slot
+from qtpy.QtCore import Signal, QObject, Slot, QMutexLocker, QMutex
 from .utils.utils import counter
 from .models.xrd import XRDMetadataPNR
 from .protocols.readers import PNRXRDReader
@@ -28,6 +28,12 @@ class FolderMonitor(QObject):
     def __init__(self, folder_path: str, parent=None):  # numpydoc ignore=GL08
         super().__init__(parent)
         self._folder_path = folder_path
+        self._is_running = True
+        self._mutex = QMutex()
+
+    def stop(self):
+        with QMutexLocker(self._mutex):
+            self._is_running = False
 
     @Slot()
     def run(self):
@@ -38,8 +44,8 @@ class FolderMonitor(QObject):
         logger.info(f"Monitoring folder: {self.folder_path}")
         logger.info("Waiting for XRD data! Please, wait")
         file_index = counter()
-        while reading_status == 1:
-            while True:
+        while reading_status == 1 and self._is_running:
+            while self._is_running:
                 try:
                     with open(
                         os.path.join(self.folder_path, "iguape_filelist.txt"), "r"
@@ -57,16 +63,21 @@ class FolderMonitor(QObject):
                         logger.info(
                             f"New data created at: {self.folder_path}. File name: {lines[i + 1]}"
                         )
-
                         reading_status = int(lines[i + 2])
                     break
                 except Exception as e:
-                    raise Exception(f"{e}") from e
+                    logger.warning(f"Exception while reading data: {e}", exc_info=True)
+                    continue
 
             i += 2
 
         file_index.close()
         self.finished.emit()
+
+    @property
+    def is_running(self):
+        with QMutexLocker(self._mutex):
+            return self._is_running
 
     @property
     def folder_path(self):

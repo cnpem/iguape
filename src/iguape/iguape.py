@@ -137,6 +137,21 @@ class Window(QMainWindow, Ui_MainWindow):
             attr.setIcon(QIcon(QPixmap(get_assets(image))))
         self.setWindowIcon(QIcon(QPixmap(get_assets("Logo_IGUAPE.ico"))))
 
+    def closeEvent(self, a0):
+        try:
+            if self.thread.isRunning():
+                self.monitor.stop()
+                self.monitor.deleteLater()
+                self.thread.quit()
+                if not self.thread.wait(2000):
+                    self.thread.terminate()
+                    self.thread.wait()
+                self.thread.deleteLater()
+        except RuntimeError:
+            pass
+
+        return super().closeEvent(a0)
+
     def create_graphs_layout(self):
         """Routine to initialize and connect UI elements. All parameters and flags are initiated and UI element's signals are connected to its functions."""
         self.url_data = {
