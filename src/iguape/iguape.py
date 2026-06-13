@@ -1,12 +1,4 @@
-# This is part of the source code for the Paineira Graphical User Interface - Iguape
-# The code is distributed under the GNU GPL-3.0 License. Please refer to the main page (https://github.com/cnpem/iguape) for more information
-
-"""
-This is the main script for the excution of the Paineira Graphical User Interface, a GUI for visualization and data processing during in situ experiments at Paineira.
-In this script, both GUIs used by the program are called and all of the backend functions and processes are defined.
-"""
-
-import sys
+import sys  # numpydoc ignore=GL08
 import time
 import gc
 import copy
@@ -25,6 +17,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QColorDialog,
     QFileDialog,
+    QErrorMessage,
 )
 from qtpy.QtGui import QGuiApplication, QDesktopServices, QIcon, QPixmap
 from qtpy.QtCore import (
@@ -57,15 +50,11 @@ from .ui.iguape_GUI import Ui_MainWindow
 from .ui.pk_window import Ui_pk_window
 from .ui.export_figure import Ui_Export_Figure
 from .ui.filter_gui import Ui_Filter_Dialog
-from .monitor import (
-    FolderMonitor,
-    counter,
-    normalize_array,
-    calculate_q_vector,
-    peak_fit,
-    peak_fit_split_gaussian,
-)
+from .monitor import FolderMonitor
 from .utils.image import get_assets
+from .utils.utils import calculate_q_vector, normalize_array
+from .protocols.readers import PNRReader
+import polars as pl
 
 
 if getattr(sys, "frozen", False):
@@ -73,30 +62,24 @@ if getattr(sys, "frozen", False):
 
 license = "GNU GPL-3.0 License"
 
-counter.count = 0
 fonts_list = [font.name for font in matplotlib.font_manager.fontManager.ttflist]
 cmaps = [cmap for cmap in plt.colormaps()]
 
 
 class Window(QMainWindow, Ui_MainWindow):
-    """Class for IGUAPE main window. It inherits QMainWindow from PyQt5 and Ui_MainWindow from GUI.iguape_GUI
+    """Class for IGUAPE main window. It inherits QMainWindow from PyQt5 and Ui_MainWindow from GUI.iguape_GUI.
 
     :param QMainWindow: QMainWindow from PyQt5
     :type QMainWindow: QMainWindow
     :param Ui_MainWindow: Ui_MainWindow from GUI.iguape_GUI
     :type Ui_MainWindow: QMainWindow
+
     """
 
-    def __init__(self, parent=None):
-        """Constructor for Window class
-
-        Args:
-            parent (optional): Defaults to None.
-        """
+    def __init__(self, parent=None):  # numpydoc ignore=GL08
         super().__init__(parent)
         self.setupUi(self)
         geometry = QGuiApplication.screens()[-1].availableGeometry()
-        # print(geometry)
         self.props_dict = {
             "Main Axis": {
                 "X_Label": "2θ (°)",
@@ -134,12 +117,13 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setGeometry(geometry)
         self.create_graphs_layout()
         self.load_icons()
+        self.test_frame = pl.DataFrame()
         self.gc_collector = GarbageCollector()
         self.gc_collector.start()
         if getattr(sys, "frozen", False):
             pyi_splash.close()  # After the GUI initialization, close the Splash Screen
 
-    def load_icons(self):
+    def load_icons(self):  # numpydoc ignore=GL08
         for attr, image in ICONS_MAP["Labels"].items():
             attr = getattr(self, attr)
             attr.setPixmap(QPixmap(get_assets(image)))
@@ -148,6 +132,29 @@ class Window(QMainWindow, Ui_MainWindow):
             attr = getattr(self, attr)
             attr.setIcon(QIcon(QPixmap(get_assets(image))))
         self.setWindowIcon(QIcon(QPixmap(get_assets("Logo_IGUAPE.ico"))))
+
+    def _thread_cleanup(self):
+        try:
+            if self.thread.isRunning():
+                self.monitor.stop()
+                self.monitor.deleteLater()
+                self.thread.quit()
+                if not self.thread.wait(2000):
+                    self.thread.terminate()
+                    self.thread.wait()
+                self.thread.deleteLater()
+        except RuntimeError:
+            pass
+
+    def handle_monitor_error(self, exc):
+        QErrorMessage(self).showMessage(
+            f"Monitor has raised the exception: {exc}. The monitor is being shut down."
+        )
+        self._thread_cleanup()
+
+    def closeEvent(self, a0):
+        self._thread_cleanup()
+        return super().closeEvent(a0)
 
     def create_graphs_layout(self):
         """Routine to initialize and connect UI elements. All parameters and flags are initiated and UI element's signals are connected to its functions."""
@@ -309,7 +316,7 @@ class Window(QMainWindow, Ui_MainWindow):
             pass
 
     def eventFilter(self, source: QLabel, event: QEvent):
-        """eventFilter method for logo QLabel. It tracks a mouse press event and calls the :func:`Window._open_url`
+        """eventFilter method for logo QLabel. It tracks a mouse press event and calls the :func:`Window._open_url`.
 
         :param source: Object name of logo in IGUAPE UI (QLabel)
         :type source: QLabel
@@ -356,8 +363,7 @@ class Window(QMainWindow, Ui_MainWindow):
         QApplication.restoreOverrideCursor()
 
     def _get_mask(self, i: int):
-        """
-        Method for getting the :math:`2\\theta` mask, given the selection of interval by `SpanSelector` in the XRD Data tab.
+        """Method for getting the :math:`2\\theta` mask, given the selection of interval by `SpanSelector` in the XRD Data tab.
 
         :param i: index of the XRD pattern
         :type i: int
@@ -374,8 +380,7 @@ class Window(QMainWindow, Ui_MainWindow):
         return slice(None)
 
     def update_colormap(self, color_map_type: str, label: str):
-        """
-        Routine for updating the colormaps and norm used in the XRD Data and PeakFit tabs.
+        """Routine for updating the colormaps and norm used in the XRD Data and PeakFit tabs.
 
         :param color_map_type: Column label of XRD patterns DataFrame. It can be `temp` or `file_index`
         :type color_map_type: str
@@ -395,9 +400,7 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def _update_main_figure(self):
-        """
-        Routine to update XRD Data Tab graph. This calls other methods such as update_colormap and plots the selected XRD measures in the main figure.
-        """
+        """Routine to update XRD Data Tab graph. This calls other methods such as update_colormap and plots the selected XRD measures in the main figure."""
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
             self.plot_data = (
@@ -473,9 +476,7 @@ class Window(QMainWindow, Ui_MainWindow):
         gc.collect()
 
     def _plot_fitting_parameters(self):
-        """
-        This method calls :py:meth:`Window._plot_single_peak` or :py:meth:`Window._plot_double_peak`, according to the profile model selected.
-        """
+        """This method calls :py:meth:`Window._plot_single_peak` or :py:meth:`Window._plot_double_peak`, according to the profile model selected."""
         if not self.fit_interval:
             return
 
@@ -754,7 +755,6 @@ class Window(QMainWindow, Ui_MainWindow):
             self.plot_data = None
             print(self.monitor.data_frame, self.monitor.fit_data, self.plot_data)
             gc.collect()
-        counter.count = 0
         self.plot_with_temp = False
         self.selected_interval = None
         self.fit_interval = None
@@ -777,21 +777,30 @@ class Window(QMainWindow, Ui_MainWindow):
             self.ax_area.clear()
             self.ax_FWHM.clear()
             self.canvas_main.draw()
+            self.thread = QThread()
             self.monitor = FolderMonitor(folder_path=folder_path)
-            self.monitor.new_data_signal.connect(self.handle_new_data)
-            self.monitor.start()
+            self.monitor.moveToThread(self.thread)
+            self.monitor.error.connect(self.handle_monitor_error)
+            self.thread.started.connect(self.monitor.run)
+            self.monitor.data.connect(self.handle_data)
+
+            self.monitor.finished.connect(self.thread.quit)
+            self.monitor.finished.connect(self.monitor.deleteLater)
+            self.thread.finished.connect(self.monitor.deleteLater)
+            self.thread.finished.connect(self.thread.deleteLater)
+
+            self.thread.start()
             gc.collect()
 
         else:
             print("No folder selected. Exiting")
 
-    def handle_new_data(self, new_data):
-        """This method is connected to the signal emited by :py:class:`Iguape.Monitor.FolderMonitor`, which delivers a pd.DataFrame containing the XDR data.
-
-        Args:
-            new_data (pd.DataFrame): pandas DataFrame to be concatenated with the existing one
-        """
-        self.plot_data = pd.concat([self.plot_data, new_data], ignore_index=True)
+    def handle_data(self, signal: PNRReader):
+        self.test_frame = pl.concat(
+            [self.test_frame, pl.DataFrame({f"{signal.file_index}": signal})],
+            strict=True,
+            how="horizontal",
+        )
 
     def onselect(self, xmin, xmax):
         """This method is passed as argument for the SpanSelector in the XRD Data Tab Graph.
@@ -1459,7 +1468,7 @@ class Worker(QThread):
                 )
                 id = [win.plot_data["file_index"][i], win.plot_data["temp"][i]]
                 if win.fit_interval_window.fit_model == "PseudoVoigt":
-                    fit = peak_fit(
+                    fit = peak_fit(  # noqa: F821
                         theta, intensity, self.fit_interval, id=id, pars=pars
                     )
                     try:
@@ -1499,7 +1508,7 @@ class Worker(QThread):
                         progress_value
                     )  # Emit progress signal with percentage
                 else:
-                    fit = peak_fit_split_gaussian(
+                    fit = peak_fit_split_gaussian(  # noqa: F821
                         theta,
                         intensity,
                         self.fit_interval,
@@ -2173,7 +2182,7 @@ class FitWindow(QDialog, Ui_pk_window):
                     win.plot_data["file_index"][self.indexes[i]],
                     win.plot_data["temp"][self.indexes[i]],
                 ]
-                data = peak_fit(theta, intensity, self.fit_interval, id=id)
+                data = peak_fit(theta, intensity, self.fit_interval, id=id)  # noqa: F821
                 best_fit = data[4].best_fit
                 # dely = data[4].eval_uncertainty(sigma = 3)
                 if win.plot_with_temp:
@@ -2217,7 +2226,7 @@ class FitWindow(QDialog, Ui_pk_window):
                         win.plot_data["file_index"][self.indexes[i]],
                         win.plot_data["temp"][self.indexes[i]],
                     ]
-                    data = peak_fit_split_gaussian(
+                    data = peak_fit_split_gaussian(  # noqa: F821
                         theta,
                         intensity,
                         self.fit_interval,
