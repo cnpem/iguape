@@ -17,6 +17,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QColorDialog,
     QFileDialog,
+    QErrorMessage,
 )
 from qtpy.QtGui import QGuiApplication, QDesktopServices, QIcon, QPixmap
 from qtpy.QtCore import (
@@ -49,14 +50,9 @@ from .ui.iguape_GUI import Ui_MainWindow
 from .ui.pk_window import Ui_pk_window
 from .ui.export_figure import Ui_Export_Figure
 from .ui.filter_gui import Ui_Filter_Dialog
-from .monitor import (
-    FolderMonitor,
-    normalize_array,
-    calculate_q_vector,
-    peak_fit,
-    peak_fit_split_gaussian,
-)
+from .monitor import FolderMonitor
 from .utils.image import get_assets
+from .utils.utils import calculate_q_vector, normalize_array
 from .protocols.readers import PNRXRDReader
 import polars as pl
 
@@ -137,7 +133,7 @@ class Window(QMainWindow, Ui_MainWindow):
             attr.setIcon(QIcon(QPixmap(get_assets(image))))
         self.setWindowIcon(QIcon(QPixmap(get_assets("Logo_IGUAPE.ico"))))
 
-    def closeEvent(self, a0):
+    def _thread_cleanup(self):
         try:
             if self.thread.isRunning():
                 self.monitor.stop()
@@ -150,6 +146,14 @@ class Window(QMainWindow, Ui_MainWindow):
         except RuntimeError:
             pass
 
+    def handle_monitor_error(self, exc):
+        QErrorMessage(self).showMessage(
+            f"Monitor has raised the exception: {exc}. The monitor is being shut down."
+        )
+        self._thread_cleanup()
+
+    def closeEvent(self, a0):
+        self._thread_cleanup()
         return super().closeEvent(a0)
 
     def create_graphs_layout(self):
@@ -776,6 +780,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.thread = QThread()
             self.monitor = FolderMonitor(folder_path=folder_path)
             self.monitor.moveToThread(self.thread)
+            self.monitor.error.connect(self.handle_monitor_error)
             self.thread.started.connect(self.monitor.run)
             self.monitor.data.connect(self.handle_data)
 
@@ -1463,7 +1468,7 @@ class Worker(QThread):
                 )
                 id = [win.plot_data["file_index"][i], win.plot_data["temp"][i]]
                 if win.fit_interval_window.fit_model == "PseudoVoigt":
-                    fit = peak_fit(
+                    fit = peak_fit(  # noqa: F821
                         theta, intensity, self.fit_interval, id=id, pars=pars
                     )
                     try:
@@ -1503,7 +1508,7 @@ class Worker(QThread):
                         progress_value
                     )  # Emit progress signal with percentage
                 else:
-                    fit = peak_fit_split_gaussian(
+                    fit = peak_fit_split_gaussian(  # noqa: F821
                         theta,
                         intensity,
                         self.fit_interval,
@@ -2177,7 +2182,7 @@ class FitWindow(QDialog, Ui_pk_window):
                     win.plot_data["file_index"][self.indexes[i]],
                     win.plot_data["temp"][self.indexes[i]],
                 ]
-                data = peak_fit(theta, intensity, self.fit_interval, id=id)
+                data = peak_fit(theta, intensity, self.fit_interval, id=id)  # noqa: F821
                 best_fit = data[4].best_fit
                 # dely = data[4].eval_uncertainty(sigma = 3)
                 if win.plot_with_temp:
@@ -2221,7 +2226,7 @@ class FitWindow(QDialog, Ui_pk_window):
                         win.plot_data["file_index"][self.indexes[i]],
                         win.plot_data["temp"][self.indexes[i]],
                     ]
-                    data = peak_fit_split_gaussian(
+                    data = peak_fit_split_gaussian(  # noqa: F821
                         theta,
                         intensity,
                         self.fit_interval,
