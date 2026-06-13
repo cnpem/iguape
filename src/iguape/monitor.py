@@ -69,6 +69,7 @@ class FolderMonitor(QObject):
                 except IndexError:
                     pass
                 except Exception as e:
+                    file_index.close()
                     self.error.emit(e)
 
             i += 2
