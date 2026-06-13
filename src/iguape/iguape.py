@@ -53,7 +53,7 @@ from .ui.filter_gui import Ui_Filter_Dialog
 from .monitor import FolderMonitor
 from .utils.image import get_assets
 from .utils.utils import calculate_q_vector, normalize_array
-from .protocols.readers import PNRXRDReader
+from .protocols.readers import PNRReader
 import polars as pl
 
 
@@ -795,7 +795,7 @@ class Window(QMainWindow, Ui_MainWindow):
         else:
             print("No folder selected. Exiting")
 
-    def handle_data(self, signal: PNRXRDReader):
+    def handle_data(self, signal: PNRReader):
         self.test_frame = pl.concat(
             [self.test_frame, pl.DataFrame({f"{signal.file_index}": signal})],
             strict=True,

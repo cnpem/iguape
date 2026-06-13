@@ -9,7 +9,9 @@ import pandas as pd
 import polars as pl
 
 
-class GenericXRDReader(ABC):
+class IXRDReader(ABC):
+    """Interface for XRD file readers"""
+
     def __init__(self, metadata: XRDMetadataBaseClass):
         self.metadata = metadata
 
@@ -27,7 +29,7 @@ class GenericXRDReader(ABC):
         raise NotImplementedError
 
 
-class PNRXRDReader(GenericXRDReader):
+class PNRReader(IXRDReader):
     metadata: XRDMetadataPNR
 
     def __init__(self, metadata: XRDMetadataPNR):

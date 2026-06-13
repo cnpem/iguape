@@ -2,7 +2,7 @@ import os  # numpydoc ignore=GL08
 from qtpy.QtCore import Signal, QObject, Slot, QMutexLocker, QMutex
 from .utils.utils import counter
 from .models.xrd import XRDMetadataPNR
-from .protocols.readers import PNRXRDReader
+from .protocols.readers import PNRReader
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class FolderMonitor(QObject):
         `QObject`'s parent.
     """
 
-    data = Signal(PNRXRDReader)
+    data = Signal(PNRReader)
     finished = Signal()
     error = Signal(Exception)
 
@@ -54,7 +54,7 @@ class FolderMonitor(QObject):
                         lines = file.read().splitlines()
                         line = lines[i + 1]
                         self.data.emit(
-                            PNRXRDReader(
+                            PNRReader(
                                 XRDMetadataPNR(
                                     file_path=os.path.join(self.folder_path, line),
                                     file_index=next(file_index),
