@@ -24,6 +24,7 @@ class FolderMonitor(QObject):
 
     data = Signal(PNRXRDReader)
     finished = Signal()
+    error = Signal(Exception)
 
     def __init__(self, folder_path: str, parent=None):  # numpydoc ignore=GL08
         super().__init__(parent)
@@ -65,9 +66,10 @@ class FolderMonitor(QObject):
                         )
                         reading_status = int(lines[i + 2])
                     break
+                except IndexError:
+                    pass
                 except Exception as e:
-                    logger.warning(f"Exception while reading data: {e}", exc_info=True)
-                    continue
+                    self.error.emit(e)
 
             i += 2
 
